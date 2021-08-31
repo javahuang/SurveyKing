@@ -1,0 +1,24 @@
+server:
+  port: 7007
+  servlet:
+    session:
+      timeout: 1h
+  compression:
+    enabled: true
+    min-response-size: 1024
+spring:
+  h2:
+    console:
+      enabled: true
+  datasource:
+    username: sa
+    password: sa
+    url: jdbc:h2:tcp://localhost/~/survey
+    driver-class-name: org.h2.Driver
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    call-setters-on-nulls: false
+  global-config:
+    db-config:
+      logic-delete-field: deleted

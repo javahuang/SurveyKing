@@ -1,0 +1,19 @@
+version: 0.0.1
+spring:
+  application:
+    name: survey
+  profiles:
+    active: ${activeProfile}
+  mvc:
+    async:
+      request-timeout: -1
+    static-path-pattern: /static/**
+    throw-exception-if-no-handler-found: true
+  servlet:
+    multipart:
+      max-file-size: 2048MB
+      max-request-size: 2048MB
+  jackson:
+    default-property-inclusion: non_null
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8

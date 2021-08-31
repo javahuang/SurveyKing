@@ -1,0 +1,72 @@
+plugins {
+}
+
+group = 'cn.surveyking'
+version = '0.0.1-release'
+sourceCompatibility = '1.8'
+project.archivesBaseName = 'surveyking'
+
+ext {
+    isProd = project.hasProperty("pro")
+    isDev = project.hasProperty("dev")
+    activeProfile = project.hasProperty("pro") ? "pro" : "dev"
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    maven { url 'https://repo.spring.io/snapshot' }
+    mavenCentral()
+}
+
+dependencies {
+//	implementation 'org.springframework.boot:spring-boot-starter-undertow'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'com.baomidou:mybatis-plus-boot-starter:3.4.3'
+    implementation 'com.blueconic:browscap-java:1.3.6'
+    implementation 'org.dhatim:fastexcel:0.12.11'
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.2'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.2'
+    implementation 'com.h2database:h2:1.4.200'
+    implementation 'org.dhatim:fastexcel:0.12.3'
+
+    implementation "org.mapstruct:mapstruct:1.4.2.Final"
+    compileOnly "org.projectlombok:lombok"
+    annotationProcessor "org.projectlombok:lombok-mapstruct-binding:0.2.0"
+    annotationProcessor "org.mapstruct:mapstruct-processor:1.4.2.Final"
+    annotationProcessor "org.projectlombok:lombok"
+
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+bootJar {
+    launchScript()
+    enabled = true
+    manifest {
+        attributes 'Main-Class': 'org.springframework.boot.loader.PropertiesLauncher'
+    }
+}
+
+processResources {
+    // exclude resources when build prod
+    if (isProd) {
+        exclude("application-dev.yml", "generatorConfig.xml")
+    }
+    // will replace the ${activeProfile} to activeProfile value in application.yml
+    filesMatching('application.yml') {
+        expand(project.properties)
+    }
+}
