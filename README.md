@@ -16,6 +16,37 @@
 - 安全、可靠、高性能的后端 API 服务
 - ...
 
+## 快速开始
+
+### 通过发行版安装
+
+点击[下载安装包](https://gitee.com/surveyking/surveyking/attach_files/817663/download/surveyking-0.0.1-release.jar)到本地
+
+```bash
+java -jar surveyking-0.0.1-release.jar
+```
+
+### 使用源码编译安装
+
+```bash
+git clone https://gitee.com/surveyking/surveyking.git
+cd api
+gradle clean format build -P pro -x test
+java -jar build/libs/surveyking-0.0.1-release.jar
+```
+
+打开浏览器，访问 <http://127.0.0.1:1991>
+
+### 使用 docker 快速启动
+
+启动 SurveyKing 镜像时，你可以指定 SurveyKing 挂载参数，将日志文件和内置数据库保存到你本地。
+
+```bash
+docker run -p 1991:1991 surveyking/surveyking
+# 挂载数据文件
+docker run -p 1991:1991 -v /surveyking:/surveyking surveyking/surveyking
+```
+
 ## 在线体验
 
 演示地址：<http://49.232.153.121:1991/>
