@@ -52,6 +52,10 @@ test {
     useJUnitPlatform()
 }
 
+jar {
+    enabled = false
+}
+
 bootJar {
     launchScript()
     enabled = true
