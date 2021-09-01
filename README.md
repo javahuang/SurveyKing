@@ -3,6 +3,12 @@
 
 [卷王](http://49.232.153.121:1991/)是一款安装简单、界面美观、易于使用、功能强大的企业级问卷数据采集系统。
 
+<details>
+  <summary>演示 1 分钟快速创建、发布、作答 BMI 计算器</summary>
+
+  ![logic-hideshow](https://surveyking.gitee.io/doc/static/BMI.47013baa.gif)
+</details>
+
 ## 特性概览
 
 - 安装简单（最快 1 分钟部署）
