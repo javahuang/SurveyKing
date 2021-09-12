@@ -46,3 +46,19 @@ create table if not exists t_answer(
   deleted int default 0,
   PRIMARY KEY(id)
 );
+
+create table if not exists t_file(
+    id varchar(64),
+    original_name varchar(256),
+    file_name  varchar(256),
+    file_path varchar(512),
+    thumb_file_path varchar(512),
+    storage_type int,
+    create_by varchar,
+    create_at timestamp,
+    update_by varchar,
+    update_at timestamp,
+    shared int default 0,
+    deleted int default 0,
+    PRIMARY KEY(id)
+);

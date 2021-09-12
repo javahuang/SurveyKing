@@ -1,6 +1,7 @@
 package cn.surveyking.server.core.uitls;
 
 import cn.surveyking.server.api.domain.model.User;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
@@ -9,12 +10,20 @@ import org.springframework.security.core.context.SecurityContextHolder;
  */
 public class SecurityContextUtils {
 
-	public static User getUser() {
-		return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-	}
+    public static User getUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            return new User("guest");
+        }
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof User) {
+            return (User) principal;
+        }
+        return new User("guest");
+    }
 
-	public static String getUsername() {
-		return getUser().getUsername();
-	}
+    public static String getUsername() {
+        return getUser().getUsername();
+    }
 
 }

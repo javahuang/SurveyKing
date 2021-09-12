@@ -1,5 +1,6 @@
 package cn.surveyking.server.api.domain.model;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -37,16 +38,22 @@ public class User implements UserDetails, Serializable {
 
 	private String salt;
 
-	/** 0失活 1 激活 */
+	/**
+	 * 0失活 1 激活
+	 */
 	private Integer status;
 
-	private String createBy;
-
+	@TableField(fill = FieldFill.INSERT, select = false)
 	private Date createAt;
 
-	private String updateBy;
+	@TableField(fill = FieldFill.INSERT, select = false)
+	private String createBy;
 
+	@TableField(fill = FieldFill.UPDATE, select = false)
 	private Date updateAt;
+
+	@TableField(fill = FieldFill.UPDATE, select = false)
+	private String updateBy;
 
 	@TableLogic
 	private Integer deleted;
@@ -55,6 +62,10 @@ public class User implements UserDetails, Serializable {
 	private Set<Role> authorities = new HashSet<>();
 
 	public User() {
+	}
+
+	public User(String username) {
+		this.username = username;
 	}
 
 	public User(String username, String password) {

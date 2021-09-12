@@ -7,11 +7,13 @@ import cn.surveyking.server.api.domain.model.Answer;
 import cn.surveyking.server.api.domain.model.Project;
 import cn.surveyking.server.api.domain.model.ProjectSetting;
 import cn.surveyking.server.api.mapper.AnswerMapper;
+import cn.surveyking.server.api.mapper.FileMapper;
 import cn.surveyking.server.api.mapper.ProjectMapper;
 import cn.surveyking.server.api.service.ProjectService;
 import cn.surveyking.server.core.exception.ServiceException;
 import cn.surveyking.server.core.uitls.NanoIdUtils;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
+import cn.surveyking.server.storage.StorageService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,10 @@ public class ProjectServiceImpl implements ProjectService {
 	private final AnswerMapper answerMapper;
 
 	private final ProjectViewMapper projectViewMapper;
+
+	private final StorageService storageService;
+
+	private final FileMapper fileMapper;
 
 	@Override
 	public List<ProjectView> listProject(ProjectQuery query) {
@@ -117,7 +123,6 @@ public class ProjectServiceImpl implements ProjectService {
 
 	@Override
 	public ProjectSetting getSetting(ProjectQuery query) {
-
 		return null;
 	}
 

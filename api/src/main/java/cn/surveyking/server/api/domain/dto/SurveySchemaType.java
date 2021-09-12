@@ -96,6 +96,10 @@ public class SurveySchemaType implements Cloneable {
 
 		private String requiredRule;
 
+		private String backgroundImage;
+
+		private String headerImage;
+
 	}
 
 	@Data

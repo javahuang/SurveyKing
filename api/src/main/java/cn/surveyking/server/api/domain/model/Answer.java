@@ -1,5 +1,6 @@
 package cn.surveyking.server.api.domain.model;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -35,12 +36,16 @@ public class Answer {
 	 */
 	private Integer tempSave;
 
+	@TableField(fill = FieldFill.INSERT, select = false)
 	private Date createAt;
 
+	@TableField(fill = FieldFill.INSERT, select = false)
 	private String createBy;
 
+	@TableField(fill = FieldFill.UPDATE, select = false)
 	private Date updateAt;
 
+	@TableField(fill = FieldFill.UPDATE, select = false)
 	private String updateBy;
 
 	@TableLogic

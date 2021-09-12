@@ -22,3 +22,9 @@ mybatis-plus:
   global-config:
     db-config:
       logic-delete-field: deleted
+file-storage:
+  local:
+    root-path: .
+custom-cache:
+  entries:
+    fileCache: 1h
