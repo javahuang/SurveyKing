@@ -2,17 +2,15 @@ package cn.surveyking.server.api.service;
 
 import cn.surveyking.server.api.domain.dto.AnswerQuery;
 import cn.surveyking.server.api.domain.dto.DownloadData;
+import cn.surveyking.server.api.domain.dto.DownloadQuery;
 import cn.surveyking.server.api.domain.model.Answer;
 import cn.surveyking.server.api.domain.model.AnswerMetaInfo;
 import cn.surveyking.server.core.exception.ServiceException;
-import cn.surveyking.server.core.uitls.ExcelExporter;
 import cn.surveyking.server.core.uitls.IPUtils;
 import cn.surveyking.server.core.uitls.UserAgentUtils;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpServletRequest;
@@ -35,6 +33,10 @@ public interface AnswerService {
 
 	void deleteAnswer(String[] ids);
 
+	DownloadData downloadAttachment(DownloadQuery query);
+
+	DownloadData downloadSurvey(String shortId);
+
 	default AnswerMetaInfo.ClientInfo parseClientInfo(HttpServletRequest request) {
 		String userAgentStr = request.getHeader("User-Agent");
 		AnswerMetaInfo.ClientInfo clientInfo = UserAgentUtils.parseAgent(userAgentStr);
@@ -42,18 +44,23 @@ public interface AnswerService {
 		return clientInfo;
 	}
 
-	default ResponseEntity<Resource> download(String shortId) {
-		DownloadData download = getDownloadData(shortId);
-		download.setFileName(download.getFileName());
-		ExcelExporter excelExporter = new ExcelExporter();
-		excelExporter.createSheet(download.getFileName());
-		excelExporter.createHeader(download.getHeaderNames());
-		excelExporter.createRow(download.getRows());
+	default ResponseEntity<Resource> download(DownloadQuery query) {
+		DownloadData download;
+		// 下载问卷答案
+		if (query.getType() == DownloadQuery.DownloadType.SURVEY_ANSWER) {
+			download = downloadSurvey(query.getShortId());
+		}
+		// 下载附件
+		else if (query.getType() == DownloadQuery.DownloadType.ANSWER_ATTACHMENT) {
+			download = downloadAttachment(query);
+		}
+		else {
+			throw new ServiceException("未知下载类型");
+		}
 		try {
-			String fileName = URLEncoder.encode(download.getFileName() + ".xlsx", "UTF-8");
+			String fileName = URLEncoder.encode(download.getFileName(), "UTF-8");
 			return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
-					.contentType(MediaType.parseMediaType("application/vnd.ms-excel"))
-					.body(new InputStreamResource(excelExporter.export()));
+					.contentType(download.getMediaType()).body(download.getResource());
 		}
 		catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
@@ -61,7 +68,5 @@ public interface AnswerService {
 		}
 
 	}
-
-	DownloadData getDownloadData(String shortId);
 
 }

@@ -13,4 +13,6 @@ public class ProjectQuery {
 
 	private String password;
 
+	private String name;
+
 }

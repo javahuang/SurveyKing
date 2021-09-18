@@ -10,20 +10,20 @@ import org.springframework.security.core.context.SecurityContextHolder;
  */
 public class SecurityContextUtils {
 
-    public static User getUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null) {
-            return new User("guest");
-        }
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof User) {
-            return (User) principal;
-        }
-        return new User("guest");
-    }
+	public static User getUser() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication == null) {
+			return new User("guest");
+		}
+		Object principal = authentication.getPrincipal();
+		if (principal instanceof User) {
+			return (User) principal;
+		}
+		return new User("guest");
+	}
 
-    public static String getUsername() {
-        return getUser().getUsername();
-    }
+	public static String getUsername() {
+		return getUser().getUsername();
+	}
 
 }

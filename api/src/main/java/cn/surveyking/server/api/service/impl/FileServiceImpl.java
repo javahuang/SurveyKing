@@ -40,13 +40,14 @@ public class FileServiceImpl implements FileService {
 
 	@Override
 	public FileView upload(MultipartFile uploadFile, AppConsts.StorageType storageType) {
-		StorePath storePath = storageService.uploadImage(uploadFile);
-		File file = new File();
-		file.setFileName(storePath.getFilePath());
-		file.setOriginalName(uploadFile.getOriginalFilename());
-		file.setFilePath(storePath.getFilePath());
-		file.setThumbFilePath(storePath.getThumbFilePath());
-		file.setStorageType(storageType.getType());
+		StorePath storePath;
+		if (isSupportImage(uploadFile.getOriginalFilename())) {
+			storePath = storageService.uploadImage(uploadFile);
+		}
+		else {
+			storePath = storageService.uploadFile(uploadFile);
+		}
+		File file = FileViewMapper.INSTANCE.toFile(storePath, uploadFile.getOriginalFilename(), storageType.getType());
 		fileMapper.insert(file);
 		FileView fileView = FileViewMapper.INSTANCE.toFileView(file);
 		return fileView;

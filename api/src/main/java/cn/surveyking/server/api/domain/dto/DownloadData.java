@@ -1,8 +1,8 @@
 package cn.surveyking.server.api.domain.dto;
 
 import lombok.Data;
-
-import java.util.List;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 
 /**
  * @author javahuang
@@ -13,8 +13,8 @@ public class DownloadData {
 
 	private String fileName;
 
-	private List<String> headerNames;
+	private Resource resource;
 
-	private List<List<Object>> rows;
+	private MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
 
 }

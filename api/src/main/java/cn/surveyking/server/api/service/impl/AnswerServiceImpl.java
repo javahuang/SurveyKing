@@ -2,25 +2,35 @@ package cn.surveyking.server.api.service.impl;
 
 import cn.surveyking.server.api.domain.dto.AnswerQuery;
 import cn.surveyking.server.api.domain.dto.DownloadData;
+import cn.surveyking.server.api.domain.dto.DownloadQuery;
 import cn.surveyking.server.api.domain.dto.SurveySchemaType;
 import cn.surveyking.server.api.domain.model.Answer;
 import cn.surveyking.server.api.domain.model.Project;
 import cn.surveyking.server.api.mapper.AnswerMapper;
 import cn.surveyking.server.api.mapper.ProjectMapper;
 import cn.surveyking.server.api.service.AnswerService;
+import cn.surveyking.server.api.service.FileService;
+import cn.surveyking.server.core.exception.ServiceException;
 import cn.surveyking.server.core.pagination.Page;
+import cn.surveyking.server.core.uitls.ExcelExporter;
 import cn.surveyking.server.core.uitls.SchemaParser;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.*;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * @author javahuang
@@ -34,6 +44,8 @@ public class AnswerServiceImpl implements AnswerService {
 	private final AnswerMapper answerMapper;
 
 	private final ProjectMapper projectMapper;
+
+	private final FileService fileService;
 
 	@Override
 	public IPage<Answer> listAnswer(AnswerQuery query) {
@@ -59,7 +71,6 @@ public class AnswerServiceImpl implements AnswerService {
 
 	@Override
 	public void updateAnswer(Answer answer) {
-		answer.setUpdateAt(new Date());
 		answerMapper.updateById(answer);
 	}
 
@@ -69,20 +80,129 @@ public class AnswerServiceImpl implements AnswerService {
 	}
 
 	@Override
-	public DownloadData getDownloadData(String shortId) {
+	public DownloadData downloadSurvey(String shortId) {
 		QueryWrapper<Project> queryWrapper = new QueryWrapper<>();
 		queryWrapper.eq("short_id", shortId).select("name", "survey");
 		Project project = projectMapper.selectOne(queryWrapper);
-		DownloadData download = new DownloadData();
-		download.setFileName(project.getName());
+
 		List<SurveySchemaType> schemaDataTypes = SchemaParser.parseDataTypes(project.getSurvey());
-		download.setHeaderNames(schemaDataTypes.stream().map(x -> x.getTitle()).collect(Collectors.toList()));
 		QueryWrapper<Answer> answerQuery = new QueryWrapper<>();
-		answerQuery.select("answer");
+		answerQuery.select("id", "answer", "meta_info", "attachment", "create_at", "create_by");
 		List<Answer> answers = answerMapper.selectList(answerQuery);
-		download.setRows(answers.stream().map(answer -> SchemaParser.parseRowData(answer.getAnswer(), schemaDataTypes))
-				.collect(Collectors.toList()));
+
+		DownloadData download = new DownloadData();
+		download.setFileName(project.getName() + ".xlsx");
+		int[] indexArr = { 0 };
+		try {
+			PipedOutputStream outputStream = new PipedOutputStream();
+			PipedInputStream inputStream = new PipedInputStream(outputStream);
+			new Thread(() -> {
+				new ExcelExporter.Builder().setSheetName(project.getName()).setOutputStream(outputStream)
+						.setColumns(SchemaParser.parseColumns(schemaDataTypes)).setRows(answers.stream().map(answer -> {
+							indexArr[0] = indexArr[0] += 1;
+							return SchemaParser.parseRowData(answer, schemaDataTypes, indexArr[0]);
+						}).collect(Collectors.toList())).build().exportToStream();
+				try {
+					outputStream.close();
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+			}).start();
+			download.setResource(new InputStreamResource(inputStream));
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		download.setMediaType(MediaType.parseMediaType("application/vnd.ms-excel"));
 		return download;
+	}
+
+	/**
+	 * 下载附件要使用 InputStreamResource，避免 Byte... 加载到内存
+	 * @param query
+	 * @return
+	 */
+	@Override
+	public DownloadData downloadAttachment(DownloadQuery query) {
+		QueryWrapper<Project> queryWrapper = new QueryWrapper<>();
+		queryWrapper.eq("short_id", query.getShortId()).select("name", "survey");
+		Project project = projectMapper.selectOne(queryWrapper);
+		DownloadData downloadData = new DownloadData();
+		// 下载某个问卷答案的附件
+		if (query.getAnswerId() != null) {
+			Answer answer = answerMapper.selectById(query.getAnswerId());
+			return generateSurveyAttachment(answer);
+		}
+		else {
+			// 下载所有问卷答案的附件
+			QueryWrapper<Answer> answerQuery = new QueryWrapper<>();
+			answerQuery.eq("short_id", query.getShortId());
+			downloadData.setResource(new InputStreamResource(answerAttachToZip(answerMapper.selectList(answerQuery))));
+			downloadData.setFileName(project.getName() + ".zip");
+			downloadData.setMediaType(MediaType.parseMediaType("application/zip"));
+		}
+		return downloadData;
+	}
+
+	private DownloadData generateSurveyAttachment(Answer answer) {
+		DownloadData downloadData = new DownloadData();
+		List<Answer.Attachment> attachments = answer.getAttachment();
+		// 如果只有一个附件，则直接返回附件的结果
+		if (attachments.size() == 1) {
+			Answer.Attachment attachment = attachments.get(0);
+			downloadData.setFileName(attachment.getOriginalName());
+			downloadData.setResource(fileService.loadAsResource(attachment.getId()));
+		}
+		else {
+			// 多个附件，压缩包
+			downloadData.setResource(new InputStreamResource(answerAttachToZip(Arrays.asList(answer))));
+			downloadData.setFileName(answer.getId() + ".zip");
+			downloadData.setMediaType(MediaType.parseMediaType("application/zip"));
+		}
+		return downloadData;
+	}
+
+	/**
+	 * 将单个问卷的附件转成 zip 压缩包
+	 * @param answers
+	 * @return
+	 */
+	private InputStream answerAttachToZip(List<Answer> answers) {
+		try {
+			PipedOutputStream outputStream = new PipedOutputStream();
+			PipedInputStream inputStream = new PipedInputStream(outputStream);
+			new Thread(() -> {
+				try (ZipOutputStream zout = new ZipOutputStream(outputStream);) {
+					answers.forEach(answer -> {
+						answer.getAttachment().forEach(attachment -> {
+							byte[] buffer = new byte[1024 * 1024 * 1024];
+							int count;
+							ByteArrayResource resource = (ByteArrayResource) fileService
+									.loadAsResource(attachment.getId());
+							ZipEntry entry = new ZipEntry(answer.getId() + "_" + attachment.getOriginalName());
+							try {
+								zout.putNextEntry(entry);
+								zout.write(resource.getByteArray());
+							}
+							catch (IOException e) {
+								e.printStackTrace();
+							}
+
+						});
+					});
+
+				}
+				catch (Exception e) {
+					throw new ServiceException("生成压缩文件失败", e);
+				}
+			}).start();
+			return inputStream;
+		}
+		catch (Exception e) {
+			throw new ServiceException("生成压缩文件失败", e);
+		}
 	}
 
 }

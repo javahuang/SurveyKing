@@ -7,13 +7,11 @@ import cn.surveyking.server.api.domain.model.Answer;
 import cn.surveyking.server.api.domain.model.Project;
 import cn.surveyking.server.api.domain.model.ProjectSetting;
 import cn.surveyking.server.api.mapper.AnswerMapper;
-import cn.surveyking.server.api.mapper.FileMapper;
 import cn.surveyking.server.api.mapper.ProjectMapper;
 import cn.surveyking.server.api.service.ProjectService;
 import cn.surveyking.server.core.exception.ServiceException;
 import cn.surveyking.server.core.uitls.NanoIdUtils;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
-import cn.surveyking.server.storage.StorageService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +23,8 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+
+import static com.baomidou.mybatisplus.core.toolkit.StringUtils.isNotBlank;
 
 /**
  * @author javahuang
@@ -41,14 +41,11 @@ public class ProjectServiceImpl implements ProjectService {
 
 	private final ProjectViewMapper projectViewMapper;
 
-	private final StorageService storageService;
-
-	private final FileMapper fileMapper;
-
 	@Override
 	public List<ProjectView> listProject(ProjectQuery query) {
 		QueryWrapper<Project> wrapper = new QueryWrapper<>();
 		wrapper.eq("create_by", SecurityContextUtils.getUsername());
+		wrapper.eq(isNotBlank(query.getName()), "name", query.getName());
 		List<Project> projects = projectMapper.selectList(wrapper);
 		List<ProjectView> result = projectViewMapper.toProjectView(projects);
 		result.forEach(view -> {

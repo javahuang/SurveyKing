@@ -1,9 +1,7 @@
 package cn.surveyking.server.api.domain.model;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.baomidou.mybatisplus.annotation.TableName;
+import cn.surveyking.server.api.domain.handler.AttachmentListTypeHandler;
+import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -11,6 +9,7 @@ import org.apache.ibatis.type.JdbcType;
 
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  * @author javahuang
@@ -28,8 +27,11 @@ public class Answer {
 	@TableField(typeHandler = JacksonTypeHandler.class, jdbcType = JdbcType.LONGVARCHAR)
 	private LinkedHashMap answer;
 
+	@TableField(typeHandler = AttachmentListTypeHandler.class, jdbcType = JdbcType.LONGVARCHAR)
+	private List<Attachment> attachment;
+
 	@TableField(typeHandler = JacksonTypeHandler.class, jdbcType = JdbcType.LONGVARCHAR)
-	private AnswerMetaInfo metaInfo = new AnswerMetaInfo();
+	private AnswerMetaInfo metaInfo;
 
 	/**
 	 * 0 暂存 1 已完成
@@ -50,5 +52,25 @@ public class Answer {
 
 	@TableLogic
 	private Integer deleted;
+
+	@Data
+	public static class Attachment {
+
+		/**
+		 * 附件id
+		 */
+		private String id;
+
+		/**
+		 * 附件原始名字
+		 */
+		private String originalName;
+
+		/**
+		 * 内容类型
+		 */
+		private String contentType;
+
+	}
 
 }

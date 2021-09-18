@@ -2,6 +2,7 @@ package cn.surveyking.server.api.domain.mapper;
 
 import cn.surveyking.server.api.domain.dto.FileView;
 import cn.surveyking.server.api.domain.model.File;
+import cn.surveyking.server.storage.StorePath;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -24,5 +25,7 @@ public interface FileViewMapper {
 	@Mapping(source = "id", target = "attachmentId")
 	@Mapping(source = "originalName", target = "fileName")
 	List<FileView> toFileView(List<File> fileList);
+
+	File toFile(StorePath storePath, String originalName, int storageType);
 
 }

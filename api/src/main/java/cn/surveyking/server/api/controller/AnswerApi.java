@@ -1,6 +1,7 @@
 package cn.surveyking.server.api.controller;
 
 import cn.surveyking.server.api.domain.dto.AnswerQuery;
+import cn.surveyking.server.api.domain.dto.DownloadQuery;
 import cn.surveyking.server.api.domain.model.Answer;
 import cn.surveyking.server.api.service.AnswerService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -49,8 +50,8 @@ public class AnswerApi {
 	}
 
 	@GetMapping("/download")
-	public ResponseEntity<Resource> download(String shortId) {
-		return answerService.download(shortId);
+	public ResponseEntity<Resource> download(DownloadQuery query) {
+		return answerService.download(query);
 	}
 
 }

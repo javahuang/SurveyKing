@@ -1,18 +1,14 @@
 package cn.surveyking.server.storage;
 
-import cn.surveyking.server.core.constant.AppConsts;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Arrays;
-import java.util.List;
+import java.io.InputStream;
 
 /**
  * @author javahuang
  * @date 2021/9/6
  */
 public interface StorageService {
-
-	List<String> SUPPORT_IMAGE_LIST = Arrays.asList(AppConsts.SUPPORT_IMAGE_TYPE);
 
 	default void init() {
 	}
@@ -25,5 +21,7 @@ public interface StorageService {
 	StorePath uploadImage(MultipartFile file);
 
 	byte[] download(String filePath);
+
+	InputStream downloadAsStream(String filePath);
 
 }

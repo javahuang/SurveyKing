@@ -44,10 +44,11 @@ public class LocalStorageService extends AbstractStorageService {
 
 	@Override
 	public StorePath uploadFile(MultipartFile file) {
-		String filePath = sequence.nextId() + "_" + file.getOriginalFilename();
+		String originalFilename = file.getOriginalFilename();
+		String filePath = sequence.nextId() + "_" + originalFilename;
 		try {
 			saveToLocal(filePath, file.getInputStream());
-			return new StorePath(filePath);
+			return new StorePath(filePath, filePath);
 		}
 		catch (IOException e) {
 			e.printStackTrace();
@@ -57,9 +58,6 @@ public class LocalStorageService extends AbstractStorageService {
 
 	@Override
 	public StorePath uploadImage(MultipartFile file) {
-		if (!isSupportImage(file.getOriginalFilename())) {
-			throw new ServiceException("不支持的图片上传类型");
-		}
 		try {
 			StorePath storePath = uploadFile(file);
 			String thumbFilePath = getThumbImagePath(storePath.getFilePath());
@@ -71,7 +69,6 @@ public class LocalStorageService extends AbstractStorageService {
 			e.printStackTrace();
 			throw new ServiceException("图片上传失败", e);
 		}
-		// TODO: 这个 inputStream 是否需要关闭
 	}
 
 	private void saveToLocal(String filePath, InputStream inputStream) {
@@ -88,6 +85,17 @@ public class LocalStorageService extends AbstractStorageService {
 	public byte[] download(String filePath) {
 		try {
 			return Files.readAllBytes(rootLocation.resolve(filePath));
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+			throw new ServiceException("下载失败", e);
+		}
+	}
+
+	@Override
+	public InputStream downloadAsStream(String filePath) {
+		try {
+			return Files.newInputStream(rootLocation.resolve(filePath));
 		}
 		catch (IOException e) {
 			e.printStackTrace();

@@ -37,6 +37,9 @@ public class AnswerMetaInfo {
 
 		private String remoteIp;
 
+		/** 地区 */
+		private String region;
+
 		private String deviceType;
 
 	}

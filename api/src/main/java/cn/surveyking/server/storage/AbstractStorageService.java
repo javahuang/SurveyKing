@@ -47,14 +47,4 @@ public abstract class AbstractStorageService implements StorageService {
 		return new ByteArrayInputStream(out.toByteArray());
 	}
 
-	/**
-	 * 是否支持该格式的图片上传
-	 * @param fileName
-	 * @return
-	 */
-	protected boolean isSupportImage(String fileName) {
-		String extType = fileName.substring(fileName.lastIndexOf(".") + 1);
-		return SUPPORT_IMAGE_LIST.contains(extType.toUpperCase());
-	}
-
 }

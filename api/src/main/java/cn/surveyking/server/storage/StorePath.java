@@ -11,6 +11,8 @@ import lombok.Data;
 @Data
 public class StorePath {
 
+	private String fileName;
+
 	private String filePath;
 
 	private String thumbFilePath;
@@ -19,7 +21,13 @@ public class StorePath {
 		this.filePath = filePath;
 	}
 
-	public StorePath(String filePath, String thumbFilePath) {
+	public StorePath(String fileNae, String filePath) {
+		this.fileName = fileName;
+		this.filePath = filePath;
+	}
+
+	public StorePath(String fileName, String filePath, String thumbFilePath) {
+		this.fileName = fileName;
 		this.filePath = filePath;
 		this.thumbFilePath = thumbFilePath;
 	}

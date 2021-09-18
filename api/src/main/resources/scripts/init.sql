@@ -37,6 +37,7 @@ create table if not exists t_answer(
   id varchar(64),
   short_id varchar(64),
   answer CLOB comment '问卷答案',
+  attachment varchar comment '问卷元数据',
   meta_info varchar comment '问卷元数据',
   temp_save int comment '0暂存 1已完成',
   create_by varchar,

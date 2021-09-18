@@ -1,16 +1,21 @@
 package cn.surveyking.server.core.uitls;
 
+import lombok.Data;
+import lombok.experimental.Accessors;
 import org.dhatim.fastexcel.Workbook;
 import org.dhatim.fastexcel.Worksheet;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * 轻量级 excel 导出工具，换成 poi 打的包会多出十几 M，不能接受，-_-||
+ *
  * @author javahuang
  * @date 2021/2/1
  */
@@ -30,8 +35,13 @@ public class ExcelExporter {
 		this.workbook = new Workbook(os, "survey", "1.0");
 	}
 
+	public ExcelExporter(OutputStream outputStream) {
+		this.workbook = new Workbook(outputStream, "survey", "1.0");
+	}
+
 	public Worksheet createSheet(String sheetName) {
 		Worksheet worksheet = workbook.newWorksheet(sheetName);
+		worksheet.fitToWidth((short) 10);
 		worksheet.setFitToPage(true);
 		threadLocal.set(worksheet);
 		rowIndexBySheet.put(sheetName, 1);
@@ -77,6 +87,43 @@ public class ExcelExporter {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public void exportToStream() {
+		try {
+			this.workbook.finish();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Data
+	@Accessors(chain = true)
+	public static class Builder {
+
+		private String sheetName;
+
+		private List<String> columns;
+
+		private List<List<Object>> rows;
+
+		private OutputStream outputStream;
+
+		public ExcelExporter build() {
+			ExcelExporter excelExporter;
+			if (this.outputStream != null) {
+				excelExporter = new ExcelExporter(this.outputStream);
+			}
+			else {
+				excelExporter = new ExcelExporter();
+			}
+			excelExporter.createSheet(this.sheetName);
+			excelExporter.createRow(this.rows);
+			excelExporter.createHeader(this.columns);
+			return excelExporter;
+		}
+
 	}
 
 }
