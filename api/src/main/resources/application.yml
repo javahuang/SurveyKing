@@ -14,6 +14,10 @@ spring:
       max-file-size: 2048MB
       max-request-size: 2048MB
   jackson:
-    default-property-inclusion: non_null
+    default-property-inclusion: non_null # 序列化忽略空值
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
+    serialization:
+      FAIL_ON_EMPTY_BEANS: false
+    deserialization:
+      FAIL_ON_UNKNOWN_PROPERTIES: false # 反序列化时允许未知属性

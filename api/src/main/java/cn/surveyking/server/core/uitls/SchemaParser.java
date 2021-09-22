@@ -82,7 +82,8 @@ public class SchemaParser {
 			}
 			else if (!questionType.name().startsWith("Matrix")) {
 				Map mapValue = (Map) valueObj;
-				rowData.add(mapValue.values().stream().collect(Collectors.joining(",")));
+				// 需要将数字类型转换成字符串
+				rowData.add(mapValue.values().stream().map(x -> x + "").collect(Collectors.joining(",")));
 			}
 			else {
 				// TODO: 矩阵题如何展示答案

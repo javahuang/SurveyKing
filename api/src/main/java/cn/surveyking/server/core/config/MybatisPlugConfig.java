@@ -1,8 +1,10 @@
 package cn.surveyking.server.core.config;
 
 import com.baomidou.mybatisplus.annotation.DbType;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +16,14 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @MapperScan("cn.surveyking.server.api.mapper")
 public class MybatisPlugConfig {
+
+	private final ObjectMapper objectMapper;
+
+	public MybatisPlugConfig(ObjectMapper objectMapper) {
+		this.objectMapper = objectMapper;
+		// 允许 MybatisPlus 使用配置的 ObjectMapper 来操作 json
+		JacksonTypeHandler.setObjectMapper(objectMapper);
+	}
 
 	/**
 	 * 新的分页插件,一缓和二缓遵循mybatis的规则,需要设置 MybatisConfiguration#useDeprecatedExecutor = false

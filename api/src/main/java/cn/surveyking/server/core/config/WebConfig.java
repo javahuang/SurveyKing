@@ -42,7 +42,8 @@ public class WebConfig implements WebMvcConfigurer {
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
 		registry.setOrder(-1) // 设置静态资源映射优先级高于下面配置的 @GetMapping
-				.addResourceHandler(STATIC_RESOURCES).addResourceLocations("classpath:/static/");
+				.addResourceHandler(STATIC_RESOURCES).addResourceLocations("classpath:/static/")
+				.setCachePeriod(3600 * 24);
 	}
 
 	/**

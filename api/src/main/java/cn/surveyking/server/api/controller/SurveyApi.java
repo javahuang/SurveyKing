@@ -6,17 +6,18 @@ import cn.surveyking.server.api.domain.dto.PublicProjectView;
 import cn.surveyking.server.api.domain.model.Answer;
 import cn.surveyking.server.api.service.AnswerService;
 import cn.surveyking.server.api.service.FileService;
-import cn.surveyking.server.api.service.ProjectService;
 import cn.surveyking.server.api.service.SurveyService;
 import cn.surveyking.server.core.constant.AppConsts;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
+import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.Duration;
 
 /**
  * 答卷页面
@@ -32,8 +33,6 @@ public class SurveyApi {
 	private final SurveyService surveyService;
 
 	private final AnswerService answerService;
-
-	private final ProjectService projectService;
 
 	private final FileService fileService;
 
@@ -60,7 +59,8 @@ public class SurveyApi {
 	@GetMapping("/preview/{attachmentId}")
 	public ResponseEntity<Resource> preview(@PathVariable String attachmentId) {
 		Resource file = fileService.loadAsResource(attachmentId);
-		return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(file);
+		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofDays(30)))
+				.contentType(MediaType.IMAGE_JPEG).body(file);
 	}
 
 }

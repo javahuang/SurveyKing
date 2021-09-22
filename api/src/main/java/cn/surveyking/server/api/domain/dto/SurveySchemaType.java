@@ -68,15 +68,31 @@ public class SurveySchemaType implements Cloneable {
 
 		private Integer rows;
 
+		/**
+		 * 范围强制校验
+		 */
 		private String scope;
 
-		private String scoreDesc;
+		/**
+		 * 范围强校验提示信息
+		 */
+		private String scopeDesc;
 
+		/**
+		 * 范围软校验，超出范围会警告，但是依然可以提交
+		 */
 		private String softScope;
+
+		private String softScopeDesc;
 
 		private Boolean readOnly;
 
 		private String suffix;
+
+		/**
+		 * 文字长度限制 [1,2] [,5]
+		 */
+		private String textLimit;
 
 		private Boolean finish;
 

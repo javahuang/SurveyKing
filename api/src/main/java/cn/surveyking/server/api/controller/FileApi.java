@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
 /**
@@ -24,7 +25,7 @@ public class FileApi {
 	private final FileService fileService;
 
 	@GetMapping("/{attachmentId}")
-	public ResponseEntity<Resource> preview(@PathVariable String attachmentId) {
+	public ResponseEntity<Resource> preview(@NotEmpty @PathVariable String attachmentId) {
 		Resource file = fileService.loadAsResource(attachmentId);
 		return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(file);
 	}

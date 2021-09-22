@@ -24,7 +24,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -97,16 +100,24 @@ public class AnswerServiceImpl implements AnswerService {
 			PipedOutputStream outputStream = new PipedOutputStream();
 			PipedInputStream inputStream = new PipedInputStream(outputStream);
 			new Thread(() -> {
-				new ExcelExporter.Builder().setSheetName(project.getName()).setOutputStream(outputStream)
-						.setColumns(SchemaParser.parseColumns(schemaDataTypes)).setRows(answers.stream().map(answer -> {
-							indexArr[0] = indexArr[0] += 1;
-							return SchemaParser.parseRowData(answer, schemaDataTypes, indexArr[0]);
-						}).collect(Collectors.toList())).build().exportToStream();
 				try {
-					outputStream.close();
+					new ExcelExporter.Builder().setSheetName(project.getName()).setOutputStream(outputStream)
+							.setColumns(SchemaParser.parseColumns(schemaDataTypes))
+							.setRows(answers.stream().map(answer -> {
+								indexArr[0] = indexArr[0] += 1;
+								return SchemaParser.parseRowData(answer, schemaDataTypes, indexArr[0]);
+							}).collect(Collectors.toList())).build().exportToStream();
 				}
-				catch (IOException e) {
+				catch (Exception e) {
 					e.printStackTrace();
+				}
+				finally {
+					try {
+						outputStream.close();
+					}
+					catch (IOException e) {
+						e.printStackTrace();
+					}
 				}
 			}).start();
 			download.setResource(new InputStreamResource(inputStream));
