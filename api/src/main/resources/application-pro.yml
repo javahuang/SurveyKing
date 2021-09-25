@@ -24,7 +24,7 @@ mybatis-plus:
       logic-delete-field: deleted
 file-storage:
   local:
-    root-path: .
+    root-path: ./files
 custom-cache:
   entries:
     fileCache: 1h

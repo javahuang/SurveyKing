@@ -1,7 +1,7 @@
 
 ## 什么是卷王
 
-[卷王](http://49.232.153.121:1991/)是一款安装简单、界面美观、易于使用、功能强大的企业级问卷数据采集系统。
+[卷王](https://surveyking.cn/)是一款安装简单、界面美观、易于使用、功能强大的企业级问卷数据采集系统。
 
 <details>
   <summary>演示 1 分钟快速创建、发布、作答 BMI 计算器</summary>
@@ -35,13 +35,13 @@ java -jar surveyking-0.0.1-release.jar
 ### 使用源码编译安装
 
 ```bash
-git clone https://gitee.com/surveyking/surveyking.git
+git clone https://github.com/javahuang/SurveyKing
 cd api
 gradle clean format build -P pro -x test
 java -jar build/libs/surveyking-0.0.1-release.jar
 ```
 
-打开浏览器，访问 <http://127.0.0.1:1991>
+打开浏览器，访问 <https://surveyking.cn/>
 
 ### 使用 docker 快速启动
 
@@ -55,7 +55,7 @@ docker run -p 1991:1991 -v /surveyking:/surveyking surveyking/surveyking
 
 ## 在线体验
 
-演示地址：<http://49.232.153.121:1991/>
+演示地址：</>
 
 点击*试一试*，无需注册登录。
 
@@ -63,6 +63,6 @@ docker run -p 1991:1991 -v /surveyking:/surveyking surveyking/surveyking
 
 目前后端代码已开源，前端代码后续也会有开源计划。
 
-[SurveyKing](https://gitee.com/surveyking/surveyking)
+[SurveyKing](https://github.com/javahuang/SurveyKing)
 
 [文档地址](https://surveyking.gitee.io/doc/)

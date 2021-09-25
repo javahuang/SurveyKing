@@ -12,7 +12,7 @@ import java.io.Serializable;
  */
 public interface FileMapper extends BaseMapper<File> {
 
-	@Cacheable(cacheNames = "fileCache", key = "#id")
+	@Cacheable(cacheNames = "fileCache", key = "#id", unless = "#result == null")
 	File selectById(Serializable id);
 
 }
