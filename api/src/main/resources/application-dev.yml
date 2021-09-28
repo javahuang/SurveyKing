@@ -22,9 +22,10 @@ mybatis-plus:
   global-config:
     db-config:
       logic-delete-field: deleted
+#      update-strategy: not_null # 对于 null 的字段，不给更新为空
 file-storage:
   local:
-    root-path: .
+    root-path: /Users/dahuang/Downloads/files
 custom-cache:
   entries:
     fileCache: 1h

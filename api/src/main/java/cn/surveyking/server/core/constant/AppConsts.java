@@ -12,9 +12,9 @@ public class AppConsts {
 	public enum StorageType {
 
 		/**
-		 * 1背景图片 2顶部图片 3问题图片 4答卷上传附件
+		 * 1.背景图片 2.顶部图片 3.问题图片 4.答卷附件 5.问卷模板预览图
 		 */
-		BACKGROUND_IMAGE(1), HEADER_IMAGE(2), QUESTION_IMAGE(3), ANSWER_ATTACHMENT(4);
+		BACKGROUND_IMAGE(1), HEADER_IMAGE(2), QUESTION_IMAGE(3), ANSWER_ATTACHMENT(4), TEMPLATE_PREVIEW_IMAGE(5);
 
 		private int type;
 

@@ -24,4 +24,6 @@ public class TemplateView {
 	 */
 	private boolean owner;
 
+	private String previewUrl;
+
 }
