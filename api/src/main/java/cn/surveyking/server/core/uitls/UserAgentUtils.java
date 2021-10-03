@@ -1,6 +1,6 @@
 package cn.surveyking.server.core.uitls;
 
-import cn.surveyking.server.api.domain.model.AnswerMetaInfo;
+import cn.surveyking.server.web.domain.model.AnswerMetaInfo;
 import com.blueconic.browscap.*;
 import lombok.extern.slf4j.Slf4j;
 

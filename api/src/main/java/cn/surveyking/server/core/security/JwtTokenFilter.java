@@ -1,6 +1,6 @@
 package cn.surveyking.server.core.security;
 
-import cn.surveyking.server.api.service.UserService;
+import cn.surveyking.server.web.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

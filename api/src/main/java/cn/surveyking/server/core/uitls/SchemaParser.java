@@ -1,7 +1,7 @@
 package cn.surveyking.server.core.uitls;
 
-import cn.surveyking.server.api.domain.dto.SurveySchemaType;
-import cn.surveyking.server.api.domain.model.Answer;
+import cn.surveyking.server.web.domain.dto.SurveySchemaType;
+import cn.surveyking.server.web.domain.model.Answer;
 
 import java.text.Format;
 import java.text.SimpleDateFormat;

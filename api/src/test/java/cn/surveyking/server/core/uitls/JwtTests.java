@@ -1,6 +1,6 @@
 package cn.surveyking.server.core.uitls;
 
-import cn.surveyking.server.api.domain.model.User;
+import cn.surveyking.server.web.domain.model.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;

@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
  * @date 2021/8/6
  */
 @Configuration
-@MapperScan("cn.surveyking.server.api.mapper")
+@MapperScan("cn.surveyking.server.web.mapper")
 public class MybatisPlugConfig {
 
 	private final ObjectMapper objectMapper;

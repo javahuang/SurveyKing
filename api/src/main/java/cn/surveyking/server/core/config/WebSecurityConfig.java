@@ -1,6 +1,6 @@
 package cn.surveyking.server.core.config;
 
-import cn.surveyking.server.api.service.UserService;
+import cn.surveyking.server.web.service.UserService;
 import cn.surveyking.server.core.security.JwtTokenFilter;
 import cn.surveyking.server.core.security.RestAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;

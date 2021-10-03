@@ -1,8 +1,8 @@
 package cn.surveyking.server.core.security;
 
-import cn.surveyking.server.api.domain.dto.UserView;
-import cn.surveyking.server.api.domain.mapper.UserViewMapper;
-import cn.surveyking.server.api.domain.model.User;
+import cn.surveyking.server.web.domain.dto.UserView;
+import cn.surveyking.server.web.domain.mapper.UserViewMapper;
+import cn.surveyking.server.web.domain.model.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Encoders;
