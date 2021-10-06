@@ -1,0 +1,16 @@
+spring:
+  h2:
+    console:
+      enabled: true
+  datasource:
+    username: sa
+    password: sa
+    url: jdbc:h2:./survey;INIT=runscript from 'classpath:scripts/init.sql'
+    driver-class-name: org.h2.Driver
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    call-setters-on-nulls: false
+  global-config:
+    db-config:
+      logic-delete-field: deleted

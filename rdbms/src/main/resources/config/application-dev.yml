@@ -1,0 +1,17 @@
+# 配置文件不能放在根目录下面，否则会被 api 的 application-dev.yml 覆盖
+spring:
+  h2:
+    console:
+      enabled: true
+  datasource:
+    username: sa
+    password: sa
+    url: jdbc:h2:tcp://localhost/~/survey
+    driver-class-name: org.h2.Driver
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    call-setters-on-nulls: false
+  global-config:
+    db-config:
+      logic-delete-field: deleted

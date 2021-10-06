@@ -9,3 +9,6 @@ pluginManagement {
 rootProject.name = 'survey-server'
 include 'mongodb'
 include 'api'
+include 'shared'
+include 'rdbms'
+

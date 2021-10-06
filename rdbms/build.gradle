@@ -1,0 +1,21 @@
+plugins {
+    id 'java'
+}
+
+version 'unspecified'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':shared')
+    implementation 'com.baomidou:mybatis-plus-boot-starter:3.4.3'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    implementation 'com.h2database:h2:1.4.200'
+}
+
+test {
+    useJUnitPlatform()
+}
