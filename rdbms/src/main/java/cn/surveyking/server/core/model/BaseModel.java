@@ -19,7 +19,7 @@ public class BaseModel {
 	@TableId(type = IdType.ASSIGN_ID)
 	private String id;
 
-	@TableField(fill = FieldFill.INSERT, select = false)
+	@TableField(fill = FieldFill.INSERT)
 	private Date createAt;
 
 	@TableField(fill = FieldFill.INSERT, select = false)

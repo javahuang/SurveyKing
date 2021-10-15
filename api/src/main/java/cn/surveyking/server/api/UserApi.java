@@ -4,9 +4,8 @@ import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.security.JwtTokenUtil;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.AuthRequest;
-import cn.surveyking.server.domain.dto.CreateUserRequest;
 import cn.surveyking.server.domain.dto.UserTokenView;
-import cn.surveyking.server.domain.dto.UserView;
+import cn.surveyking.server.domain.dto.UserInfo;
 import cn.surveyking.server.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -35,11 +34,6 @@ public class UserApi {
 
 	private final JwtTokenUtil jwtTokenUtil;
 
-	@PostMapping("/public/register")
-	public void register(@RequestBody @Valid CreateUserRequest request) {
-		userService.create(request);
-	}
-
 	@PostMapping("/public/login")
 	public ResponseEntity login(@RequestBody @Valid AuthRequest request) {
 		Authentication authentication;
@@ -51,14 +45,14 @@ public class UserApi {
 		}
 		// 将 token 提交给 spring security 的 DaoAuthenticationProvider 进行认证
 		Authentication authenticate = authenticationManager.authenticate(authentication);
-		UserView user = (UserView) authenticate.getPrincipal();
+		UserInfo user = (UserInfo) authenticate.getPrincipal();
 		return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION,
 				jwtTokenUtil.generateAccessToken(new UserTokenView(user.getUserId()))).build();
 	}
 
 	@GetMapping("/currentUser")
 	@PreAuthorize("isAuthenticated()")
-	public UserView currentUser() {
+	public UserInfo currentUser() {
 		return userService.currentUser(SecurityContextUtils.getUserId());
 	}
 

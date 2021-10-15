@@ -1,7 +1,7 @@
 package cn.surveyking.server.service;
 
-import cn.surveyking.server.domain.dto.CreateUserRequest;
-import cn.surveyking.server.domain.dto.UserView;
+import cn.surveyking.server.core.common.PaginationResponse;
+import cn.surveyking.server.domain.dto.*;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 /**
@@ -10,8 +10,15 @@ import org.springframework.security.core.userdetails.UserDetailsService;
  */
 public interface UserService extends UserDetailsService {
 
-	void create(CreateUserRequest request);
+	UserInfo currentUser(String userId);
 
-	UserView currentUser(String userId);
+    PaginationResponse<UserView> getUsers(UserQuery query);
 
+	void createUser(UserRequest request);
+
+	void updateUser(UserRequest request);
+
+	void deleteUser(String id);
+
+	boolean checkUsernameExist(String username);
 }

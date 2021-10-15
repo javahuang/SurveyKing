@@ -1,7 +1,7 @@
 package cn.surveyking.server.core.uitls;
 
 import cn.surveyking.server.core.constant.AppConsts;
-import cn.surveyking.server.domain.dto.UserView;
+import cn.surveyking.server.domain.dto.UserInfo;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -11,16 +11,16 @@ import org.springframework.security.core.context.SecurityContextHolder;
  */
 public class SecurityContextUtils {
 
-	public static UserView getUser() {
+	public static UserInfo getUser() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (authentication == null) {
-			return new UserView("guest");
+			return new UserInfo("guest");
 		}
 		Object principal = authentication.getPrincipal();
-		if (principal instanceof UserView) {
-			return (UserView) principal;
+		if (principal instanceof UserInfo) {
+			return (UserInfo) principal;
 		}
-		return new UserView("guest");
+		return new UserInfo("guest");
 	}
 
 	public static String getUsername() {

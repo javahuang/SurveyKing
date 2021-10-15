@@ -1,10 +1,12 @@
 package cn.surveyking.server.impl;
 
+import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.constant.AppConsts;
-import cn.surveyking.server.core.security.PreAuthorizeAnnotationExtractor;
-import cn.surveyking.server.domain.dto.CreateUserRequest;
+import cn.surveyking.server.domain.dto.UserInfo;
+import cn.surveyking.server.domain.dto.UserQuery;
+import cn.surveyking.server.domain.dto.UserRequest;
 import cn.surveyking.server.domain.dto.UserView;
-import cn.surveyking.server.domain.mapper.UserEditMapper;
+import cn.surveyking.server.domain.mapper.RoleViewMapper;
 import cn.surveyking.server.domain.mapper.UserViewMapper;
 import cn.surveyking.server.domain.model.Account;
 import cn.surveyking.server.domain.model.Role;
@@ -18,6 +20,7 @@ import cn.surveyking.server.service.BaseService;
 import cn.surveyking.server.service.UserService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.AccessDeniedException;
@@ -27,7 +30,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.ValidationException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -35,6 +37,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * @author javahuang
@@ -49,7 +52,7 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 
 	private final PasswordEncoder passwordEncoder;
 
-	private final UserEditMapper userEditMapper;
+	private final RoleViewMapper roleViewMapper;
 
 	private final UserViewMapper userViewMapper;
 
@@ -63,7 +66,7 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 	 * @throws UsernameNotFoundException
 	 */
 	@Override
-	public UserView loadUserByUsername(String username) throws UsernameNotFoundException {
+	public UserInfo loadUserByUsername(String username) throws UsernameNotFoundException {
 		LambdaQueryWrapper<Account> queryWrapper = Wrappers.<Account>lambdaQuery().eq(Account::getAuthAccount,
 				username);
 		Account existAccount = accountMapper.selectOne(queryWrapper);
@@ -79,9 +82,9 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 
 	@Override
 	@Cacheable(cacheNames = "userCache", key = "#userId", unless = "#result == null")
-	public UserView currentUser(String userId) {
+	public UserInfo currentUser(String userId) {
 		User user = this.getById(userId);
-		UserView view = userViewMapper.toUserView(user);
+		UserInfo userInfo = userViewMapper.toUserInfo(user);
 		List<Role> roles = userRoleMapper
 				.selectList(Wrappers.<UserRole>lambdaQuery().eq(UserRole::getUserId, user.getId())).stream()
 				.map(ur -> roleMapper.selectById(ur.getRoleId())).collect(Collectors.toList());
@@ -92,51 +95,87 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 				authorities.add(authority);
 			});
 		});
-		view.setAuthorities(
+		userInfo.setAuthorities(
 				authorities.stream().map(authority -> (GrantedAuthority) () -> authority).collect(Collectors.toSet()));
-		return view;
+		return userInfo;
 	}
 
 	@Override
-	public void create(CreateUserRequest request) {
-		LambdaQueryWrapper<Account> queryWrapper = Wrappers.<Account>lambdaQuery().eq(Account::getAuthAccount,
-				request.getUsername());
-		Account existAccount = accountMapper.selectOne(queryWrapper);
-		if (existAccount != null) {
-			throw new ValidationException("用户名已存在!");
-		}
-		if (!request.getPassword().equals(request.getRePassword())) {
-			throw new ValidationException("两次输入密码不一致!");
-		}
-		if (request.getAuthorities() == null) {
-			request.setAuthorities(new HashSet<>());
-		}
-		User user = userEditMapper.create(request);
+	public PaginationResponse<UserView> getUsers(UserQuery query) {
+		Page<User> userPage = pageByQuery(query,
+				Wrappers.<User>lambdaQuery().like(isNotBlank(query.getName()), User::getName, query.getName()));
+		return new PaginationResponse<>(userPage.getTotal(), userPage.getRecords().stream().map(x -> {
+			UserView userView = userViewMapper.toUserView(x);
+			userView.setUsername(accountMapper
+					.selectOne(Wrappers.<Account>lambdaQuery().eq(Account::getUserId, x.getId())).getAuthAccount());
+			userView.setRoles(userRoleMapper
+					.selectList(Wrappers.<UserRole>lambdaQuery().eq(UserRole::getUserId, x.getId())).stream()
+					.map(userRole -> roleViewMapper.toView(roleMapper.selectById(userRole.getRoleId())))
+					.collect(Collectors.toList()));
+			return userView;
+		}).collect(Collectors.toList()));
+	}
+
+	@Override
+	public void createUser(UserRequest request) {
+		User user = userViewMapper.toUser(request);
 		this.save(user);
 
 		// 创建登录账号
-		Account account = userEditMapper.createAccount(request);
+		Account account = userViewMapper.toAccount(request);
 		account.setAuthType(AppConsts.AUTH_TYPE.PWD.name());
 		account.setUserType(AppConsts.USER_TYPE.SysUser.toString());
 		account.setAuthSecret(passwordEncoder.encode(request.getPassword()));
 		account.setUserId(user.getId());
 		accountMapper.insert(account);
 
-		// 添加角色
-		Role role = new Role();
-		String authority = PreAuthorizeAnnotationExtractor.extractAllApiPermissions().stream()
-				.collect(Collectors.joining(","));
-		role.setAuthority(authority);
-		role.setName("管理员");
-		role.setCode("admin");
-		roleMapper.insert(role);
+		// 添加用户角色
+		request.getRoles().forEach(roleId -> {
+			UserRole userRole = new UserRole();
+			userRole.setUserId(user.getId());
+			userRole.setRoleId(roleId);
+			userRole.setUserType(AppConsts.USER_TYPE.SysUser.name());
+			userRoleMapper.insert(userRole);
+		});
+	}
+
+	@Override
+	public void updateUser(UserRequest request) {
+		if (request.getId() == null) {
+			return;
+		}
+		User user = userViewMapper.toUser(request);
+		this.updateById(user);
+
+		// 创建登录账号
+		Account account = userViewMapper.toAccount(request);
+		accountMapper.update(account, Wrappers.<Account>lambdaQuery().eq(Account::getUserId, request.getId()));
 
 		// 添加用户角色
-		UserRole userRole = new UserRole();
-		userRole.setUserId(user.getId());
-		userRole.setRoleId(role.getId());
-		userRole.setUserType(AppConsts.USER_TYPE.SysUser.name());
-		userRoleMapper.insert(userRole);
+		userRoleMapper.delete(Wrappers.<UserRole>lambdaQuery().eq(UserRole::getUserId, request.getId()));
+		request.getRoles().forEach(roleId -> {
+			UserRole userRole = new UserRole();
+			userRole.setUserId(user.getId());
+			userRole.setRoleId(roleId);
+			userRole.setUserType(AppConsts.USER_TYPE.SysUser.name());
+			userRoleMapper.insert(userRole);
+		});
+	}
+
+	@Override
+	public void deleteUser(String id) {
+		removeById(id);
+		accountMapper.delete(Wrappers.<Account>lambdaQuery().eq(Account::getUserId, id));
+	}
+
+	@Override
+	public boolean checkUsernameExist(String username) {
+		Account account = accountMapper
+				.selectOne(Wrappers.<Account>lambdaQuery().eq(Account::getAuthAccount, username));
+		if (account != null) {
+			return true;
+		}
+		return false;
 	}
 
 }

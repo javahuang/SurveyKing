@@ -1,11 +1,9 @@
 package cn.surveyking.server.api;
 
 import cn.surveyking.server.core.common.PaginationResponse;
-import cn.surveyking.server.domain.dto.PermissionView;
-import cn.surveyking.server.domain.dto.RoleQuery;
-import cn.surveyking.server.domain.dto.RoleRequest;
-import cn.surveyking.server.domain.dto.RoleView;
+import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.service.SystemService;
+import cn.surveyking.server.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- *
  * @author javahuang
  * @date 2021/10/12
  */
@@ -23,6 +20,8 @@ import java.util.List;
 public class SystemApi {
 
 	private final SystemService systemService;
+
+	private final UserService userService;
 
 	@RequestMapping("/roles")
 	@PreAuthorize("hasAuthority('system:role')")
@@ -63,4 +62,33 @@ public class SystemApi {
 		systemService.extractCodeDiffDbPermissions();
 	}
 
+	@RequestMapping("/users")
+	@PreAuthorize("hasAuthority('system:user')")
+	public PaginationResponse<UserView> roles(UserQuery query) {
+		return userService.getUsers(query);
+	}
+
+	@PostMapping("/users")
+	@PreAuthorize("hasAuthority('system:user:create')")
+	public void createRole(@RequestBody UserRequest request) {
+		userService.createUser(request);
+	}
+
+	@PatchMapping("/users/{id}")
+	@PreAuthorize("hasAuthority('system:user:update')")
+	public void updateRole(@PathVariable("id") String id, @RequestBody UserRequest request) {
+		request.setId(id);
+		userService.updateUser(request);
+	}
+
+	@DeleteMapping("/users/{id}")
+	@PreAuthorize("hasAuthority('system:user:delete')")
+	public void deleteUser(@PathVariable("id") String id) {
+		userService.deleteUser(id);
+	}
+
+	@GetMapping("/checkUsernameExist")
+	public boolean checkUsernameExist(String username) {
+		return userService.checkUsernameExist(username);
+	}
 }
