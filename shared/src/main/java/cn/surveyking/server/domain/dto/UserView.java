@@ -8,7 +8,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author javahuang
@@ -17,20 +19,28 @@ import java.util.Set;
 @Data
 public class UserView implements UserDetails, Serializable {
 
-	private String id;
+	/** 用户id */
+	private String userId;
 
-	private String username;
+	/** 用户名 */
+	private String name;
 
-	private String fullName;
-
+	@JsonIgnore
 	private Integer status;
+
+	private Boolean enabled;
+
+	/** 登录账号 */
+	@JsonIgnore
+	private String username;
 
 	@JsonIgnore
 	private String password;
 
-	private Boolean enabled;
+	@JsonIgnore
+	private Set<GrantedAuthority> authorities = new HashSet<>();
 
-	private Set<Role> authorities = new HashSet<>();
+	private List<String> authorityList;
 
 	public UserView() {
 	}
@@ -69,12 +79,16 @@ public class UserView implements UserDetails, Serializable {
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return null;
+		return this.authorities;
 	}
 
 	@Override
 	public String getPassword() {
 		return this.password;
+	}
+
+	public List<String> getAuthorityList() {
+		return this.authorities.stream().map(x -> x.getAuthority()).collect(Collectors.toList());
 	}
 
 }

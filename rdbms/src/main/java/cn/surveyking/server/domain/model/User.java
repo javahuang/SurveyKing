@@ -1,13 +1,10 @@
 package cn.surveyking.server.domain.model;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableLogic;
+import cn.surveyking.server.core.model.BaseModel;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-
-import java.util.Date;
 
 /**
  * @author javahuang
@@ -16,45 +13,24 @@ import java.util.Date;
 @Data
 @TableName(value = "t_user", autoResultMap = true)
 @Accessors(chain = true)
-public class User {
+@EqualsAndHashCode(callSuper = false)
+public class User extends BaseModel {
 
-	private String id;
-
-	private String fullName;
-
-	private String avatar;
-
-	private String gender;
-
-	private String username;
+	private String name;
 
 	private String phone;
 
-	private String password;
+	private String email;
 
-	private String salt;
+	private String avatarUrl;
+
+	private String gender;
+
+	private String birthday;
 
 	/**
 	 * 0失活 1 激活
 	 */
 	private Integer status;
-
-	@TableField(fill = FieldFill.INSERT, select = false)
-	private Date createAt;
-
-	@TableField(fill = FieldFill.INSERT, select = false)
-	private String createBy;
-
-	@TableField(fill = FieldFill.UPDATE, select = false)
-	private Date updateAt;
-
-	@TableField(fill = FieldFill.UPDATE, select = false)
-	private String updateBy;
-
-	@TableLogic
-	private Integer deleted;
-
-	public User() {
-	}
 
 }

@@ -1,11 +1,10 @@
 package cn.surveyking.server.service;
 
+import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.domain.dto.ProjectQuery;
 import cn.surveyking.server.domain.dto.ProjectRequest;
 import cn.surveyking.server.domain.dto.ProjectSetting;
 import cn.surveyking.server.domain.dto.ProjectView;
-
-import java.util.List;
 
 /**
  * @author javahuang
@@ -13,7 +12,7 @@ import java.util.List;
  */
 public interface ProjectService {
 
-	List<ProjectView> listProject(ProjectQuery filter);
+	PaginationResponse<ProjectView> listProject(ProjectQuery filter);
 
 	ProjectView getProject(ProjectQuery filter);
 

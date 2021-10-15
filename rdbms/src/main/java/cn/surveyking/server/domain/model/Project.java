@@ -1,11 +1,14 @@
 package cn.surveyking.server.domain.model;
 
+import cn.surveyking.server.core.model.BaseModel;
 import cn.surveyking.server.domain.dto.ProjectSetting;
 import cn.surveyking.server.domain.dto.SurveySchemaType;
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.Data;
-import lombok.experimental.Accessors;
+import lombok.EqualsAndHashCode;
 import org.apache.ibatis.type.JdbcType;
 
 import java.util.Date;
@@ -16,11 +19,8 @@ import java.util.Date;
  */
 @Data
 @TableName(value = "t_project", autoResultMap = true)
-@Accessors(chain = true)
-public class Project {
-
-	@TableId(type = IdType.ASSIGN_ID)
-	private String id;
+@EqualsAndHashCode(callSuper = false)
+public class Project extends BaseModel {
 
 	private String shortId;
 
@@ -35,21 +35,12 @@ public class Project {
 	// 1已发布 0未发布
 	private Integer status;
 
-	@TableField(fill = FieldFill.INSERT, select = false)
-	private Date createAt;
-
-	@TableField(fill = FieldFill.INSERT, select = false)
-	private String createBy;
-
-	@TableField(fill = FieldFill.UPDATE, select = false)
-	private Date updateAt;
-
-	@TableField(fill = FieldFill.UPDATE, select = false)
-	private String updateBy;
-
 	private String belongGroup;
 
-	@TableLogic
-	private Integer deleted;
+	@TableField(fill = FieldFill.INSERT)
+	private Date createAt;
+
+	@TableField(fill = FieldFill.UPDATE)
+	private Date updateAt;
 
 }

@@ -1,7 +1,7 @@
 package cn.surveyking.server.service;
 
 import cn.surveyking.server.core.exception.InternalServerError;
-import cn.surveyking.server.core.pagination.PaginationResponse;
+import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.uitls.IPUtils;
 import cn.surveyking.server.core.uitls.UserAgentUtils;
 import cn.surveyking.server.domain.dto.*;

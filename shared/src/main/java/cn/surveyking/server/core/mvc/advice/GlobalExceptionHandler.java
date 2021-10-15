@@ -68,9 +68,9 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(AccessDeniedException.class)
 	public ResponseEntity<ApiResponse<String>> handleAccessDeniedException(HttpServletRequest request,
 			AccessDeniedException ex) {
-		log.error("handleAccessDeniedException {}\n", request.getRequestURI(), ex);
+		log.error("handleAccessDeniedException {}\n", request.getRequestURI());
 
-		return ResponseEntity.ok().body(new ApiResponse<>(ResponseCode.FAIL.code, ex.getMessage()));
+		return ResponseEntity.ok().body(new ApiResponse<>(ResponseCode.FORBIDDEN.code, ex.getMessage()));
 	}
 
 	@ExceptionHandler(Exception.class)

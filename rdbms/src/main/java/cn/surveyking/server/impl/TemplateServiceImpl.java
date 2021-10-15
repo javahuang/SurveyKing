@@ -9,6 +9,7 @@ import cn.surveyking.server.domain.model.Template;
 import cn.surveyking.server.mapper.TemplateMapper;
 import cn.surveyking.server.service.TemplateService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,9 +29,7 @@ import static org.springframework.util.StringUtils.hasText;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class TemplateServiceImpl implements TemplateService {
-
-	private final TemplateMapper templateMapper;
+public class TemplateServiceImpl extends ServiceImpl<TemplateMapper, Template> implements TemplateService {
 
 	private final TemplateViewMapper templateViewMapper;
 
@@ -43,24 +42,24 @@ public class TemplateServiceImpl implements TemplateService {
 		// 默认情况下查问题模板
 		queryWrapper.ne(query.getQuestionType() == null, "question_type", SurveySchemaType.QuestionType.Survey);
 		queryWrapper.orderByAsc("priority");
-		return templateViewMapper.toViewList(templateMapper.selectList(queryWrapper));
+		return templateViewMapper.toViewList(list(queryWrapper));
 	}
 
 	@Override
 	public String addTemplate(TemplateRequest request) {
 		Template template = templateViewMapper.fromRequest(request);
-		templateMapper.insert(template);
+		save(template);
 		return template.getId();
 	}
 
 	@Override
 	public void updateTemplate(TemplateRequest request) {
-		templateMapper.updateById(templateViewMapper.fromRequest(request));
+		updateById(templateViewMapper.fromRequest(request));
 	}
 
 	@Override
 	public void deleteTemplate(String id) {
-		templateMapper.deleteById(id);
+		removeById(id);
 	}
 
 	@Override
@@ -68,7 +67,7 @@ public class TemplateServiceImpl implements TemplateService {
 		QueryWrapper<Template> queryWrapper = new QueryWrapper<>();
 		queryWrapper.select("DISTINCT category");
 		queryWrapper.like(hasText(search), "category", search);
-		return templateMapper.selectList(queryWrapper).stream().filter(x -> x != null).map(x -> x.getCategory())
+		return list(queryWrapper).stream().filter(x -> x != null).map(x -> x.getCategory())
 				.collect(Collectors.toList());
 	}
 
@@ -78,7 +77,7 @@ public class TemplateServiceImpl implements TemplateService {
 		queryWrapper.select("tag");
 		queryWrapper.like(hasText(search), "tag", search);
 		Set<String> tags = new HashSet<>();
-		templateMapper.selectList(queryWrapper).stream().filter(x -> x != null).forEach(x -> {
+		list(queryWrapper).stream().filter(x -> x != null).forEach(x -> {
 			tags.addAll(Arrays.asList(x.getTag()));
 		});
 		return tags;

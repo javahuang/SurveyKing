@@ -27,8 +27,6 @@ public class AnswerRequest {
 	 */
 	private Integer tempSave;
 
-	private Integer deleted;
-
 	@Data
 	public static class Attachment {
 

@@ -37,4 +37,63 @@ public class AppConsts {
 	 */
 	public static final String[] SUPPORT_IMAGE_TYPE = { "JPG", "JPEG", "PNG", "GIF", "BMP", "WBMP" };
 
+	/**
+	 * 逻辑删除列名
+	 */
+	public static final String COLUMN_IS_DELETED = "is_deleted";
+
+	public static final String ROLE_ADMIN = "ROLE_admin";
+
+	/**
+	 * 字典编码 - 权限类型
+	 */
+	public enum DICTCODE_PERMISSION_TYPE {
+
+		MENU, OPERATION, OTHER
+
+	}
+
+	/**
+	 * 前端权限类型
+	 */
+	public enum RESOURCE_PERMISSION_DISPLAY_TYPE {
+
+		MODULE, MENU, PERMISSION
+
+	}
+
+	public enum AUTH_TYPE {
+
+		PWD
+
+	}
+
+	public enum USER_TYPE {
+
+		/** 系统用户 */
+		SysUser
+
+	}
+
+	public enum USER_STATUS {
+
+		/** 正常用户 */
+		VALID(1);
+
+		private int status;
+
+		USER_STATUS(int type) {
+			this.status = type;
+		}
+
+		public int getStatus() {
+			return status;
+		}
+
+		public void setStatus(int status) {
+			this.status = status;
+		}
+
+	}
+
 }

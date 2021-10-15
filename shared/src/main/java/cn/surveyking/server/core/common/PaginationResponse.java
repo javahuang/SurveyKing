@@ -1,4 +1,4 @@
-package cn.surveyking.server.core.pagination;
+package cn.surveyking.server.core.common;
 
 import lombok.Data;
 
@@ -13,18 +13,15 @@ public class PaginationResponse<T> {
 
 	private Long total;
 
-	private List<T> data;
+	private List<T> list;
 
 	private Integer current;
 
 	private Integer pageSize;
 
-	public PaginationResponse() {
-	}
-
-	public PaginationResponse(Long total, List<T> data) {
+	public PaginationResponse(Long total, List<T> list) {
 		this.total = total;
-		this.data = data;
+		this.list = list;
 	}
 
 }

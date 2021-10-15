@@ -1,5 +1,6 @@
 package cn.surveyking.server.domain.dto;
 
+import cn.surveyking.server.core.constant.AppConsts;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
@@ -16,5 +17,10 @@ public class AuthRequest {
 
 	@NotNull
 	private String password;
+
+	/**
+	 * 默认认证方式，密码认证
+	 */
+	private AppConsts.AUTH_TYPE authType = AppConsts.AUTH_TYPE.PWD;
 
 }

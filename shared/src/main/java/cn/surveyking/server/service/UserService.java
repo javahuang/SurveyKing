@@ -10,6 +10,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
  */
 public interface UserService extends UserDetailsService {
 
-	UserView create(CreateUserRequest request);
+	void create(CreateUserRequest request);
+
+	UserView currentUser(String userId);
 
 }

@@ -2,6 +2,8 @@ package cn.surveyking.server.domain.dto;
 
 import lombok.Data;
 
+import java.util.Date;
+
 /**
  * @author javahuang
  * @date 2021/8/25
@@ -21,7 +23,7 @@ public class ProjectView {
 
 	private ProjectSetting setting;
 
-	private Integer total;
+	private Long total;
 
 	/** 今日答卷数量 */
 	private Integer totalOfToday;
@@ -31,5 +33,9 @@ public class ProjectView {
 
 	/** 平均填写时长 */
 	private Long averageDuration;
+
+	private Date createAt;
+
+	private Date updateAt;
 
 }

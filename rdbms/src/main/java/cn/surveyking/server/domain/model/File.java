@@ -1,10 +1,10 @@
 package cn.surveyking.server.domain.model;
 
-import com.baomidou.mybatisplus.annotation.*;
+import cn.surveyking.server.core.model.BaseModel;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-
-import java.util.Date;
 
 /**
  * @author javahuang
@@ -13,10 +13,8 @@ import java.util.Date;
 @Data
 @TableName(value = "t_file", autoResultMap = true)
 @Accessors(chain = true)
-public class File {
-
-	@TableId(type = IdType.ASSIGN_ID)
-	private String id;
+@EqualsAndHashCode(callSuper = false)
+public class File extends BaseModel {
 
 	/**
 	 * 原始文件名称
@@ -43,24 +41,9 @@ public class File {
 	 */
 	private Integer storageType;
 
-	@TableField(fill = FieldFill.INSERT, select = false)
-	private Date createAt;
-
-	@TableField(fill = FieldFill.INSERT, select = false)
-	private String createBy;
-
-	@TableField(fill = FieldFill.UPDATE, select = false)
-	private Date updateAt;
-
-	@TableField(fill = FieldFill.UPDATE, select = false)
-	private String updateBy;
-
 	/**
 	 * 与其他用户共享
 	 */
 	private Integer shared;
-
-	@TableLogic
-	private Integer deleted;
 
 }

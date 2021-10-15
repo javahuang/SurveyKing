@@ -1,13 +1,14 @@
 package cn.surveyking.server.domain.model;
 
+import cn.surveyking.server.core.model.BaseModel;
 import cn.surveyking.server.domain.dto.SurveySchemaType;
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.Data;
-import lombok.experimental.Accessors;
+import lombok.EqualsAndHashCode;
 import org.apache.ibatis.type.JdbcType;
-
-import java.util.Date;
 
 /**
  * 问题模板表
@@ -17,11 +18,8 @@ import java.util.Date;
  */
 @Data
 @TableName(value = "t_template", autoResultMap = true)
-@Accessors(chain = true)
-public class Template {
-
-	@TableId(type = IdType.ASSIGN_ID)
-	private String id;
+@EqualsAndHashCode(callSuper = false)
+public class Template extends BaseModel {
 
 	/**
 	 * 模板标题
@@ -60,24 +58,12 @@ public class Template {
 	 */
 	private Integer priority;
 
-	@TableField(fill = FieldFill.INSERT, select = false)
-	private Date createAt;
-
 	@TableField(fill = FieldFill.INSERT)
 	private String createBy;
-
-	@TableField(fill = FieldFill.UPDATE, select = false)
-	private Date updateAt;
-
-	@TableField(fill = FieldFill.UPDATE, select = false)
-	private String updateBy;
 
 	/**
 	 * 与其他用户共享
 	 */
 	private Integer shared;
-
-	@TableLogic
-	private Integer deleted;
 
 }

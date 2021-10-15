@@ -11,6 +11,7 @@ import cn.surveyking.server.service.FileService;
 import cn.surveyking.server.storage.StorageService;
 import cn.surveyking.server.storage.StorePath;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -27,15 +28,13 @@ import java.util.List;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class FileServiceImpl implements FileService {
-
-	private final FileMapper fileMapper;
+public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements FileService {
 
 	private final StorageService storageService;
 
 	@Override
 	public void deleteImage(String id) {
-		fileMapper.deleteById(id);
+		removeById(id);
 	}
 
 	@Override
@@ -48,7 +47,7 @@ public class FileServiceImpl implements FileService {
 			storePath = storageService.uploadFile(uploadFile);
 		}
 		File file = FileViewMapper.INSTANCE.toFile(storePath, uploadFile.getOriginalFilename(), storageType.getType());
-		fileMapper.insert(file);
+		save(file);
 		FileView fileView = FileViewMapper.INSTANCE.toFileView(file);
 		return fileView;
 	}
@@ -59,8 +58,7 @@ public class FileServiceImpl implements FileService {
 		if (fileId.contains("@")) {
 			fileId = attachmentId.substring(0, attachmentId.lastIndexOf("@"));
 		}
-		File file = fileMapper.selectById(fileId);
-
+		File file = getById(fileId);
 		if (file == null) {
 			throw new InternalServerError("资源不存在");
 		}
@@ -80,8 +78,8 @@ public class FileServiceImpl implements FileService {
 	public List<FileView> listImages(AppConsts.StorageType storageType) {
 		QueryWrapper<File> query = new QueryWrapper<>();
 		query.eq("storage_type", storageType.getType())
-				.and(i -> i.eq("create_by", SecurityContextUtils.getUsername()).or().eq("shared", 1));
-		return FileViewMapper.INSTANCE.toFileView(fileMapper.selectList(query));
+				.and(i -> i.eq("create_by", SecurityContextUtils.getUserId()).or().eq("shared", 1));
+		return FileViewMapper.INSTANCE.toFileView(list(query));
 	}
 
 }

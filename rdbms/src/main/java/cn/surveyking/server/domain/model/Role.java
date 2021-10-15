@@ -1,21 +1,33 @@
 package cn.surveyking.server.domain.model;
 
-import lombok.AllArgsConstructor;
+import cn.surveyking.server.core.model.BaseModel;
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
+import lombok.EqualsAndHashCode;
+
+import java.util.Date;
 
 /**
  * @author javahuang
  * @date 2021/8/24
  */
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class Role implements GrantedAuthority {
+@TableName(value = "t_role", autoResultMap = true)
+@EqualsAndHashCode(callSuper = false)
+public class Role extends BaseModel {
 
-	public static final String USER_ADMIN = "USER_ADMIN";
+	private String name;
 
+	private String code;
+
+	private String remark;
+
+	/** 用户权限列表，以逗号分割 */
 	private String authority;
+
+	@TableField(fill = FieldFill.INSERT)
+	private Date createAt;
 
 }

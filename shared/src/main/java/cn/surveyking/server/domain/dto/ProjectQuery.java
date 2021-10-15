@@ -7,7 +7,7 @@ import lombok.Data;
  * @date 2021/8/31
  */
 @Data
-public class ProjectQuery {
+public class ProjectQuery extends PageQuery {
 
 	private String shortId;
 

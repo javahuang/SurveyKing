@@ -36,8 +36,6 @@ public class AnswerView {
 
 	private String updateBy;
 
-	private Integer deleted;
-
 	@Data
 	public static class Attachment {
 

@@ -1,7 +1,7 @@
 package cn.surveyking.server.impl;
 
 import cn.surveyking.server.core.exception.InternalServerError;
-import cn.surveyking.server.core.pagination.PaginationResponse;
+import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.uitls.ExcelExporter;
 import cn.surveyking.server.core.uitls.SchemaParser;
 import cn.surveyking.server.domain.dto.*;
@@ -14,6 +14,7 @@ import cn.surveyking.server.service.AnswerService;
 import cn.surveyking.server.service.FileService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
@@ -40,9 +41,7 @@ import java.util.zip.ZipOutputStream;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class AnswerServiceImpl implements AnswerService {
-
-	private final AnswerMapper answerMapper;
+public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> implements AnswerService {
 
 	private final ProjectMapper projectMapper;
 
@@ -55,14 +54,16 @@ public class AnswerServiceImpl implements AnswerService {
 		QueryWrapper<Answer> wrapper = new QueryWrapper<>();
 		wrapper.eq("short_id", query.getShortId()).orderByDesc("create_at");
 		Page<Answer> page = new Page<>(query.getCurrent(), query.getPageSize());
-		return new PaginationResponse<>(page.getTotal(), answerViewMapper.toAnswerView(page.getRecords()));
+		super.page(page, wrapper);
+		List<AnswerView> list = answerViewMapper.toAnswerView(page.getRecords());
+		return new PaginationResponse<>(page.getTotal(), list);
 	}
 
 	@Override
 	public AnswerView getAnswer(AnswerQuery query) {
 		QueryWrapper<Answer> wrapper = new QueryWrapper<>();
 		wrapper.eq("id", query.getId());
-		return answerViewMapper.toAnswerView(answerMapper.selectOne(wrapper));
+		return answerViewMapper.toAnswerView(super.getOne(wrapper));
 	}
 
 	@Override
@@ -70,17 +71,17 @@ public class AnswerServiceImpl implements AnswerService {
 		request.getMetaInfo().setClientInfo(parseClientInfo(httpRequest));
 		Answer answer = answerViewMapper.fromRequest(request);
 		answer.setCreateAt(new Date());
-		answerMapper.insert(answer);
+		save(answer);
 	}
 
 	@Override
 	public void updateAnswer(AnswerRequest answer) {
-		answerMapper.updateById(answerViewMapper.fromRequest(answer));
+		super.updateById(answerViewMapper.fromRequest(answer));
 	}
 
 	@Override
 	public void deleteAnswer(String[] ids) {
-		answerMapper.deleteBatchIds(Arrays.asList(ids));
+		super.removeByIds(Arrays.asList(ids));
 	}
 
 	@Override
@@ -92,7 +93,7 @@ public class AnswerServiceImpl implements AnswerService {
 		List<SurveySchemaType> schemaDataTypes = SchemaParser.parseDataTypes(project.getSurvey());
 		QueryWrapper<Answer> answerQuery = new QueryWrapper<>();
 		answerQuery.select("id", "answer", "meta_info", "attachment", "create_at", "create_by");
-		List<Answer> answers = answerMapper.selectList(answerQuery);
+		List<Answer> answers = list(answerQuery);
 
 		DownloadData download = new DownloadData();
 		download.setFileName(project.getName() + ".xlsx");
@@ -145,14 +146,14 @@ public class AnswerServiceImpl implements AnswerService {
 		DownloadData downloadData = new DownloadData();
 		// 下载某个问卷答案的附件
 		if (query.getAnswerId() != null) {
-			Answer answer = answerMapper.selectById(query.getAnswerId());
+			Answer answer = getById(query.getAnswerId());
 			return generateSurveyAttachment(answer);
 		}
 		else {
 			// 下载所有问卷答案的附件
 			QueryWrapper<Answer> answerQuery = new QueryWrapper<>();
 			answerQuery.eq("short_id", query.getShortId());
-			downloadData.setResource(new InputStreamResource(answerAttachToZip(answerMapper.selectList(answerQuery))));
+			downloadData.setResource(new InputStreamResource(answerAttachToZip(list(answerQuery))));
 			downloadData.setFileName(project.getName() + ".zip");
 			downloadData.setMediaType(MediaType.parseMediaType("application/zip"));
 		}

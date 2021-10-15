@@ -28,8 +28,22 @@ subprojects {
         implementation 'org.springframework.boot:spring-boot-starter-web'
         implementation 'org.springframework.boot:spring-boot-starter-validation'
         implementation 'org.springframework.boot:spring-boot-starter-security'
+        implementation 'org.apache.commons:commons-lang3:3.0'
+
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testImplementation 'org.springframework.security:spring-security-test'
     }
     repositories {
         mavenCentral()
+    }
+
+    compileJava {
+        options.compilerArgs += [
+                '-Amapstruct.suppressGeneratorTimestamp=true',
+                '-Amapstruct.suppressGeneratorVersionInfoComment=true',
+                '-Amapstruct.verbose=true',
+                '-Amapstruct.defaultComponentModel=spring',
+                '-Amapstruct.unmappedTargetPolicy=IGNORE'
+        ]
     }
 }

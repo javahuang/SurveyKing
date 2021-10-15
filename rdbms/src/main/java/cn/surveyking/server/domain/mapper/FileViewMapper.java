@@ -13,7 +13,7 @@ import java.util.List;
  * @author javahuang
  * @date 2021/9/8
  */
-@Mapper(componentModel = "spring")
+@Mapper
 public interface FileViewMapper {
 
 	FileViewMapper INSTANCE = Mappers.getMapper(FileViewMapper.class);

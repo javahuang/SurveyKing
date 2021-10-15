@@ -1,6 +1,6 @@
 package cn.surveyking.server.core.security;
 
-import cn.surveyking.server.domain.dto.UserView;
+import cn.surveyking.server.domain.dto.UserTokenView;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Encoders;
@@ -30,7 +30,7 @@ public class JwtTokenUtil {
 	// 每次重启，所有客户端的 token 将失效
 	private final String jwtSecret = generateSecurityKey();
 
-	public String generateAccessToken(UserView user) {
+	public String generateAccessToken(UserTokenView user) {
 		return Jwts.builder().serializeToJsonWith(new JacksonSerializer(objectMapper)).claim("user", user)
 				.setIssuedAt(new Date()).signWith(Keys.hmacShaKeyFor(jwtSecret.getBytes())).compact();
 	}
@@ -58,11 +58,11 @@ public class JwtTokenUtil {
 		return false;
 	}
 
-	public UserView getUser(String token) {
+	public UserTokenView getUser(String token) {
 		return Jwts.parserBuilder()
-				.deserializeJsonWith(new JacksonDeserializer(Maps.of("user", UserView.class).build()))
+				.deserializeJsonWith(new JacksonDeserializer(Maps.of("user", UserTokenView.class).build()))
 				.setSigningKey(Keys.hmacShaKeyFor(jwtSecret.getBytes())).build().parseClaimsJws(token).getBody()
-				.get("user", UserView.class);
+				.get("user", UserTokenView.class);
 	}
 
 	private static String generateSecurityKey() {

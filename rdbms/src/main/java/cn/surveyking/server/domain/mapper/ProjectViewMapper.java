@@ -13,7 +13,7 @@ import java.util.List;
  * @author javahuang
  * @date 2021/8/25
  */
-@Mapper(componentModel = "spring")
+@Mapper
 public interface ProjectViewMapper {
 
 	List<ProjectView> toProjectView(List<Project> projects);

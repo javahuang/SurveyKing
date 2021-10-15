@@ -17,13 +17,13 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
 	@Override
 	public void insertFill(MetaObject metaObject) {
 		this.strictInsertFill(metaObject, "createAt", () -> new Date(), Date.class);
-		this.strictInsertFill(metaObject, "createBy", () -> SecurityContextUtils.getUsername(), String.class);
+		this.strictInsertFill(metaObject, "createBy", () -> SecurityContextUtils.getUserId(), String.class);
 	}
 
 	@Override
 	public void updateFill(MetaObject metaObject) {
 		this.strictUpdateFill(metaObject, "updateAt", () -> new Date(), Date.class);
-		this.strictUpdateFill(metaObject, "updateBy", () -> SecurityContextUtils.getUsername(), String.class);
+		this.strictUpdateFill(metaObject, "updateBy", () -> SecurityContextUtils.getUserId(), String.class);
 	}
 
 }

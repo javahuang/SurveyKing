@@ -51,6 +51,4 @@ public class TemplateRequest {
 	 */
 	private Integer shared;
 
-	private Integer deleted;
-
 }

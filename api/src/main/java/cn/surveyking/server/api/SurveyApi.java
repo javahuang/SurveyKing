@@ -25,7 +25,7 @@ import java.time.Duration;
  * @author javahuang
  * @date 2021/8/22
  */
-@RequestMapping("/api/public")
+@RequestMapping("${api.prefix}/public")
 @RequiredArgsConstructor
 @RestController
 public class SurveyApi {

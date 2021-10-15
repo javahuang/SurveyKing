@@ -11,7 +11,7 @@ import java.util.List;
  * @author javahuang
  * @date 2021/10/6
  */
-@Mapper(componentModel = "spring")
+@Mapper
 public interface AnswerViewMapper {
 
 	AnswerView toAnswerView(Answer answer);

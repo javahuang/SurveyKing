@@ -10,7 +10,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.core.GrantedAuthorityDefaults;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -41,9 +40,21 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
 	}
 
+	// @Override
+	// public UserDetailsService userDetailsService() throws Exception {
+	//
+	// UserServiceImpl userService = new UserServiceImpl(commerceReposiotry, repository,
+	// defaultConfigRepository);
+	// CachingUserDetailsService cachingUserService = new
+	// CachingUserDetailsService(userService);
+	// cachingUserService.setUserCache(this.userCache);
+	// return cachingUserService;
+	// }
+
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 		auth.userDetailsService(username -> userService.loadUserByUsername(username));
+		// 添加更多类型的认证方式 auth.authenticationProvider();
 	}
 
 	@Override
@@ -52,10 +63,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		http = http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and();
 
 		http = http.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint).and();
-
 		http.authorizeRequests().antMatchers("/").permitAll().antMatchers(WebConfig.STATIC_RESOURCES).permitAll()
-				.antMatchers("/api/public/**").permitAll().antMatchers("/api/**").authenticated().anyRequest()
-				.permitAll();
+				.antMatchers("/api/public/**").permitAll()
+				// .antMatchers("/api/**").authenticated()
+				.anyRequest().authenticated();
 
 		http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 	}
@@ -80,9 +91,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	// Remove the default ROLE_ prefix
-	@Bean
-	public GrantedAuthorityDefaults grantedAuthorityDefaults() {
-		return new GrantedAuthorityDefaults("");
-	}
+	// @Bean
+	// public GrantedAuthorityDefaults grantedAuthorityDefaults() {
+	// return new GrantedAuthorityDefaults("");
+	// }
 
 }

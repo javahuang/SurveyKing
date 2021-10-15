@@ -2,7 +2,6 @@ package cn.surveyking.server.domain.dto;
 
 import lombok.Data;
 
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import java.util.Set;
 
@@ -14,11 +13,10 @@ import java.util.Set;
 public class CreateUserRequest {
 
 	@NotBlank
-	@Email
 	private String username;
 
 	@NotBlank
-	private String fullName;
+	private String name;
 
 	@NotBlank
 	private String password;

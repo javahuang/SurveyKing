@@ -40,6 +40,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 		// Get authorization header and validate
 		final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+
 		if (isEmpty(header) || !header.startsWith("Bearer ")) {
 			chain.doFilter(request, response);
 			return;
@@ -54,7 +55,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
 		try {
 			// Get user identity and set it on the spring security context
-			UserDetails userDetails = userService.loadUserByUsername(jwtTokenUtil.getUser(token).getUsername());
+			UserDetails userDetails = userService.currentUser(jwtTokenUtil.getUser(token).getUserId());
 
 			UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails,
 					null, ofNullable(userDetails).map(UserDetails::getAuthorities).orElse(new ArrayList<>()));

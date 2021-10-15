@@ -14,7 +14,7 @@ import java.util.List;
  * @author javahuang
  * @date 2021/9/23
  */
-@Mapper(componentModel = "spring")
+@Mapper
 public interface TemplateViewMapper {
 
 	Template fromRequest(TemplateRequest request);
@@ -26,7 +26,7 @@ public interface TemplateViewMapper {
 
 	@Named("ownerType")
 	default boolean itemToOwner(Template item) {
-		return SecurityContextUtils.getUsername().equals(item.getCreateBy());
+		return SecurityContextUtils.getUserId().equals(item.getCreateBy());
 	}
 
 }
