@@ -71,10 +71,10 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 				username);
 		Account existAccount = accountMapper.selectOne(queryWrapper);
 		if (existAccount == null) {
-			throw new UsernameNotFoundException(format("用户: %s, 不存在", username));
+			throw new UsernameNotFoundException(format("用户: {}, 不存在", username));
 		}
 		if (existAccount.getStatus() != AppConsts.USER_STATUS.VALID.getStatus()) {
-			throw new AccessDeniedException("用户: %s, 被禁用");
+			throw new AccessDeniedException("用户: {}, 被禁用");
 		}
 
 		return userViewMapper.toUserView(existAccount);
@@ -147,11 +147,14 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 		User user = userViewMapper.toUser(request);
 		this.updateById(user);
 
-		// 创建登录账号
+		// 更新登录账号
 		Account account = userViewMapper.toAccount(request);
+		if (isNotBlank(request.getPassword())) {
+			account.setAuthSecret(passwordEncoder.encode(request.getPassword()));
+		}
 		accountMapper.update(account, Wrappers.<Account>lambdaQuery().eq(Account::getUserId, request.getId()));
 
-		// 添加用户角色
+		// 更新用户角色
 		userRoleMapper.delete(Wrappers.<UserRole>lambdaQuery().eq(UserRole::getUserId, request.getId()));
 		request.getRoles().forEach(roleId -> {
 			UserRole userRole = new UserRole();

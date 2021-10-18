@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -24,7 +25,7 @@ public class SystemApi {
 	private final UserService userService;
 
 	@RequestMapping("/roles")
-	@PreAuthorize("hasAuthority('system:role')")
+	@PreAuthorize("hasAuthority('system:role:list')")
 	public PaginationResponse<RoleView> roles(RoleQuery query) {
 		return systemService.getRoles(query);
 	}
@@ -63,20 +64,20 @@ public class SystemApi {
 	}
 
 	@RequestMapping("/users")
-	@PreAuthorize("hasAuthority('system:user')")
+	@PreAuthorize("hasAuthority('system:user:list')")
 	public PaginationResponse<UserView> roles(UserQuery query) {
 		return userService.getUsers(query);
 	}
 
 	@PostMapping("/users")
 	@PreAuthorize("hasAuthority('system:user:create')")
-	public void createRole(@RequestBody UserRequest request) {
+	public void createRole(@RequestBody @Valid UserRequest request) {
 		userService.createUser(request);
 	}
 
 	@PatchMapping("/users/{id}")
 	@PreAuthorize("hasAuthority('system:user:update')")
-	public void updateRole(@PathVariable("id") String id, @RequestBody UserRequest request) {
+	public void updateRole(@PathVariable("id") String id, @RequestBody @Valid UserRequest request) {
 		request.setId(id);
 		userService.updateUser(request);
 	}
@@ -91,4 +92,5 @@ public class SystemApi {
 	public boolean checkUsernameExist(String username) {
 		return userService.checkUsernameExist(username);
 	}
+
 }

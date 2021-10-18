@@ -1,8 +1,7 @@
 package cn.surveyking.server.api;
 
-import cn.surveyking.server.domain.dto.TemplateQuery;
-import cn.surveyking.server.domain.dto.TemplateRequest;
-import cn.surveyking.server.domain.dto.TemplateView;
+import cn.surveyking.server.core.common.PaginationResponse;
+import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.service.TemplateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,8 +24,8 @@ public class TemplateApi {
 	private final TemplateService templateService;
 
 	@GetMapping
-	@PreAuthorize("hasAuthority('template')")
-	public List<TemplateView> listQuestionTemplate(TemplateQuery query) {
+	@PreAuthorize("hasAuthority('template:list')")
+	public PaginationResponse<TemplateView> listQuestionTemplate(TemplateQuery query) {
 		return templateService.listTemplate(query);
 	}
 
@@ -49,15 +48,13 @@ public class TemplateApi {
 	}
 
 	@GetMapping("/getCategories")
-	@PreAuthorize("hasAuthority('template:category')")
-	public List<String> listTemplateCategories(String search) {
-		return templateService.listTemplateCategories(search);
+	public List<String> listTemplateCategories(CategoryQuery query) {
+		return templateService.listTemplateCategories(query);
 	}
 
 	@GetMapping("/getTags")
-	@PreAuthorize("hasAuthority('template:tag')")
-	public Set<String> listTemplateTags(String search) {
-		return templateService.listTemplateTags(search);
+	public Set<String> listTemplateTags(TagQuery query) {
+		return templateService.listTemplateTags(query);
 	}
 
 }

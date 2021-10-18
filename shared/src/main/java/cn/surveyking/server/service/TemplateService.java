@@ -1,8 +1,7 @@
 package cn.surveyking.server.service;
 
-import cn.surveyking.server.domain.dto.TemplateQuery;
-import cn.surveyking.server.domain.dto.TemplateRequest;
-import cn.surveyking.server.domain.dto.TemplateView;
+import cn.surveyking.server.core.common.PaginationResponse;
+import cn.surveyking.server.domain.dto.*;
 
 import java.util.List;
 import java.util.Set;
@@ -13,7 +12,7 @@ import java.util.Set;
  */
 public interface TemplateService {
 
-	List<TemplateView> listTemplate(TemplateQuery query);
+	PaginationResponse<TemplateView> listTemplate(TemplateQuery query);
 
 	String addTemplate(TemplateRequest template);
 
@@ -21,8 +20,8 @@ public interface TemplateService {
 
 	void deleteTemplate(String id);
 
-	List<String> listTemplateCategories(String search);
+	List<String> listTemplateCategories(CategoryQuery query);
 
-	Set<String> listTemplateTags(String search);
+	Set<String> listTemplateTags(TagQuery query);
 
 }

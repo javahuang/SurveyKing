@@ -2,6 +2,8 @@ package cn.surveyking.server.domain.dto;
 
 import lombok.Data;
 
+import java.util.Date;
+
 /**
  * 答卷页面
  *
@@ -20,5 +22,7 @@ public class PublicProjectView {
 	private String name;
 
 	private Boolean passwordRequired;
+
+	private Date createAt;
 
 }

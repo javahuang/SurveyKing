@@ -12,7 +12,7 @@ public interface UserService extends UserDetailsService {
 
 	UserInfo currentUser(String userId);
 
-    PaginationResponse<UserView> getUsers(UserQuery query);
+	PaginationResponse<UserView> getUsers(UserQuery query);
 
 	void createUser(UserRequest request);
 
@@ -21,4 +21,5 @@ public interface UserService extends UserDetailsService {
 	void deleteUser(String id);
 
 	boolean checkUsernameExist(String username);
+
 }

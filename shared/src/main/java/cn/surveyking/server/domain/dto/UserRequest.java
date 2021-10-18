@@ -33,4 +33,6 @@ public class UserRequest {
 
 	private String gender;
 
+	private Integer status;
+
 }

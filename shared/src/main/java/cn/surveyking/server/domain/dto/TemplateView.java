@@ -2,6 +2,8 @@ package cn.surveyking.server.domain.dto;
 
 import lombok.Data;
 
+import java.util.Date;
+
 /**
  * @author javahuang
  * @date 2021/9/23
@@ -25,5 +27,7 @@ public class TemplateView {
 	private boolean owner;
 
 	private String previewUrl;
+
+	private Date createAt;
 
 }
