@@ -7,7 +7,7 @@ spring:
   mvc:
     async:
       request-timeout: -1
-    static-path-pattern: /static/**
+    static-path-pattern: /notfound # 覆盖默认的 /**
     throw-exception-if-no-handler-found: true
   servlet:
     multipart:

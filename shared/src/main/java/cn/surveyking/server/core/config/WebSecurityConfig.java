@@ -40,17 +40,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
 	}
 
-	// @Override
-	// public UserDetailsService userDetailsService() throws Exception {
-	//
-	// UserServiceImpl userService = new UserServiceImpl(commerceReposiotry, repository,
-	// defaultConfigRepository);
-	// CachingUserDetailsService cachingUserService = new
-	// CachingUserDetailsService(userService);
-	// cachingUserService.setUserCache(this.userCache);
-	// return cachingUserService;
-	// }
-
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 		auth.userDetailsService(username -> userService.loadUserByUsername(username));
@@ -63,10 +52,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		http = http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and();
 
 		http = http.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint).and();
-		http.authorizeRequests().antMatchers("/").permitAll().antMatchers(WebConfig.STATIC_RESOURCES).permitAll()
-				.antMatchers("/api/public/**").permitAll()
-				// .antMatchers("/api/**").authenticated()
-				.anyRequest().authenticated();
+		// 所有请求都放行，目的是单 jar 部署，输入任意路由也能跳转到对应的页面，权限拦截通过注解配置
+		http.authorizeRequests().antMatchers("/api/public/**").permitAll().antMatchers("/api/**").authenticated()
+				.antMatchers("/").permitAll();
 
 		http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 	}
