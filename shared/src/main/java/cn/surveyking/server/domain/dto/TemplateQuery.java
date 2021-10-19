@@ -1,6 +1,7 @@
 package cn.surveyking.server.domain.dto;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,9 +11,13 @@ import java.util.List;
  * @date 2021/9/23
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class TemplateQuery extends PageQuery {
 
-	SurveySchemaType.QuestionType questionType = SurveySchemaType.QuestionType.Survey;
+	/**
+	 * 如果为空则查询普通的题型
+	 */
+	SurveySchemaType.QuestionType questionType;
 
 	private String name;
 

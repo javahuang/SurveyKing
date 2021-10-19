@@ -38,13 +38,6 @@ CREATE TABLE `t_account` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='登录账号';
 
 -- ----------------------------
--- Records of t_account
--- ----------------------------
-BEGIN;
-INSERT INTO `t_account` VALUES ('1448313054600114177', 'SysUser', '1448313054205849601', 'PWD', 'admin', '$2a$10$1guxYQ160K0ws39KU2IdSObp8ziRTg1Xh7TwPmalSO0xfZfLQ/rhm', NULL, 1, 0, '2021-10-13 23:41:55', 'guest', '2021-10-13 23:44:57', NULL);
-COMMIT;
-
--- ----------------------------
 -- Table structure for t_answer
 -- ----------------------------
 DROP TABLE IF EXISTS `t_answer`;
@@ -97,7 +90,7 @@ CREATE TABLE `t_project` (
   `id` varchar(64) COLLATE utf8mb4_bin NOT NULL,
   `short_id` varchar(32) COLLATE utf8mb4_bin DEFAULT NULL,
   `name` varchar(64) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '项目名称',
-  `survey` text COLLATE utf8mb4_bin COMMENT '问卷',
+  `survey` longtext COLLATE utf8mb4_bin COMMENT '问卷',
   `setting` varchar(256) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '问卷设置',
   `status` int(11) DEFAULT '0' COMMENT '0未发布 1已发布',
   `belong_group` varchar(256) COLLATE utf8mb4_bin DEFAULT NULL,
@@ -129,13 +122,6 @@ CREATE TABLE `t_role` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1448917371220783106 DEFAULT CHARSET=utf8 COMMENT='角色';
 
 -- ----------------------------
--- Records of t_role
--- ----------------------------
-BEGIN;
-INSERT INTO `t_role` VALUES (1448313054675611649, '管理员', 'admin', NULL, 'template,template:update,template:category,template:tag,system,system:role,system:role:create,system:role:update,project,project:list,project:detail,project:create,project:update,project:delete,project:report,answer,answer:export,answer:list,answer:detail,answer:create,answer:update,answer:delete,file,file:detail,file:import,file:list,file:delete,template:create,template:delete,system:role:delete', 0, '2021-10-13 23:41:55', 'guest', '2021-10-15 15:57:11', '1448313054205849601');
-COMMIT;
-
--- ----------------------------
 -- Table structure for t_template
 -- ----------------------------
 DROP TABLE IF EXISTS `t_template`;
@@ -143,7 +129,7 @@ CREATE TABLE `t_template` (
   `id` varchar(64) COLLATE utf8mb4_bin NOT NULL,
   `name` varchar(64) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '模板标题',
   `question_type` varchar(64) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '问题类型',
-  `template` text COLLATE utf8mb4_bin COMMENT '模板',
+  `template` longtext COLLATE utf8mb4_bin COMMENT '模板',
   `category` varchar(256) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '模板分类',
   `tag` varchar(512) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '标签',
   `priority` int(11) DEFAULT NULL COMMENT '排序优先级',
@@ -185,13 +171,6 @@ CREATE TABLE `t_user` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1448313054205849602 DEFAULT CHARSET=utf8 COMMENT='系统用户';
 
 -- ----------------------------
--- Records of t_user
--- ----------------------------
-BEGIN;
-INSERT INTO `t_user` VALUES (1448313054205849601, 'Admin', '男', NULL, '13800138000', NULL, NULL, 1, 0, '2021-10-13 23:41:55', 'guest', NULL, NULL);
-COMMIT;
-
--- ----------------------------
 -- Table structure for t_user_role
 -- ----------------------------
 DROP TABLE IF EXISTS `t_user_role`;
@@ -208,12 +187,5 @@ CREATE TABLE `t_user_role` (
   PRIMARY KEY (`id`),
   KEY `idx_t_user_role` (`user_type`,`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1448313054692388867 DEFAULT CHARSET=utf8 COMMENT='用户角色关联';
-
--- ----------------------------
--- Records of t_user_role
--- ----------------------------
-BEGIN;
-INSERT INTO `t_user_role` VALUES (1448313054692388866, 'SysUser', 1448313054205849601, 1448313054675611649, 0, '2021-10-13 23:41:55', 'guest', NULL, NULL);
-COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;

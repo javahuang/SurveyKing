@@ -3,3 +3,6 @@ build/
 .idea/
 logs/
 *.map
+files/
+.settings
+bin/

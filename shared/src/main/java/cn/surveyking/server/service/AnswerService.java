@@ -59,8 +59,7 @@ public interface AnswerService {
 					.contentType(download.getMediaType()).body(download.getResource());
 		}
 		catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			throw new InternalServerError("下载失败");
+			throw new InternalServerError("下载失败", e);
 		}
 
 	}

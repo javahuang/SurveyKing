@@ -81,9 +81,19 @@ public class SchemaParser {
 				}).collect(Collectors.joining(",")));
 			}
 			else if (!questionType.name().startsWith("Matrix")) {
-				Map mapValue = (Map) valueObj;
 				// 需要将数字类型转换成字符串
-				rowData.add(mapValue.values().stream().map(x -> x + "").collect(Collectors.joining(",")));
+				List<String> result = new ArrayList<>();
+				((Map<?, ?>) valueObj).forEach((optionId, v) -> {
+					if (v != null && v instanceof Boolean) {
+						// 单选、多选题，选中的话，答案会是 true，需要转换成标题
+						result.add(trimHtmlTag(schemaType.getChildren().stream().filter(x -> x.getId().equals(optionId))
+								.findFirst().get().getTitle()));
+					}
+					else {
+						result.add(v + "");
+					}
+				});
+				rowData.add(String.join(",", result));
 			}
 			else {
 				// TODO: 矩阵题如何展示答案

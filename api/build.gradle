@@ -1,8 +1,7 @@
 plugins {
+    id 'maven-publish'
 }
 
-group = 'cn.surveyking'
-version = '0.0.1-release'
 sourceCompatibility = '1.8'
 project.archivesBaseName = 'surveyking'
 

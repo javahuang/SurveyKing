@@ -22,4 +22,9 @@ public interface UserService extends UserDetailsService {
 
 	boolean checkUsernameExist(String username);
 
+	/**
+	 * 系统用户初始化
+	 */
+	void init();
+
 }

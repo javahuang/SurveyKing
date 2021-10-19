@@ -37,15 +37,17 @@ public class TemplateServiceImpl extends BaseService<TemplateMapper, Template> i
 
 	@Override
 	public PaginationResponse<TemplateView> listTemplate(TemplateQuery query) {
-		Page<Template> templatePage = pageByQuery(query,
-				Wrappers.<Template>lambdaQuery().like(isNotEmpty(query.getName()), Template::getName, query.getName())
-						.eq(query.getQuestionType() != null, Template::getQuestionType, query.getQuestionType())
-						.in(query.getCategories().size() > 0, Template::getCategory, query.getCategories())
-						.eq(Template::getShared, query.getShared())
-						.eq(query.getShared() == 0, Template::getCreateBy, SecurityContextUtils.getUserId())
-						.and(query.getTags().size() > 0, i -> query.getTags().forEach(tag -> {
-							i.or(j -> j.like(Template::getTag, tag));
-						})).orderByAsc(Template::getPriority));
+		Page<Template> templatePage = pageByQuery(query, Wrappers.<Template>lambdaQuery()
+				.like(isNotEmpty(query.getName()), Template::getName, query.getName())
+				.eq(query.getQuestionType() != null, Template::getQuestionType, query.getQuestionType())
+				// 默认查询额是普通题型
+				.ne(query.getQuestionType() == null, Template::getQuestionType, SurveySchemaType.QuestionType.Survey)
+				.in(query.getCategories().size() > 0, Template::getCategory, query.getCategories())
+				.eq(Template::getShared, query.getShared())
+				.eq(query.getShared() == 0, Template::getCreateBy, SecurityContextUtils.getUserId())
+				.and(query.getTags().size() > 0, i -> query.getTags().forEach(tag -> {
+					i.or(j -> j.like(Template::getTag, tag));
+				})).orderByAsc(Template::getPriority));
 		return new PaginationResponse<>(templatePage.getTotal(),
 				templatePage.getRecords().stream().map(x -> templateViewMapper.toView(x)).collect(Collectors.toList()));
 	}

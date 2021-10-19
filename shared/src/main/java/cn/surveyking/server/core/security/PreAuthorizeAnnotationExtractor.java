@@ -65,12 +65,17 @@ public class PreAuthorizeAnnotationExtractor {
 		}
 		String authorityCode = StringUtils.substringBetween(value, "'");
 		if (StringUtils.isNotBlank(authorityCode)) {
-			permissions.add(authorityCode.trim());
+			String[] authorityHierarchy = authorityCode.split(":");
+			String current = authorityHierarchy[0];
+			permissions.add(current.trim());
+			for (int i = 1; i < authorityHierarchy.length; i++) {
+				current = current + ":" + authorityHierarchy[i];
+				permissions.add(current);
+			}
 		}
 		else {
 			log.warn("检测到权限码未配置 {}", value);
 		}
-
 	}
 
 	/**

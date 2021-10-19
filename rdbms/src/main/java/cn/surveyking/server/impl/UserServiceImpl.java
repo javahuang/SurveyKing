@@ -2,6 +2,7 @@ package cn.surveyking.server.impl;
 
 import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.constant.AppConsts;
+import cn.surveyking.server.core.security.PreAuthorizeAnnotationExtractor;
 import cn.surveyking.server.domain.dto.UserInfo;
 import cn.surveyking.server.domain.dto.UserQuery;
 import cn.surveyking.server.domain.dto.UserRequest;
@@ -13,7 +14,6 @@ import cn.surveyking.server.domain.model.Role;
 import cn.surveyking.server.domain.model.User;
 import cn.surveyking.server.domain.model.UserRole;
 import cn.surveyking.server.mapper.AccountMapper;
-import cn.surveyking.server.mapper.RoleMapper;
 import cn.surveyking.server.mapper.UserMapper;
 import cn.surveyking.server.mapper.UserRoleMapper;
 import cn.surveyking.server.service.BaseService;
@@ -22,6 +22,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.GrantedAuthority;
@@ -46,6 +47,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl extends BaseService<UserMapper, User> implements UserService {
 
 	private final AccountMapper accountMapper;
@@ -58,7 +60,7 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 
 	private final UserRoleMapper userRoleMapper;
 
-	private final RoleMapper roleMapper;
+	private final RoleServiceImpl roleService;
 
 	/**
 	 * @param username 账号密码登录认证使用
@@ -87,7 +89,7 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 		UserInfo userInfo = userViewMapper.toUserInfo(user);
 		List<Role> roles = userRoleMapper
 				.selectList(Wrappers.<UserRole>lambdaQuery().eq(UserRole::getUserId, user.getId())).stream()
-				.map(ur -> roleMapper.selectById(ur.getRoleId())).collect(Collectors.toList());
+				.map(ur -> roleService.getById(ur.getRoleId())).collect(Collectors.toList());
 		Set<String> authorities = new HashSet<>();
 		roles.forEach(role -> {
 			authorities.add("ROLE_" + role.getCode());
@@ -108,10 +110,10 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 			UserView userView = userViewMapper.toUserView(x);
 			userView.setUsername(accountMapper
 					.selectOne(Wrappers.<Account>lambdaQuery().eq(Account::getUserId, x.getId())).getAuthAccount());
-			userView.setRoles(userRoleMapper
-					.selectList(Wrappers.<UserRole>lambdaQuery().eq(UserRole::getUserId, x.getId())).stream()
-					.map(userRole -> roleViewMapper.toView(roleMapper.selectById(userRole.getRoleId())))
-					.collect(Collectors.toList()));
+			userView.setRoles(
+					userRoleMapper.selectList(Wrappers.<UserRole>lambdaQuery().eq(UserRole::getUserId, x.getId()))
+							.stream().map(userRole -> roleViewMapper.toView(roleService.getById(userRole.getRoleId())))
+							.collect(Collectors.toList()));
 			return userView;
 		}).collect(Collectors.toList()));
 	}
@@ -179,6 +181,45 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public void init() {
+		if (count() > 0) {
+			return;
+		}
+		log.info("开始初始化系统用户");
+		// 创建角色
+		Role role = new Role();
+		role.setName("Admin");
+		role.setCode("admin");
+		role.setRemark("系统初始化角色");
+		role.setAuthority(String.join(",", PreAuthorizeAnnotationExtractor.extractAllApiPermissions()));
+		roleService.save(role);
+
+		// 创建用户
+		User user = new User();
+		user.setName("Admin");
+		user.setGender("M");
+		user.setStatus(AppConsts.USER_STATUS.VALID.getStatus());
+		save(user);
+
+		// 绑定用户角色
+		UserRole userRole = new UserRole();
+		userRole.setUserId(user.getId());
+		userRole.setRoleId(role.getId());
+		userRole.setUserType(AppConsts.USER_TYPE.SysUser.name());
+		userRoleMapper.insert(userRole);
+
+		// 创建账号
+		Account account = new Account();
+		account.setAuthAccount("admin");
+		account.setAuthSecret(passwordEncoder.encode("surveyking"));
+		account.setUserId(user.getId());
+		account.setUserType(AppConsts.USER_TYPE.SysUser.name());
+		account.setStatus(AppConsts.USER_STATUS.VALID.getStatus());
+		accountMapper.insert(account);
+		log.info("系统用户初始化完成(admin/surveyking)");
 	}
 
 }
