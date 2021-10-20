@@ -6,3 +6,5 @@ logs/
 files/
 .settings
 bin/
+.classpath
+.project
