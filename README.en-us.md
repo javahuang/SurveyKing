@@ -4,6 +4,8 @@ English | [简体中文](./README.md)
 
 ![preview-surveyking](./docs/preview.gif)
 
+[BMI calculator survey](https://surveyking.cn/s/q12345)
+
 ## Background
 
 Based on Ali's open source [formily](https://github.com/alibaba/formily) form solution self-developed survey editor, using the latest front-end and back-end technology (React+SpringBoot+AntDesignUI) to build a complete survey system.
@@ -14,18 +16,18 @@ SurveyKing is one of the known open source survey systems that has **the most po
 
 ## Features
 
--🥇 Support a variety of question types, such as fill-blank, selection, dropdown, cascade, matrix, pagination, signature, question-group, etc.
--🚀 It can be calculated, divided into **logical calculation** and **field calculation**, such as calculating age and gender according to the ID number, and controlling another question according to the option value. Show hide
--🦋 Questions and options support fast rich text editing
--🥊 Responsive layout, all pages have a good operating experience on PC and mobile
--🥂 Various survey settings, such as support for temporary storage, survey modification, password setting, etc.
--🎇 Data, support survey data adding, editing, marking, exporting, previewing and downloading attachments
--🎨 Reports, support real-time statistical analysis of problems and display the output in the form of graphs (bar graphs, column graphs, fan graphs) and tables
--🎉 Simple installation and deployment (**The fastest deployment in 1 minute**), supports nginx deployment and one-click startup
--🎁 The backend supports a variety of databases (embedded h2), which can support all relational databases with jdbc driver, and mongodb will be supported in the future.
--🐯 Safe, reliable, stable and high-performance back-end API service
--🙆 Support complete RBAC permission control (workflow will be introduced later)
--🌈 Support internationalization (under improvement)
+- 🥇 Support a variety of question types, such as fill-blank, selection, dropdown, cascade, matrix, pagination, signature, question-group, etc.
+- 🚀 It can be calculated, divided into **logical calculation** and **field calculation**, such as calculating age and gender according to the ID number, and controlling another question according to the option value. Show hide
+- 🦋 Questions and options support fast rich text editing
+- 🥊 Responsive layout, all pages have a good operating experience on PC and mobile
+- 🥂 Various survey settings, such as support for temporary storage, survey modification, password setting, etc.
+- 🎇 Data, support survey data adding, editing, marking, exporting, previewing and downloading attachments
+- 🎨 Reports, support real-time statistical analysis of problems and display the output in the form of graphs (bar graphs, column graphs, fan graphs) and tables
+- 🎉 Simple installation and deployment (**The fastest deployment in 1 minute**), supports nginx deployment and one-click startup
+- 🎁 The backend supports a variety of databases (embedded h2), which can support all relational databases with jdbc driver, and mongodb will be supported in the future.
+- 🐯 Safe, reliable, stable and high-performance back-end API service
+- 🙆 Support complete RBAC permission control (workflow will be introduced later)
+- 🌈 Support internationalization (under improvement)
 -...
 
 ## Install
@@ -85,22 +87,22 @@ Without any configuration, the database startup script will be created automatic
 ### mysql startup mode
 
 1. First create the mysql database, and then execute the initialization script, [download script](https://raw.githubusercontent.com/javahuang/SurveyKing/master/rdbms/src/main/resources/scripts/init-mysql.sql).
-2. First create a new `application.properties` file under the current directory.
+2. Then create a new `application.properties` file under the current directory.
 
   ```properties
-  server.port=8082 # Port number (optional, default 1991)
+  server.port=1991 # Port number (optional, default 1991)
   spring.datasource.url=jdbc:mysql://<ip>:<port>/<dbname> # Database connection address, replace with your mysql database address
   spring.datasource.username=username # Database account (required)
   spring.datasource.password=password # database password (required)
   ```
 
-### Deploy the front end with nginx
+### Deploy the front-end with nginx
 
 Download [static resource files under this directory](https://github.com/javahuang/SurveyKing/tree/master/api/src/main/resources/static) and deploy directly to nginx.
 
 Then configure the proxy to proxy to the back-end api service.
 
-## online experience
+## Online experience
 
 Demo address: <https://surveyking.cn>
 
@@ -108,7 +110,7 @@ Click *Try it*, no need to register and log in (-_-||, the server bandwidth is o
 
 ## Contact the author
 
-This project was developed by the author personally based on interest, without any interest-driven development. The back-end code is completely open source, and the front-end code will have an open source plan after it is stabilized. If you find it helpful, you can click the star in the upper right corner.
+This project was developed by the author personally based on interest. The back-end code is completely open source, and the front-end code will have an open source plan after it is stabilized. If you find it helpful, you can click the star in the upper right corner.
 
 If you encounter any problems or suggestions, Please send me an issue.
 

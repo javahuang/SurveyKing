@@ -5,6 +5,8 @@
 
 ![preview-surveyking](./docs/preview.gif)
 
+[BMI 计算器问卷](https://surveyking.cn/s/q443is)
+
 ## 背景
 
 基于阿里开源的 [formily](https://github.com/alibaba/formily) 表单解决方案自研问卷编辑器，使用最新的前后端技术（React+SpringBoot+AntDesignUI），构建出一套完整的调查问卷系统。
@@ -35,9 +37,9 @@
 
 目前已适配 h2 数据库和 mysql 数据库
 
-点击[下载 surveyking-h2 版本](https://gitee.com/surveyking/surveyking/attach_files/857365/download/surveyking-v0.1.0.jar)到本地
+点击[下载 surveyking-h2 版本](https://gitee.com/surveyking/surveyking/attach_files/857675/download/surveyking-h2-v0.1.0.jar)到本地
 
-点击[下载 surveyking-mysql 版本](https://gitee.com/surveyking/surveyking/attach_files/857365/download/surveyking-v0.1.0.jar)到本地
+点击[下载 surveyking-mysql 版本](https://gitee.com/surveyking/surveyking/attach_files/857674/download/surveyking-v0.1.0.jar)到本地
 
 ### 使用源码编译安装
 
@@ -66,12 +68,10 @@ docker run -p 1991:1991 -v /surveyking:/surveyking surveyking/surveyking
 
 ## 使用
 
-由于本系统是 Java 构建的，需要依赖 Java 运行环境，可以通过 [适用于所有操作系统的 Java 下载
+- **预安装 JRE 环境**，由于本系统是 Java 构建的，需要依赖 Java 运行环境，可以通过 [适用于所有操作系统的 Java 下载
 ](https://www.java.com/zh-CN/download/manual.jsp) 来预装 java 环境。
-
-按照下面的说明来配置不同的数据库，如果前端需要使用 nginx 部署，参考使用 nginx 部署前端。
-
-支持所有平台部署，windows 和 mac 支持双击运行，或者打开命令行窗口执行如下命令
+- **配置数据库**，按照下面的说明来配置不同的数据库，如果前端需要使用 nginx 部署，参考使用 nginx 部署前端。
+- **运行**，支持所有平台部署，windows 和 mac 支持双击运行，或者打开命令行窗口执行如下命令
 
 ```bash
 java -jar surveyking-v0.1.0.jar
@@ -86,10 +86,10 @@ java -jar surveyking-v0.1.0.jar
 ### mysql 启动方式
 
 1. 首先创建 mysql 数据库，然后执行初始化脚本，[下载脚本](https://gitee.com/surveyking/surveyking/blob/master/rdbms/src/main/resources/scripts/init-mysql.sql)。
-2. 首先在当前目录下面新建 `application.properties` 文件。
+2. 然后在当前目录下面新建 `application.properties` 文件。
 
   ```properties
-  server.port=8082 # 端口号（可选，默认 1991）
+  server.port=1991 # 端口号（可选，默认 1991）
   spring.datasource.url=jdbc:mysql://<ip>:<port>/<dbname> # 数据库连接地址，替换为你的 mysql 数据库地址
   spring.datasource.username=username # 数据库账号（必填）
   spring.datasource.password=password # 数据库密码（必填）
