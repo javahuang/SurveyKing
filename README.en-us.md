@@ -49,7 +49,7 @@ The h2 version of the installation package is built by default.
 git clone https://github.com/javahuang/SurveyKing.git
 
 # Start building
-gradle clean build -P pro -x test
+gradle clean :api:build -P pro -x test
 
 # start operation
 java -jar api/build/libs/surveyking-v0.1.0.jar

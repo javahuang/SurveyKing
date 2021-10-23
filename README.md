@@ -50,7 +50,7 @@
 git clone https://gitee.com/surveyking/surveyking.git
 
 # 开始构建
-gradle clean build -P pro -x test
+gradle clean :api:build -P pro -x test
 
 # 开始运行
 java -jar api/build/libs/surveyking-v0.1.0.jar

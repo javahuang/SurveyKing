@@ -1,7 +1,7 @@
 package cn.surveyking.server.impl;
 
-import cn.surveyking.server.core.exception.InternalServerError;
 import cn.surveyking.server.core.common.PaginationResponse;
+import cn.surveyking.server.core.exception.InternalServerError;
 import cn.surveyking.server.core.uitls.ExcelExporter;
 import cn.surveyking.server.core.uitls.SchemaParser;
 import cn.surveyking.server.domain.dto.*;
@@ -13,6 +13,7 @@ import cn.surveyking.server.mapper.ProjectMapper;
 import cn.surveyking.server.service.AnswerService;
 import cn.surveyking.server.service.FileService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -86,14 +87,14 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
 	@Override
 	public DownloadData downloadSurvey(String shortId) {
-		QueryWrapper<Project> queryWrapper = new QueryWrapper<>();
-		queryWrapper.eq("short_id", shortId).select("name", "survey");
-		Project project = projectMapper.selectOne(queryWrapper);
+		Project project = projectMapper.selectOne(Wrappers.<Project>lambdaQuery()
+				.select(Project::getName, Project::getSurvey).eq(Project::getShortId, shortId));
 
 		List<SurveySchemaType> schemaDataTypes = SchemaParser.parseDataTypes(project.getSurvey());
-		QueryWrapper<Answer> answerQuery = new QueryWrapper<>();
-		answerQuery.select("id", "answer", "meta_info", "attachment", "create_at", "create_by");
-		List<Answer> answers = list(answerQuery);
+		List<Answer> answers = list(Wrappers
+				.<Answer>lambdaQuery().select(Answer::getId, Answer::getAnswer, Answer::getMetaInfo,
+						Answer::getAttachment, Answer::getCreateAt, Answer::getCreateBy)
+				.eq(Answer::getShortId, shortId));
 
 		DownloadData download = new DownloadData();
 		download.setFileName(project.getName() + ".xlsx");
