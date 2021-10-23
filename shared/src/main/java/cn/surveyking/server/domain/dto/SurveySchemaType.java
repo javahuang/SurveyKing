@@ -30,12 +30,12 @@ public class SurveySchemaType implements Cloneable {
 
 	public enum QuestionType {
 
-		FillBlank, MultipleBlank, Signature, Single, Multi, Select, Cascader, Upload, MatrixAuto, MatrixSingle, MatrixMulti, MatrixFillBlank, MatrixScore, Survey, QuestionSet, Pagination, Remark, SplitLine, Option;
+		FillBlank, MultipleBlank, Signature, Score, Single, Multi, Select, Cascader, Upload, MatrixAuto, MatrixSingle, MatrixMulti, MatrixFillBlank, MatrixScore, Survey, QuestionSet, Pagination, Remark, SplitLine, Option;
 
 		// 分为数据类型和空类型
 		public static EnumSet<QuestionType> dataType() {
-			return EnumSet.of(FillBlank, MultipleBlank, Signature, Single, Multi, Select, Cascader, Upload, MatrixAuto,
-					MatrixSingle, MatrixMulti, MatrixFillBlank, MatrixScore);
+			return EnumSet.of(FillBlank, MultipleBlank, Signature, Score, Single, Multi, Select, Cascader, Upload,
+					MatrixAuto, MatrixSingle, MatrixMulti, MatrixFillBlank, MatrixScore);
 		}
 
 		public static EnumSet<QuestionType> voidType() {
@@ -139,6 +139,11 @@ public class SurveySchemaType implements Cloneable {
 		 * 单个上传文件大小限制
 		 */
 		private Double maxFileSize;
+
+		/**
+		 * 打分题显示样式
+		 */
+		private String scoreStyle;
 
 	}
 
