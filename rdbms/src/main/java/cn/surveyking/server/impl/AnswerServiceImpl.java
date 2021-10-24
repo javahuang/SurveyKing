@@ -192,8 +192,6 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 				try (ZipOutputStream zout = new ZipOutputStream(outputStream);) {
 					answers.forEach(answer -> {
 						answer.getAttachment().forEach(attachment -> {
-							byte[] buffer = new byte[1024 * 1024 * 1024];
-							int count;
 							ByteArrayResource resource = (ByteArrayResource) fileService
 									.loadAsResource(attachment.getId());
 							ZipEntry entry = new ZipEntry(answer.getId() + "_" + attachment.getOriginalName());
