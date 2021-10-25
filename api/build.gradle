@@ -2,7 +2,6 @@ plugins {
     id 'maven-publish'
 }
 
-sourceCompatibility = '1.8'
 project.archivesBaseName = 'surveyking'
 
 ext {
