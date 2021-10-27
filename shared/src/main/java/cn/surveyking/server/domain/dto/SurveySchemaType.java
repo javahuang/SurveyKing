@@ -145,6 +145,9 @@ public class SurveySchemaType implements Cloneable {
 		 */
 		private String scoreStyle;
 
+		/** 文本替换规则 */
+		private String replaceTextRule;
+
 	}
 
 	@Data
