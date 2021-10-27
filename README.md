@@ -5,8 +5,6 @@
 
 ![preview-surveyking](./docs/preview.gif)
 
-[BMI 计算器问卷](https://surveyking.cn/s/q443is)
-
 ## 背景
 
 基于阿里开源的 [formily](https://github.com/alibaba/formily) 表单解决方案自研问卷编辑器，使用最新的前后端技术（React+SpringBoot+AntDesignUI），构建出一套完整的调查问卷系统。
@@ -15,16 +13,23 @@
 
 **简单**、**易用**、**专业**，是卷王的持续开发理念。大中小企业甚至个人都可以使用卷王快速搭建一个属于自己的在线问卷系统。
 
+## 🚀 1 分钟快速搭建调查问卷系统
+
+1. 安装 [Java 运行环境](https://www.java.com/zh-CN/download/manual.jsp)（如果本机已有 Java 环境可以忽略）
+2. 下载 [卷王安装包](https://gitee.com/surveyking/surveyking/attach_files/864427/download/surveyking-h2-v0.2.0.jar)
+3. 双击运行
+4. 打开浏览器访问 <http://localhost:1991>，输入账号密码： *admin*/*surveyking*
+
 ## 特性
 
 - 🥇 支持多种题型，如填空、选择、下拉、级联、矩阵、分页、签名、题组等
-- 🚀 可计算，分为**逻辑计算**和**字段计算**，如根据身份证号计算年龄和性别、根据选项值控制另外一个问题显示隐藏
+- 🎉 可计算，分为**逻辑计算**、**值计算**、**文本替换计算**、**必填计算**，[点击体验](https://surveyking.cn/s/logic8)
 - 🦋 问题、选项支持快速富文本编辑
 - 🥊 响应式布局，所有页面在 PC 和手机端都有良好的操作体验
 - 🥂 多种问卷设置，如支持暂存、问卷修改、设置密码等
 - 🎇 数据，支持问卷数据新增、编辑、标记、导出、预览和打包下载附件
 - 🎨 报表，支持对问题实时统计分析并以图形（条形图、柱形图、扇形图）、表格的形式展示输出
-- 🎉 安装部署简单（**最快 1 分钟部署**），支持 nginx 部署和一键启动的方式
+- 🚀 安装部署简单（**最快 1 分钟部署**），支持 nginx 部署和一键启动的方式
 - 🎁 后端支持多种数据库（内嵌 h2），可支持所有带有 jdbc 驱动的关系型数据库，未来将支持 mongodb 这种文档数据库
 - 🐯 安全、可靠、稳定、高性能的后端 API 服务
 - 🙆 支持完善的 RBAC 权限控制（后续将推出工作流）
@@ -37,9 +42,9 @@
 
 目前已适配 h2 数据库和 mysql 数据库
 
-点击[下载 surveyking-h2 版本](https://gitee.com/surveyking/surveyking/attach_files/857675/download/surveyking-h2-v0.1.0.jar)到本地
+点击[下载 surveyking-h2 版本](https://gitee.com/surveyking/surveyking/attach_files/864427/download/surveyking-h2-v0.2.0.jar)到本地
 
-点击[下载 surveyking-mysql 版本](https://gitee.com/surveyking/surveyking/attach_files/857674/download/surveyking-v0.1.0.jar)到本地
+点击[下载 surveyking-mysql 版本](https://gitee.com/surveyking/surveyking/attach_files/864426/download/surveyking-mysql-v0.2.0.jar)到本地
 
 ### 使用源码编译安装
 
@@ -109,11 +114,13 @@ java -jar surveyking-v0.1.0.jar
 
 ## 联系作者
 
-本项目是作者个人基于兴趣驱动，无任何利益驱使开发的，后端代码完全开源，前端代码待稳定之后也会有开源计划。如果觉得对您有帮助，可以点击右上角的 star。
+本项目后端代码完全开源，前端代码待稳定之后也会有开源计划。如果觉得对您有帮助，可以点击右上角的 star。
 
 如果遇到任何问题或者建议，欢迎加群讨论。
 
-![contact-me](./docs/wechat.jpeg)
+<div>
+<img width="200" src="./docs/wechat.jpeg">
+</div>
 
 ## 开源协议
 

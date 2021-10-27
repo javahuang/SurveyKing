@@ -14,16 +14,23 @@ SurveyKing is one of the known open source survey systems that has **the most po
 
 **Simple**, **Easy to use**, and **Professional** are the continuous development concepts of SurveyKing. Large and medium-sized enterprises and even individuals can use SurveyKing to quickly build their own online survey system.
 
+## 🚀 Quickly build a questionnaire system in 1 minute
+
+1. First [install Java runtime environment](https://www.java.com/en/download/manual.jsp) (if the machine already has a Java environment, you can ignore it)
+2. Download [Volume King Installation Package](https://github.com/javahuang/SurveyKing/releases/download/v0.2.0/surveyking-h2-v0.2.0.jar)
+3. Double-click to run
+4. Open the browser to visit <http://localhost:1991>, enter the account password: *admin*/*surveyking*
+
 ## Features
 
 - 🥇 Support a variety of question types, such as fill-blank, selection, dropdown, cascade, matrix, pagination, signature, question-group, etc.
-- 🚀 It can be calculated, divided into **logical calculation** and **field calculation**, such as calculating age and gender according to the ID number, and controlling another question according to the option value. Show hide
+- 🎉 Computable, divided into **logical calculation**, **value calculation**, **text replacement calculation**, **required calculation**, [click to experience](https://surveyking.cn/s/logic6)
 - 🦋 Questions and options support fast rich text editing
 - 🥊 Responsive layout, all pages have a good operating experience on PC and mobile
 - 🥂 Various survey settings, such as support for temporary storage, survey modification, password setting, etc.
 - 🎇 Data, support survey data adding, editing, marking, exporting, previewing and downloading attachments
 - 🎨 Reports, support real-time statistical analysis of problems and display the output in the form of graphs (bar graphs, column graphs, fan graphs) and tables
-- 🎉 Simple installation and deployment (**The fastest deployment in 1 minute**), supports nginx deployment and one-click startup
+- 🚀 Simple installation and deployment (**The fastest deployment in 1 minute**), supports nginx deployment and one-click startup
 - 🎁 The backend supports a variety of databases (embedded h2), which can support all relational databases with jdbc driver, and mongodb will be supported in the future.
 - 🐯 Safe, reliable, stable and high-performance back-end API service
 - 🙆 Support complete RBAC permission control (workflow will be introduced later)
@@ -36,9 +43,9 @@ SurveyKing is one of the known open source survey systems that has **the most po
 
 Currently adapted to h2 database and mysql database
 
-Click [Download surveyking-h2 version](https://github.com/javahuang/SurveyKing/releases/download/v0.1.0/surveyking-h2-v0.1.0.jar) to the local
+Click [Download surveyking-h2 version](https://github.com/javahuang/SurveyKing/releases/download/v0.2.0/surveyking-h2-v0.2.0.jar) to the local
 
-Click [Download surveyking-mysql version](https://github.com/javahuang/SurveyKing/releases/download/v0.1.0/surveyking-mysql-v0.1.0.jar) to the local
+Click [Download surveyking-mysql version](https://github.com/javahuang/SurveyKing/releases/download/v0.2.0/surveyking-mysql-v0.2.0.jar) to the local
 
 ### Use source code to compile and install
 
@@ -110,7 +117,7 @@ Click *Try it*, no need to register and log in (-_-||, the server bandwidth is o
 
 ## Contact the author
 
-This project was developed by the author personally based on interest. The back-end code is completely open source, and the front-end code will have an open source plan after it is stabilized. If you find it helpful, you can click the star in the upper right corner.
+The back-end code is completely open source, and the front-end code will have an open source plan after it is stabilized. If you find it helpful, you can click the star in the upper right corner.
 
 If you encounter any problems or suggestions, Please send me an issue.
 
