@@ -15,6 +15,8 @@ public class UserRequest {
 
 	private String id;
 
+	private String orgId;
+
 	@NotNull
 	private String name;
 
@@ -34,5 +36,7 @@ public class UserRequest {
 	private String gender;
 
 	private Integer status;
+
+	private List<UserPositionRequest> userPositions = new ArrayList<>();
 
 }

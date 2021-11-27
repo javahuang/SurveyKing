@@ -18,6 +18,8 @@ public class User extends BaseModel {
 
 	private String name;
 
+	private String orgId;
+
 	private String phone;
 
 	private String email;

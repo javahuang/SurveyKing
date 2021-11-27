@@ -28,6 +28,13 @@ public class UserView {
 
 	private Date createAt;
 
+	private String orgId;
+
+	private String orgName;
+
 	private List<RoleView> roles;
+
+	/** 用户岗位 */
+	private List<UserPositionView> userPositions;
 
 }

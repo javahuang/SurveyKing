@@ -7,15 +7,12 @@ import cn.surveyking.server.domain.dto.UserInfo;
 import cn.surveyking.server.domain.dto.UserQuery;
 import cn.surveyking.server.domain.dto.UserRequest;
 import cn.surveyking.server.domain.dto.UserView;
+import cn.surveyking.server.domain.model.*;
+import cn.surveyking.server.workflow.domain.dto.*;
 import cn.surveyking.server.domain.mapper.RoleViewMapper;
+import cn.surveyking.server.domain.mapper.UserPositionDtoMapper;
 import cn.surveyking.server.domain.mapper.UserViewMapper;
-import cn.surveyking.server.domain.model.Account;
-import cn.surveyking.server.domain.model.Role;
-import cn.surveyking.server.domain.model.User;
-import cn.surveyking.server.domain.model.UserRole;
-import cn.surveyking.server.mapper.AccountMapper;
-import cn.surveyking.server.mapper.UserMapper;
-import cn.surveyking.server.mapper.UserRoleMapper;
+import cn.surveyking.server.mapper.*;
 import cn.surveyking.server.service.BaseService;
 import cn.surveyking.server.service.UserService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -31,10 +28,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -61,6 +55,12 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 	private final UserRoleMapper userRoleMapper;
 
 	private final RoleServiceImpl roleService;
+
+	private final UserPositionMapper userPositionMapper;
+
+	private final UserPositionDtoMapper userPositionDtoMapper;
+
+	private final OrgMapper orgMapper;
 
 	/**
 	 * @param username 账号密码登录认证使用
@@ -104,18 +104,42 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 
 	@Override
 	public PaginationResponse<UserView> getUsers(UserQuery query) {
+		List<String> orgIds = getChildOrgIds(query.getOrgId());
 		Page<User> userPage = pageByQuery(query,
-				Wrappers.<User>lambdaQuery().like(isNotBlank(query.getName()), User::getName, query.getName()));
+				Wrappers.<User>lambdaQuery().like(isNotBlank(query.getName()), User::getName, query.getName())
+						.in(orgIds.size() > 0, User::getOrgId, orgIds)
+						.in(query.getIds() != null, User::getId, Arrays.asList(query.getIds() != null ? query.getIds() : new String[0])));
 		return new PaginationResponse<>(userPage.getTotal(), userPage.getRecords().stream().map(x -> {
 			UserView userView = userViewMapper.toUserView(x);
 			userView.setUsername(accountMapper
 					.selectOne(Wrappers.<Account>lambdaQuery().eq(Account::getUserId, x.getId())).getAuthAccount());
+			// 设置用户部门
+			Org org = orgMapper.selectById(x.getOrgId());
+			if (org != null) {
+				userView.setOrgName(org.getName());
+			}
+			// 设置用户角色
 			userView.setRoles(
 					userRoleMapper.selectList(Wrappers.<UserRole>lambdaQuery().eq(UserRole::getUserId, x.getId()))
 							.stream().map(userRole -> roleViewMapper.toView(roleService.getById(userRole.getRoleId())))
 							.collect(Collectors.toList()));
+			// 设置用户岗位
+			userView.setUserPositions(userPositionDtoMapper.toView(userPositionMapper
+					.selectList(Wrappers.<UserPosition>lambdaQuery().eq(UserPosition::getUserId, x.getId()))));
 			return userView;
 		}).collect(Collectors.toList()));
+	}
+
+	private List<String> getChildOrgIds(String parentOrgId) {
+		List<String> result = new ArrayList<>();
+		if (parentOrgId == null) {
+			return result;
+		}
+		result.add(parentOrgId);
+		orgMapper.selectList(Wrappers.<Org>lambdaQuery().eq(Org::getParentId, parentOrgId)).forEach(org -> {
+			result.addAll(getChildOrgIds(org.getId()));
+		});
+		return result;
 	}
 
 	@Override
@@ -132,13 +156,30 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 		accountMapper.insert(account);
 
 		// 添加用户角色
+		request.setId(user.getId());
+		addUserRoles(request);
+		// 添加用户岗位
+		addUserPositions(request);
+	}
+
+	private void addUserRoles(UserRequest request) {
 		request.getRoles().forEach(roleId -> {
 			UserRole userRole = new UserRole();
-			userRole.setUserId(user.getId());
+			userRole.setUserId(request.getId());
 			userRole.setRoleId(roleId);
 			userRole.setUserType(AppConsts.USER_TYPE.SysUser.name());
 			userRoleMapper.insert(userRole);
 		});
+	}
+
+	private void addUserPositions(UserRequest request) {
+		if (request.getUserPositions() != null) {
+			request.getUserPositions().forEach(userPositionRequest -> {
+				UserPosition userPosition = userPositionDtoMapper.fromRequest(userPositionRequest);
+				userPosition.setUserId(request.getId());
+				userPositionMapper.insert(userPosition);
+			});
+		}
 	}
 
 	@Override
@@ -158,13 +199,10 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 
 		// 更新用户角色
 		userRoleMapper.delete(Wrappers.<UserRole>lambdaQuery().eq(UserRole::getUserId, request.getId()));
-		request.getRoles().forEach(roleId -> {
-			UserRole userRole = new UserRole();
-			userRole.setUserId(user.getId());
-			userRole.setRoleId(roleId);
-			userRole.setUserType(AppConsts.USER_TYPE.SysUser.name());
-			userRoleMapper.insert(userRole);
-		});
+		addUserRoles(request);
+		// 更新用户岗位
+		userPositionMapper.delete(Wrappers.<UserPosition>lambdaQuery().eq(UserPosition::getUserId, request.getId()));
+		addUserPositions(request);
 	}
 
 	@Override
@@ -181,6 +219,37 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public void updateUserPosition(UserRequest request) {
+		userPositionMapper
+				.delete(Wrappers.<UserPosition>lambdaQuery().eq(UserPosition::getPositionId, request.getId()));
+		request.getUserPositions().forEach(userPositionRequest -> {
+			UserPosition position = userPositionDtoMapper.fromRequest(userPositionRequest);
+			position.setUserId(request.getId());
+			userPositionMapper.insert(position);
+		});
+	}
+
+	@Override
+	public Set<String> getUserGroups(String userId) {
+		Set<String> groups = new LinkedHashSet<>();
+		// 获取用户的系统角色
+		userRoleMapper.selectList(Wrappers.<UserRole>lambdaQuery().eq(UserRole::getUserId, userId)).forEach(role -> {
+			groups.add("R:" + role.getRoleId());
+		});
+		// 获取用户的用户岗位
+		userPositionMapper.selectList(Wrappers.<UserPosition>lambdaQuery().eq(UserPosition::getUserId, userId))
+				.forEach(userPosition -> {
+					groups.add("P:" + userPosition.getOrgId() + ":" + userPosition.getPositionId());
+					groups.add("P:" + "ALL:" + userPosition.getPositionId());
+					groups.add("P:" + userPosition.getOrgId() + ":ALL");
+				});
+		User current = getById(userId);
+		groups.add("U:" + current.getId());
+		groups.add("P:" + current.getOrgId() + ":");
+		return groups;
 	}
 
 	@Override

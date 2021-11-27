@@ -5,16 +5,12 @@ import lombok.EqualsAndHashCode;
 
 /**
  * @author javahuang
- * @date 2021/10/15
+ * @date 2021/8/31
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class UserQuery extends PageQuery {
+public class PositionQuery extends PageQuery {
 
 	private String name;
-
-	private String orgId;
-
-	private String[] ids;
 
 }

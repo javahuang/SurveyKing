@@ -96,4 +96,14 @@ public class AppConsts {
 
 	}
 
+	/**
+	 * 岗位对应的数据权限
+	 */
+	public enum DATA_PERMISSION_TYPE {
+
+		/** 本人、本人及下属、本部门、本部门及下属部门、全部 */
+		SELF, SELF_AND_SUB, DEPT, DEPT_AND_SUB, ALL;
+
+	}
+
 }

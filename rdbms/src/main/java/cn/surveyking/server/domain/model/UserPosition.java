@@ -9,19 +9,26 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 /**
+ * 用户岗位
+ *
  * @author javahuang
- * @date 2021/10/12
+ * @date 2021/11/2
  */
 @Data
-@TableName(value = "t_user_role", autoResultMap = true)
+@TableName(value = "t_user_position", autoResultMap = true)
 @EqualsAndHashCode(callSuper = false)
-public class UserRole extends BaseModel {
+public class UserPosition extends BaseModel {
 
 	private String userId;
 
-	private String roleId;
+	private String orgId;
 
-	private String userType;
+	private String positionId;
+
+	/**
+	 * 是否主岗
+	 */
+	private Boolean isPrimaryPosition;
 
 	@JsonIgnore
 	@TableField(value = AppConsts.COLUMN_IS_DELETED, select = false)

@@ -108,7 +108,7 @@ CREATE TABLE `t_project` (
 -- ----------------------------
 DROP TABLE IF EXISTS `t_role`;
 CREATE TABLE `t_role` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `id` varchar(64) NOT NULL COMMENT 'ID',
   `name` varchar(50) NOT NULL COMMENT '名称',
   `code` varchar(50) NOT NULL COMMENT '编码',
   `remark` varchar(100) DEFAULT NULL COMMENT '备注',
@@ -154,8 +154,9 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_user`;
 CREATE TABLE `t_user` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `id` varchar(64) NOT NULL COMMENT 'ID',
   `name` varchar(50) NOT NULL COMMENT '真实姓名',
+  org_id varchar(20),
   `gender` varchar(10) NOT NULL COMMENT '性别',
   `birthday` date DEFAULT NULL COMMENT '出生日期',
   `phone` varchar(20) DEFAULT NULL COMMENT '手机号',
@@ -175,7 +176,7 @@ CREATE TABLE `t_user` (
 -- ----------------------------
 DROP TABLE IF EXISTS `t_user_role`;
 CREATE TABLE `t_user_role` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `id` varchar(64) NOT NULL COMMENT 'ID',
   `user_type` varchar(100) NOT NULL DEFAULT 'SysUser' COMMENT '用户类型',
   `user_id` bigint(20) NOT NULL COMMENT '用户ID',
   `role_id` bigint(20) NOT NULL COMMENT '角色ID',
@@ -187,5 +188,58 @@ CREATE TABLE `t_user_role` (
   PRIMARY KEY (`id`),
   KEY `idx_t_user_role` (`user_type`,`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1448313054692388867 DEFAULT CHARSET=utf8 COMMENT='用户角色关联';
+
+DROP TABLE IF EXISTS `t_position`;
+CREATE TABLE `t_position` (
+                          `id` varchar(64) NOT NULL COMMENT 'ID',
+                          `name` varchar(50) NOT NULL COMMENT '',
+                          code varchar(20),
+                          `is_virtual` tinyint(1) NOT NULL COMMENT '是否虚拟岗',
+                          `data_permission_type` date DEFAULT NULL COMMENT '数据权限类型',
+                          `property_json` varchar(20) DEFAULT NULL COMMENT '扩展字段',
+                          `is_deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否删除',
+                          `create_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                          `create_by` varchar(256) DEFAULT NULL,
+                          `update_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                          `update_by` varchar(256) DEFAULT NULL,
+                          PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1448313054205849602 DEFAULT CHARSET=utf8 COMMENT='岗位';
+
+DROP TABLE IF EXISTS `t_user_position`;
+CREATE TABLE `t_user_position` (
+                              `id` varchar(64) NOT NULL COMMENT 'ID',
+                              `user_id` varchar(64) NOT NULL COMMENT '',
+                              org_id varchar(64),
+                              `position_id` varchar(64) DEFAULT NULL COMMENT '数据权限类型',
+                              `is_primary_position` tinyint(1) NOT NULL COMMENT '是否主岗',
+                              `propertyJson` varchar(256) DEFAULT NULL COMMENT '扩展字段',
+                              `is_deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否删除',
+                              `create_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                              `create_by` varchar(256) DEFAULT NULL,
+                              `update_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                              `update_by` varchar(256) DEFAULT NULL,
+                              PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1448313054205849602 DEFAULT CHARSET=utf8 COMMENT='用户岗位';
+
+DROP TABLE IF EXISTS `t_org`;
+CREATE TABLE `t_org` (
+                              `id` varchar(64) NOT NULL COMMENT 'ID',
+                              `parent_id` varchar(64) NOT NULL COMMENT '',
+                              name varchar(64) COMMENT '名称',
+                              `short_name` varchar(64) NOT NULL COMMENT '简称',
+                              `code` varchar(64) DEFAULT NULL COMMENT '数据权限类型',
+                              `manager_id` varchar(64) DEFAULT NULL COMMENT '扩展字段',
+                              sortCode int,
+                              `property_json` varchar(256) DEFAULT NULL COMMENT '扩展字段',
+                              `status` varchar(20) DEFAULT NULL COMMENT '扩展字段',
+                              `remark` varchar(256) DEFAULT NULL COMMENT '扩展字段',
+                              `is_deleted` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否删除',
+                              `create_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                              `create_by` varchar(256) DEFAULT NULL,
+                              `update_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                              `update_by` varchar(256) DEFAULT NULL,
+                              PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1448313054205849602 DEFAULT CHARSET=utf8 COMMENT='组织机构';
+
 
 SET FOREIGN_KEY_CHECKS = 1;
