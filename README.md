@@ -119,7 +119,7 @@ java -jar surveyking-v0.1.0.jar
 如果遇到任何问题或者建议，欢迎加群讨论。
 
 <div>
-<img width="200" src="./docs/wechat.jpeg">
+ QQ群：338461197
 </div>
 
 ## 开源协议
