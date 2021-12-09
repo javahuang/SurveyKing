@@ -13,8 +13,6 @@ public class ProjectView {
 
 	private String id;
 
-	private String shortId;
-
 	private String name;
 
 	private Integer status;

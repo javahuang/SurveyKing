@@ -7,7 +7,6 @@ import cn.surveyking.server.domain.dto.PermissionView;
 import cn.surveyking.server.domain.dto.RoleQuery;
 import cn.surveyking.server.domain.dto.RoleRequest;
 import cn.surveyking.server.domain.dto.RoleView;
-import cn.surveyking.server.workflow.domain.dto.*;
 import cn.surveyking.server.domain.mapper.RoleViewMapper;
 import cn.surveyking.server.domain.model.Role;
 import cn.surveyking.server.domain.model.UserRole;

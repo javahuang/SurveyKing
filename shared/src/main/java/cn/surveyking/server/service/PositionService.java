@@ -4,7 +4,6 @@ import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.domain.dto.PositionQuery;
 import cn.surveyking.server.domain.dto.PositionRequest;
 import cn.surveyking.server.domain.dto.PositionView;
-import cn.surveyking.server.workflow.domain.dto.*;
 
 /**
  * @author javahuang

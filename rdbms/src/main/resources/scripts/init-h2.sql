@@ -24,7 +24,6 @@ COMMENT ON TABLE `t_account` IS '登录账号';
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS `t_answer` (
   `id` varchar(64)  NOT NULL,
-  `short_id` varchar(64)  DEFAULT NULL,
   `answer` text  COMMENT '问卷答案',
   `attachment` varchar(1024)  DEFAULT NULL COMMENT '问卷元数据',
   `meta_info` text  COMMENT '问卷元数据',
@@ -67,7 +66,6 @@ COMMIT;
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS `t_project` (
   `id` varchar(64)  NOT NULL,
-  `short_id` varchar(32)  DEFAULT NULL,
   `name` varchar(64)  DEFAULT NULL COMMENT '项目名称',
   `survey` longtext  COMMENT '问卷',
   `setting` varchar(256)  DEFAULT NULL COMMENT '问卷设置',
@@ -78,8 +76,7 @@ CREATE TABLE IF NOT EXISTS `t_project` (
   `create_by` varchar(256)  DEFAULT NULL,
   `update_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `update_by` varchar(256)  DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `short_id` (`short_id`)
+  PRIMARY KEY (`id`)
 ) ;
 COMMENT ON TABLE `t_project` IS '项目';
 -- ----------------------------

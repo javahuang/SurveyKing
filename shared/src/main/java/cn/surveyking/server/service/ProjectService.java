@@ -16,7 +16,7 @@ public interface ProjectService {
 
 	ProjectView getProject(ProjectQuery filter);
 
-	String addProject(ProjectRequest project);
+	ProjectView addProject(ProjectRequest project);
 
 	void updateProject(ProjectRequest project);
 

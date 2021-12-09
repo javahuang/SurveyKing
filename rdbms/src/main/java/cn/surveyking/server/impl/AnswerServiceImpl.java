@@ -5,7 +5,6 @@ import cn.surveyking.server.core.exception.InternalServerError;
 import cn.surveyking.server.core.uitls.ExcelExporter;
 import cn.surveyking.server.core.uitls.SchemaParser;
 import cn.surveyking.server.domain.dto.*;
-import cn.surveyking.server.workflow.domain.dto.*;
 import cn.surveyking.server.domain.mapper.AnswerViewMapper;
 import cn.surveyking.server.domain.model.Answer;
 import cn.surveyking.server.domain.model.Project;
@@ -53,10 +52,9 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
 	@Override
 	public PaginationResponse<AnswerView> listAnswer(AnswerQuery query) {
-		QueryWrapper<Answer> wrapper = new QueryWrapper<>();
-		wrapper.eq("short_id", query.getShortId()).orderByDesc("create_at");
 		Page<Answer> page = new Page<>(query.getCurrent(), query.getPageSize());
-		super.page(page, wrapper);
+		super.page(page, Wrappers.<Answer>lambdaQuery().eq(Answer::getProjectId, query.getShortId())
+				.in(query.getIds() != null, Answer::getId, query.getIds()).orderByDesc(Answer::getCreateAt));
 		List<AnswerView> list = answerViewMapper.toAnswerView(page.getRecords());
 		return new PaginationResponse<>(page.getTotal(), list);
 	}
@@ -69,11 +67,12 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	}
 
 	@Override
-	public void saveAnswer(AnswerRequest request, HttpServletRequest httpRequest) {
+	public String saveAnswer(AnswerRequest request, HttpServletRequest httpRequest) {
 		request.getMetaInfo().setClientInfo(parseClientInfo(httpRequest));
 		Answer answer = answerViewMapper.fromRequest(request);
 		answer.setCreateAt(new Date());
 		save(answer);
+		return answer.getId();
 	}
 
 	@Override
@@ -87,15 +86,13 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	}
 
 	@Override
-	public DownloadData downloadSurvey(String shortId) {
-		Project project = projectMapper.selectOne(Wrappers.<Project>lambdaQuery()
-				.select(Project::getName, Project::getSurvey).eq(Project::getShortId, shortId));
+	public DownloadData downloadSurvey(String id) {
+		Project project = projectMapper.selectById(id);
 
 		List<SurveySchemaType> schemaDataTypes = SchemaParser.parseDataTypes(project.getSurvey());
-		List<Answer> answers = list(Wrappers
-				.<Answer>lambdaQuery().select(Answer::getId, Answer::getAnswer, Answer::getMetaInfo,
-						Answer::getAttachment, Answer::getCreateAt, Answer::getCreateBy)
-				.eq(Answer::getShortId, shortId));
+		List<Answer> answers = list(
+				Wrappers.<Answer>lambdaQuery().select(Answer::getId, Answer::getAnswer, Answer::getMetaInfo,
+						Answer::getAttachment, Answer::getCreateAt, Answer::getCreateBy).eq(Answer::getProjectId, id));
 
 		DownloadData download = new DownloadData();
 		download.setFileName(project.getName() + ".xlsx");
@@ -142,9 +139,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	 */
 	@Override
 	public DownloadData downloadAttachment(DownloadQuery query) {
-		QueryWrapper<Project> queryWrapper = new QueryWrapper<>();
-		queryWrapper.eq("short_id", query.getShortId()).select("name", "survey");
-		Project project = projectMapper.selectOne(queryWrapper);
+		Project project = projectMapper.selectById(query.getProjectId());
 		DownloadData downloadData = new DownloadData();
 		// 下载某个问卷答案的附件
 		if (query.getAnswerId() != null) {
@@ -154,7 +149,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		else {
 			// 下载所有问卷答案的附件
 			QueryWrapper<Answer> answerQuery = new QueryWrapper<>();
-			answerQuery.eq("short_id", query.getShortId());
+			answerQuery.eq("short_id", query.getProjectId());
 			downloadData.setResource(new InputStreamResource(answerAttachToZip(list(answerQuery))));
 			downloadData.setFileName(project.getName() + ".zip");
 			downloadData.setMediaType(MediaType.parseMediaType("application/zip"));

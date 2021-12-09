@@ -7,7 +7,6 @@ import cn.surveyking.server.domain.mapper.ProjectViewMapper;
 import cn.surveyking.server.domain.model.Project;
 import cn.surveyking.server.mapper.ProjectMapper;
 import cn.surveyking.server.service.SurveyService;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +31,7 @@ public class SurveyServiceImpl implements SurveyService {
 	 */
 	@Override
 	public PublicProjectView loadProject(ProjectQuery query) {
-		Project project = getProjectByShortId(query.getShortId());
+		Project project = projectMapper.selectById(query.getId());
 		if (project != null && project.getSetting() != null && project.getSetting().getAnswerSetting() != null
 				&& project.getSetting().getAnswerSetting().getPassword() != null) {
 			project.getSetting().getAnswerSetting().setPassword(null);
@@ -43,7 +42,7 @@ public class SurveyServiceImpl implements SurveyService {
 
 	@Override
 	public PublicProjectView verifyPassword(ProjectQuery query) {
-		Project project = getProjectByShortId(query.getShortId());
+		Project project = projectMapper.selectById(query.getId());
 		try {
 			if (project.getSetting().getAnswerSetting().getPassword().equals(query.getPassword())) {
 				return projectViewMapper.toPublicProjectView(project);
@@ -53,12 +52,6 @@ public class SurveyServiceImpl implements SurveyService {
 		catch (Exception e) {
 			throw new InternalServerError("密码验证失败");
 		}
-	}
-
-	private Project getProjectByShortId(String shortId) {
-		QueryWrapper<Project> queryMapper = new QueryWrapper();
-		queryMapper.eq("short_id", shortId);
-		return projectMapper.selectOne(queryMapper);
 	}
 
 }

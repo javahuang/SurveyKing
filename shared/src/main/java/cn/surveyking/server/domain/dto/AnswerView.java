@@ -17,7 +17,9 @@ public class AnswerView {
 
 	private String shortId;
 
-	private LinkedHashMap answer;
+	private String surveyId;
+
+	private LinkedHashMap<String, Object> answer;
 
 	private List<Attachment> attachment;
 

@@ -5,7 +5,6 @@ import cn.surveyking.server.domain.dto.PermissionView;
 import cn.surveyking.server.domain.dto.RoleQuery;
 import cn.surveyking.server.domain.dto.RoleRequest;
 import cn.surveyking.server.domain.dto.RoleView;
-import cn.surveyking.server.workflow.domain.dto.*;
 
 import java.util.List;
 

@@ -15,7 +15,7 @@ public class DownloadQuery {
 	 * 问卷id
 	 */
 	@NotNull
-	private String shortId;
+	private String projectId;
 
 	/**
 	 * 当前答案id

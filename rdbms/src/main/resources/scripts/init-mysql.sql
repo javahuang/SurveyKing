@@ -43,7 +43,7 @@ CREATE TABLE `t_account` (
 DROP TABLE IF EXISTS `t_answer`;
 CREATE TABLE `t_answer` (
   `id` varchar(64) COLLATE utf8mb4_bin NOT NULL,
-  `short_id` varchar(64) COLLATE utf8mb4_bin DEFAULT NULL,
+  `project_id` varchar(64) COLLATE utf8mb4_bin DEFAULT NULL,
   `answer` text COLLATE utf8mb4_bin COMMENT '问卷答案',
   `attachment` varchar(1024) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '问卷元数据',
   `meta_info` text COLLATE utf8mb4_bin COMMENT '问卷元数据',
@@ -88,7 +88,6 @@ COMMIT;
 DROP TABLE IF EXISTS `t_project`;
 CREATE TABLE `t_project` (
   `id` varchar(64) COLLATE utf8mb4_bin NOT NULL,
-  `short_id` varchar(32) COLLATE utf8mb4_bin DEFAULT NULL,
   `name` varchar(64) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '项目名称',
   `survey` longtext COLLATE utf8mb4_bin COMMENT '问卷',
   `setting` varchar(256) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '问卷设置',
@@ -99,8 +98,7 @@ CREATE TABLE `t_project` (
   `create_by` varchar(256) COLLATE utf8mb4_bin DEFAULT NULL,
   `update_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `update_by` varchar(256) COLLATE utf8mb4_bin DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `short_id` (`short_id`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='项目';
 
 -- ----------------------------

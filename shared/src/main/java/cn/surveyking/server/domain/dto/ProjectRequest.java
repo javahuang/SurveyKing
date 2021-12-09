@@ -11,8 +11,6 @@ public class ProjectRequest {
 
 	private String id;
 
-	private String shortId;
-
 	private String name;
 
 	private SurveySchemaType survey;

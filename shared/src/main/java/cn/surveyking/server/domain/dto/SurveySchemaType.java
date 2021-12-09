@@ -56,6 +56,9 @@ public class SurveySchemaType implements Cloneable {
 	@Data
 	public static class Attribute {
 
+		/** none/visible/hidden */
+		private String display;
+
 		private Boolean hidden;
 
 		private Integer width;

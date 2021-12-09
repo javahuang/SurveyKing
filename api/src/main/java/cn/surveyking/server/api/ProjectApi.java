@@ -27,23 +27,23 @@ public class ProjectApi {
 		return projectService.listProject(query);
 	}
 
-	@GetMapping("/{shortId}")
+	@GetMapping("/{id}")
 	@PreAuthorize("hasAuthority('project:detail')")
-	public ProjectView getProject(@PathVariable String shortId, ProjectQuery query) {
-		query.setShortId(shortId);
+	public ProjectView getProject(@PathVariable String id, ProjectQuery query) {
+		query.setId(id);
 		return projectService.getProject(query);
 	}
 
-	@GetMapping("/{shortId}/settings")
+	@GetMapping("/{id}/settings")
 	@PreAuthorize("hasAuthority('project:detail')")
-	public ProjectSetting getSetting(@PathVariable String shortId, ProjectQuery query) {
-		query.setShortId(shortId);
+	public ProjectSetting getSetting(@PathVariable String id, ProjectQuery query) {
+		query.setId(id);
 		return projectService.getSetting(query);
 	}
 
 	@PostMapping
 	@PreAuthorize("hasAuthority('project:create')")
-	public String addProject(@RequestBody ProjectRequest project) {
+	public ProjectView addProject(@RequestBody ProjectRequest project) {
 		return projectService.addProject(project);
 	}
 

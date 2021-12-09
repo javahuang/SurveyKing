@@ -1,13 +1,12 @@
 package cn.surveyking.server.api;
 
 import cn.surveyking.server.core.constant.AppConsts;
-import cn.surveyking.server.domain.dto.AnswerRequest;
-import cn.surveyking.server.domain.dto.FileView;
-import cn.surveyking.server.domain.dto.ProjectQuery;
-import cn.surveyking.server.domain.dto.PublicProjectView;
+import cn.surveyking.server.core.uitls.SecurityContextUtils;
+import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.service.AnswerService;
 import cn.surveyking.server.service.FileService;
 import cn.surveyking.server.service.SurveyService;
+import cn.surveyking.server.workflow.service.WorkflowService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
@@ -36,19 +35,30 @@ public class SurveyApi {
 
 	private final FileService fileService;
 
+	private final WorkflowService workflowService;
+
 	@GetMapping("/loadProject")
 	public PublicProjectView loadProject(ProjectQuery query) {
-		return surveyService.loadProject(query);
+		PublicProjectView projectView = surveyService.loadProject(query);
+		SurveySchemaType schema = workflowService.beforeLaunchProcess(SecurityContextUtils.getUserId(),
+				projectView.getSurvey());
+		projectView.setSurvey(schema);
+		return projectView;
 	}
 
 	@PostMapping("/verifyPassword")
 	public PublicProjectView verifyPassword(@RequestBody ProjectQuery query) {
-		return surveyService.verifyPassword(query);
+		PublicProjectView projectView = surveyService.verifyPassword(query);
+		SurveySchemaType schema = workflowService.beforeLaunchProcess(SecurityContextUtils.getUserId(),
+				projectView.getSurvey());
+		projectView.setSurvey(schema);
+		return projectView;
 	}
 
 	@PostMapping("/saveAnswer")
 	public void saveAnswer(@RequestBody AnswerRequest answer, HttpServletRequest request) {
-		answerService.saveAnswer(answer, request);
+		String answerId = answerService.saveAnswer(answer, request);
+		workflowService.launchProcess(answer.getShortId(), answerId);
 	}
 
 	@PostMapping("/upload")

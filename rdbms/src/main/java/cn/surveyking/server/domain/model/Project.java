@@ -22,8 +22,6 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = false)
 public class Project extends BaseModel {
 
-	private String shortId;
-
 	private String name;
 
 	@TableField(typeHandler = JacksonTypeHandler.class, jdbcType = JdbcType.LONGVARCHAR)

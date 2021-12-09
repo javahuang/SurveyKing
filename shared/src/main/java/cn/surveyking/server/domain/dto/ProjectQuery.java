@@ -11,7 +11,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 public class ProjectQuery extends PageQuery {
 
-	private String shortId;
+	private String id;
 
 	private String password;
 

@@ -8,7 +8,6 @@ import cn.surveyking.server.domain.dto.UserQuery;
 import cn.surveyking.server.domain.dto.UserRequest;
 import cn.surveyking.server.domain.dto.UserView;
 import cn.surveyking.server.domain.model.*;
-import cn.surveyking.server.workflow.domain.dto.*;
 import cn.surveyking.server.domain.mapper.RoleViewMapper;
 import cn.surveyking.server.domain.mapper.UserPositionDtoMapper;
 import cn.surveyking.server.domain.mapper.UserViewMapper;

@@ -24,7 +24,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = false)
 public class Answer extends BaseModel {
 
-	private String shortId;
+	private String projectId;
 
 	@TableField(typeHandler = JacksonTypeHandler.class, jdbcType = JdbcType.LONGVARCHAR)
 	private LinkedHashMap answer;

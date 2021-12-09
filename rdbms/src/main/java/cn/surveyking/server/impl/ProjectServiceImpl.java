@@ -50,16 +50,15 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 				projectViewMapper.toProjectView(page.getRecords()));
 		result.getList().forEach(view -> {
 			view.setTotal(
-					answerMapper.selectCount(Wrappers.<Answer>lambdaQuery().eq(Answer::getShortId, view.getShortId())));
+					answerMapper.selectCount(Wrappers.<Answer>lambdaQuery().eq(Answer::getProjectId, view.getId())));
 		});
 		return result;
 	}
 
 	public ProjectView getProject(ProjectQuery query) {
-		ProjectView result = projectViewMapper
-				.toProjectView(getOne(Wrappers.<Project>lambdaQuery().eq(Project::getShortId, query.getShortId())));
+		ProjectView result = projectViewMapper.toProjectView(getById(query.getId()));
 		List<Answer> answers = answerMapper
-				.selectList(Wrappers.<Answer>lambdaQuery().eq(Answer::getShortId, query.getShortId())
+				.selectList(Wrappers.<Answer>lambdaQuery().eq(Answer::getProjectId, query.getId())
 						.select(Answer::getMetaInfo, Answer::getCreateAt).orderByDesc(Answer::getCreateAt));
 		result.setTotal((long) answers.size());
 		long totalDuration = 0;
@@ -84,13 +83,13 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 	}
 
 	@Override
-	public String addProject(ProjectRequest request) {
+	public ProjectView addProject(ProjectRequest request) {
 		Project project = projectViewMapper.fromRequest(request);
-		project.setShortId(NanoIdUtils.randomNanoId());
+		project.setId(NanoIdUtils.randomNanoId());
 		try {
 			project.setName(project.getSurvey().getTitle());
 			save(project);
-			return project.getShortId();
+			return projectViewMapper.toProjectView(project);
 		}
 		catch (Exception e) {
 			if (e instanceof DuplicateKeyException) {
@@ -104,8 +103,7 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 
 	@Override
 	public void updateProject(ProjectRequest request) {
-		Project project = projectViewMapper.fromRequest(request);
-		update(project, Wrappers.<Project>lambdaUpdate().eq(Project::getShortId, project.getShortId()));
+		updateById(projectViewMapper.fromRequest(request));
 	}
 
 	@Override

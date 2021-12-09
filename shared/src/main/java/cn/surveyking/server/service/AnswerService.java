@@ -5,7 +5,6 @@ import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.uitls.IPUtils;
 import cn.surveyking.server.core.uitls.UserAgentUtils;
 import cn.surveyking.server.domain.dto.*;
-import cn.surveyking.server.workflow.domain.dto.*;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +23,7 @@ public interface AnswerService {
 
 	AnswerView getAnswer(AnswerQuery filter);
 
-	void saveAnswer(AnswerRequest answer, HttpServletRequest request);
+	String saveAnswer(AnswerRequest answer, HttpServletRequest request);
 
 	void updateAnswer(AnswerRequest answer);
 
@@ -45,7 +44,7 @@ public interface AnswerService {
 		DownloadData download;
 		// 下载问卷答案
 		if (query.getType() == DownloadQuery.DownloadType.SURVEY_ANSWER) {
-			download = downloadSurvey(query.getShortId());
+			download = downloadSurvey(query.getProjectId());
 		}
 		// 下载附件
 		else if (query.getType() == DownloadQuery.DownloadType.ANSWER_ATTACHMENT) {

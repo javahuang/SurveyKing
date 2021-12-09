@@ -33,7 +33,7 @@ SurveyKing is one of the known open source survey systems that has **the most po
 - 🚀 Simple installation and deployment (**The fastest deployment in 1 minute**), supports nginx deployment and one-click startup
 - 🎁 The backend supports a variety of databases (embedded h2), which can support all relational databases with jdbc driver, and mongodb will be supported in the future.
 - 🐯 Safe, reliable, stable and high-performance back-end API service
-- 🙆 Support complete RBAC permission control (workflow will be introduced later)
+- 🙆 Support complete RBAC permission control (cn.surveyking.server.workflow will be introduced later)
 - 🌈 Support internationalization (under improvement)
 -...
 
