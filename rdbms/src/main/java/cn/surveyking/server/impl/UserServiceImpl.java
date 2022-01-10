@@ -82,9 +82,12 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 	}
 
 	@Override
-	@Cacheable(cacheNames = "userCache", key = "#userId", unless = "#result == null")
-	public UserInfo currentUser(String userId) {
+	@Cacheable(cacheNames = "userCache", key = "#p0", condition = "#p0!=null", unless = "#result == null")
+	public UserInfo loadUserById(String userId) {
 		User user = this.getById(userId);
+		if (user == null) {
+			return null;
+		}
 		UserInfo userInfo = userViewMapper.toUserInfo(user);
 		List<Role> roles = userRoleMapper
 				.selectList(Wrappers.<UserRole>lambdaQuery().eq(UserRole::getUserId, user.getId())).stream()
@@ -106,8 +109,8 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 		List<String> orgIds = getChildOrgIds(query.getOrgId());
 		Page<User> userPage = pageByQuery(query,
 				Wrappers.<User>lambdaQuery().like(isNotBlank(query.getName()), User::getName, query.getName())
-						.in(orgIds.size() > 0, User::getOrgId, orgIds)
-						.in(query.getIds() != null, User::getId, Arrays.asList(query.getIds() != null ? query.getIds() : new String[0])));
+						.in(orgIds.size() > 0, User::getOrgId, orgIds).in(query.getIds() != null, User::getId,
+								Arrays.asList(query.getIds() != null ? query.getIds() : new String[0])));
 		return new PaginationResponse<>(userPage.getTotal(), userPage.getRecords().stream().map(x -> {
 			UserView userView = userViewMapper.toUserView(x);
 			userView.setUsername(accountMapper
@@ -246,8 +249,8 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 					groups.add("P:" + userPosition.getOrgId() + ":ALL");
 				});
 		User current = getById(userId);
-		groups.add("U:" + current.getId());
-		groups.add("P:" + current.getOrgId() + ":");
+		// groups.add("U:" + current.getId());
+		// groups.add("P:" + current.getOrgId() + ":");
 		return groups;
 	}
 

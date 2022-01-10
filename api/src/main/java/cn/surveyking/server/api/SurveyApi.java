@@ -3,10 +3,12 @@ package cn.surveyking.server.api;
 import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.*;
+import cn.surveyking.server.flow.constant.FlowApprovalType;
+import cn.surveyking.server.flow.domain.dto.ApprovalTaskRequest;
+import cn.surveyking.server.flow.service.FlowService;
 import cn.surveyking.server.service.AnswerService;
 import cn.surveyking.server.service.FileService;
 import cn.surveyking.server.service.SurveyService;
-import cn.surveyking.server.workflow.service.WorkflowService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
@@ -35,12 +37,12 @@ public class SurveyApi {
 
 	private final FileService fileService;
 
-	private final WorkflowService workflowService;
+	private final FlowService flowService;
 
 	@GetMapping("/loadProject")
 	public PublicProjectView loadProject(ProjectQuery query) {
 		PublicProjectView projectView = surveyService.loadProject(query);
-		SurveySchemaType schema = workflowService.beforeLaunchProcess(SecurityContextUtils.getUserId(),
+		SurveySchema schema = flowService.beforeLaunchProcess(SecurityContextUtils.getUserId(),
 				projectView.getSurvey());
 		projectView.setSurvey(schema);
 		return projectView;
@@ -49,7 +51,7 @@ public class SurveyApi {
 	@PostMapping("/verifyPassword")
 	public PublicProjectView verifyPassword(@RequestBody ProjectQuery query) {
 		PublicProjectView projectView = surveyService.verifyPassword(query);
-		SurveySchemaType schema = workflowService.beforeLaunchProcess(SecurityContextUtils.getUserId(),
+		SurveySchema schema = flowService.beforeLaunchProcess(SecurityContextUtils.getUserId(),
 				projectView.getSurvey());
 		projectView.setSurvey(schema);
 		return projectView;
@@ -58,7 +60,11 @@ public class SurveyApi {
 	@PostMapping("/saveAnswer")
 	public void saveAnswer(@RequestBody AnswerRequest answer, HttpServletRequest request) {
 		String answerId = answerService.saveAnswer(answer, request);
-		workflowService.launchProcess(answer.getShortId(), answerId);
+		ApprovalTaskRequest approvalTaskRequest = new ApprovalTaskRequest();
+		approvalTaskRequest.setType(FlowApprovalType.SAVE);
+		approvalTaskRequest.setAnswerId(answerId);
+		approvalTaskRequest.setProjectId(answer.getProjectId());
+		flowService.approvalTask(approvalTaskRequest);
 	}
 
 	@PostMapping("/upload")

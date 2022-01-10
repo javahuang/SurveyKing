@@ -1,7 +1,7 @@
 package cn.surveyking.server.domain.model;
 
 import cn.surveyking.server.core.model.BaseModel;
-import cn.surveyking.server.domain.dto.SurveySchemaType;
+import cn.surveyking.server.domain.dto.SurveySchema;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -29,13 +29,13 @@ public class Template extends BaseModel {
 	/**
 	 * 问题类型
 	 */
-	private SurveySchemaType.QuestionType questionType;
+	private SurveySchema.QuestionType questionType;
 
 	/**
 	 * 问题模板
 	 */
 	@TableField(typeHandler = JacksonTypeHandler.class, jdbcType = JdbcType.LONGVARCHAR)
-	private SurveySchemaType template;
+	private SurveySchema template;
 
 	/**
 	 * 标签

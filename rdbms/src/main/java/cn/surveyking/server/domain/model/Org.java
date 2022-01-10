@@ -35,4 +35,5 @@ public class Org extends BaseModel {
 	private String status;
 
 	private String remark;
+
 }

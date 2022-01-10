@@ -1,0 +1,33 @@
+plugins {
+    id 'java'
+}
+
+group 'cn.surveyking'
+version 'v0.2.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+
+    implementation 'com.baomidou:mybatis-plus-boot-starter:3.5.0'
+
+    implementation('org.flowable:flowable-spring-boot-starter:6.7.0'){
+        exclude group: 'org.flowable', module: 'flowable-cmmn-spring-configurator'
+        exclude group: 'org.flowable', module: 'flowable-spring-boot-starter-cmmn'
+        exclude group: 'org.flowable', module: 'flowable-spring-boot-starter-dmn'
+        exclude group: 'org.flowable', module: 'flowable-dmn-spring-configurator'
+        exclude group: 'org.flowable', module: 'flowable-form-spring-configurator'
+        exclude group: 'org.flowable', module: 'flowable-idm-spring-configurator'
+    }
+    implementation 'mysql:mysql-connector-java:8.0.26'
+    implementation project(':shared')
+    implementation project(':rdbms')
+}
+
+test {
+    useJUnitPlatform()
+}

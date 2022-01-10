@@ -22,4 +22,5 @@ public interface OrgService {
 	void deleteOrg(String id);
 
 	void sortOrg(OrgSortRequest request);
+
 }

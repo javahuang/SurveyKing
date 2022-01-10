@@ -17,7 +17,7 @@ public class TemplateView {
 
 	private String questionType;
 
-	private SurveySchemaType template;
+	private SurveySchema template;
 
 	private String category;
 

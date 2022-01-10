@@ -24,6 +24,7 @@ repositories {
 dependencies {
     implementation project(':shared')
     implementation project(':rdbms')
+    implementation project(':flow')
 }
 
 test {

@@ -17,7 +17,7 @@ public class TemplateQuery extends PageQuery {
 	/**
 	 * 如果为空则查询普通的题型
 	 */
-	SurveySchemaType.QuestionType questionType;
+	SurveySchema.QuestionType questionType;
 
 	private String name;
 

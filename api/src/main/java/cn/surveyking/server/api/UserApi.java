@@ -53,7 +53,7 @@ public class UserApi {
 	@GetMapping("/currentUser")
 	@PreAuthorize("isAuthenticated()")
 	public UserInfo currentUser() {
-		return userService.currentUser(SecurityContextUtils.getUserId());
+		return userService.loadUserById(SecurityContextUtils.getUserId());
 	}
 
 }

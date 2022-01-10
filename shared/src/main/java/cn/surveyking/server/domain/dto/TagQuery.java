@@ -16,6 +16,6 @@ public class TagQuery {
 	 */
 	private Integer shared = 1;
 
-	SurveySchemaType.QuestionType questionType = SurveySchemaType.QuestionType.Survey;
+	SurveySchema.QuestionType questionType = SurveySchema.QuestionType.Survey;
 
 }

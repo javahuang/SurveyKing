@@ -10,7 +10,7 @@ import java.util.List;
  * @date 2021/8/10
  */
 @Data
-public class SurveySchemaType implements Cloneable {
+public class SurveySchema implements Cloneable {
 
 	private String id;
 
@@ -24,7 +24,7 @@ public class SurveySchemaType implements Cloneable {
 
 	private List<DataSource> dataSource;
 
-	private List<SurveySchemaType> children;
+	private List<SurveySchema> children;
 
 	private List<Row> row;
 
@@ -171,7 +171,7 @@ public class SurveySchemaType implements Cloneable {
 		}
 		catch (CloneNotSupportedException e) {
 			e.printStackTrace();
-			return new SurveySchemaType();
+			return new SurveySchema();
 		}
 	}
 

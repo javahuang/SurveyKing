@@ -13,7 +13,7 @@ import java.util.Date;
 @Data
 public class PublicProjectView {
 
-	private SurveySchemaType survey;
+	private SurveySchema survey;
 
 	private Integer status;
 

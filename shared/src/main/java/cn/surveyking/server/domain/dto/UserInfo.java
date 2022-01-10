@@ -25,10 +25,10 @@ public class UserInfo implements UserDetails, Serializable {
 	/** 用户名 */
 	private String name;
 
+	private Boolean enabled;
+
 	@JsonIgnore
 	private Integer status;
-
-	private Boolean enabled;
 
 	/** 登录账号 */
 	@JsonIgnore
@@ -88,7 +88,18 @@ public class UserInfo implements UserDetails, Serializable {
 	}
 
 	public List<String> getAuthorityList() {
+		if (this.authorities == null) {
+			return null;
+		}
 		return this.authorities.stream().map(x -> x.getAuthority()).collect(Collectors.toList());
+	}
+
+	public UserInfo simpleMode() {
+		UserInfo userInfo = new UserInfo();
+		userInfo.setUserId(this.getUserId());
+		userInfo.setName(this.getName());
+		userInfo.setAuthorityList(null);
+		return userInfo;
 	}
 
 }

@@ -15,7 +15,7 @@ import java.util.Set;
  */
 public interface UserService extends UserDetailsService {
 
-	UserInfo currentUser(String userId);
+	UserInfo loadUserById(String userId);
 
 	PaginationResponse<UserView> getUsers(UserQuery query);
 

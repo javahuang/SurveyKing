@@ -17,7 +17,7 @@ public class ProjectView {
 
 	private Integer status;
 
-	private SurveySchemaType survey;
+	private SurveySchema survey;
 
 	private ProjectSetting setting;
 

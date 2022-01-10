@@ -1,7 +1,7 @@
 package cn.surveyking.server.core.uitls;
 
 import cn.surveyking.server.domain.dto.AnswerView;
-import cn.surveyking.server.domain.dto.SurveySchemaType;
+import cn.surveyking.server.domain.dto.SurveySchema;
 
 import java.text.Format;
 import java.text.SimpleDateFormat;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  */
 public class SchemaParser {
 
-	public static List<String> parseColumns(List<SurveySchemaType> schemaDataTypes) {
+	public static List<String> parseColumns(List<SurveySchema> schemaDataTypes) {
 		List<String> result = new ArrayList<>();
 		result.add("序号");
 		schemaDataTypes.forEach(schemaType -> {
@@ -39,10 +39,10 @@ public class SchemaParser {
 	 * @param schema
 	 * @return 有数据
 	 */
-	public static List<SurveySchemaType> parseDataTypes(SurveySchemaType schema) {
-		List<SurveySchemaType> dataTypes = new ArrayList<>();
-		if (SurveySchemaType.QuestionType.dataType().contains(schema.getType())) {
-			SurveySchemaType dataType = (SurveySchemaType) schema.clone();
+	public static List<SurveySchema> parseDataTypes(SurveySchema schema) {
+		List<SurveySchema> dataTypes = new ArrayList<>();
+		if (SurveySchema.QuestionType.dataType().contains(schema.getType())) {
+			SurveySchema dataType = (SurveySchema) schema.clone();
 			dataType.setTitle(trimHtmlTag(schema.getTitle()));
 			dataTypes.add(dataType);
 		}
@@ -55,21 +55,21 @@ public class SchemaParser {
 		return dataTypes;
 	}
 
-	public static List<Object> parseRowData(AnswerView answerInfo, List<SurveySchemaType> dataTypes, int index) {
+	public static List<Object> parseRowData(AnswerView answerInfo, List<SurveySchema> dataTypes, int index) {
 		LinkedHashMap answer = answerInfo.getAnswer();
 		List<Object> rowData = new ArrayList<>();
 		rowData.add(index);
 		// 转换答案
-		for (SurveySchemaType schemaType : dataTypes) {
+		for (SurveySchema schemaType : dataTypes) {
 			String questionId = schemaType.getId();
-			SurveySchemaType.QuestionType questionType = schemaType.getType();
+			SurveySchema.QuestionType questionType = schemaType.getType();
 			Object valueObj = answer.get(questionId);
 
 			if (valueObj == null) {
 				rowData.add(null);
 				continue;
 			}
-			if (questionType == SurveySchemaType.QuestionType.Upload) {
+			if (questionType == SurveySchema.QuestionType.Upload) {
 				Map mapValue = (Map) valueObj;
 				rowData.add(mapValue.values().stream().map((x) -> {
 					List<String> fileIds = (List<String>) x;

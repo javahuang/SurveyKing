@@ -15,7 +15,7 @@ public class AnswerQuery extends PageQuery {
 
 	private String id;
 
-	private String shortId;
+	private String projectId;
 
 	private List<String> ids;
 

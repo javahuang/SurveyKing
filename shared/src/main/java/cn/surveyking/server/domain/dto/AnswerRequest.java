@@ -14,7 +14,7 @@ public class AnswerRequest {
 
 	private String id;
 
-	private String shortId;
+	private String projectId;
 
 	private LinkedHashMap answer;
 
@@ -26,25 +26,5 @@ public class AnswerRequest {
 	 * 0 暂存 1 已完成
 	 */
 	private Integer tempSave;
-
-	@Data
-	public static class Attachment {
-
-		/**
-		 * 附件id
-		 */
-		private String id;
-
-		/**
-		 * 附件原始名字
-		 */
-		private String originalName;
-
-		/**
-		 * 内容类型
-		 */
-		private String contentType;
-
-	}
 
 }

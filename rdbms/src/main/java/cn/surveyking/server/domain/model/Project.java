@@ -2,7 +2,7 @@ package cn.surveyking.server.domain.model;
 
 import cn.surveyking.server.core.model.BaseModel;
 import cn.surveyking.server.domain.dto.ProjectSetting;
-import cn.surveyking.server.domain.dto.SurveySchemaType;
+import cn.surveyking.server.domain.dto.SurveySchema;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -25,7 +25,7 @@ public class Project extends BaseModel {
 	private String name;
 
 	@TableField(typeHandler = JacksonTypeHandler.class, jdbcType = JdbcType.LONGVARCHAR)
-	private SurveySchemaType survey;
+	private SurveySchema survey;
 
 	@TableField(typeHandler = JacksonTypeHandler.class, jdbcType = JdbcType.LONGNVARCHAR)
 	private ProjectSetting setting;

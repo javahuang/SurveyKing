@@ -19,12 +19,12 @@ public class TemplateRequest {
 	/**
 	 * 问题类型
 	 */
-	private SurveySchemaType.QuestionType questionType;
+	private SurveySchema.QuestionType questionType;
 
 	/**
 	 * 问题模板
 	 */
-	private SurveySchemaType template;
+	private SurveySchema template;
 
 	/**
 	 * 标签

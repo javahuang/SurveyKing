@@ -41,7 +41,7 @@ public class TemplateServiceImpl extends BaseService<TemplateMapper, Template> i
 				.like(isNotEmpty(query.getName()), Template::getName, query.getName())
 				.eq(query.getQuestionType() != null, Template::getQuestionType, query.getQuestionType())
 				// 默认查询额是普通题型
-				.ne(query.getQuestionType() == null, Template::getQuestionType, SurveySchemaType.QuestionType.Survey)
+				.ne(query.getQuestionType() == null, Template::getQuestionType, SurveySchema.QuestionType.Survey)
 				.in(query.getCategories().size() > 0, Template::getCategory, query.getCategories())
 				.eq(Template::getShared, query.getShared())
 				.eq(query.getShared() == 0, Template::getCreateBy, SecurityContextUtils.getUserId())

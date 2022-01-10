@@ -22,10 +22,6 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.List;
-
 import static com.baomidou.mybatisplus.core.toolkit.StringUtils.isNotBlank;
 
 /**
@@ -56,30 +52,32 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 	}
 
 	public ProjectView getProject(ProjectQuery query) {
-		ProjectView result = projectViewMapper.toProjectView(getById(query.getId()));
-		List<Answer> answers = answerMapper
-				.selectList(Wrappers.<Answer>lambdaQuery().eq(Answer::getProjectId, query.getId())
-						.select(Answer::getMetaInfo, Answer::getCreateAt).orderByDesc(Answer::getCreateAt));
-		result.setTotal((long) answers.size());
-		long totalDuration = 0;
-		int totalOfToday = 0;
-		for (int i = 0; i < answers.size(); i++) {
-			Answer current = answers.get(i);
-			if (i == 0) {
-				result.setLastUpdate(current.getCreateAt().getTime());
-			}
-			if (current.getCreateAt().getTime() > LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()
-					.toEpochMilli()) {
-				totalOfToday++;
-			}
-			totalDuration += current.getMetaInfo().getAnswerInfo().getEndTime()
-					- current.getMetaInfo().getAnswerInfo().getStartTime();
-		}
-		if (totalDuration > 0) {
-			result.setAverageDuration(totalDuration / answers.size());
-			result.setTotalOfToday(totalOfToday);
-		}
-		return result;
+		return projectViewMapper.toProjectView(getById(query.getId()));
+		// List<Answer> answers = answerMapper
+		// .selectList(Wrappers.<Answer>lambdaQuery().eq(Answer::getProjectId,
+		// query.getId())
+		// .select(Answer::getMetaInfo,
+		// Answer::getCreateAt).orderByDesc(Answer::getCreateAt));
+		// result.setTotal((long) answers.size());
+		// long totalDuration = 0;
+		// int totalOfToday = 0;
+		// for (int i = 0; i < answers.size(); i++) {
+		// Answer current = answers.get(i);
+		// if (i == 0) {
+		// result.setLastUpdate(current.getCreateAt().getTime());
+		// }
+		// if (current.getCreateAt().getTime() >
+		// LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()
+		// .toEpochMilli()) {
+		// totalOfToday++;
+		// }
+		// totalDuration += current.getMetaInfo().getAnswerInfo().getEndTime()
+		// - current.getMetaInfo().getAnswerInfo().getStartTime();
+		// }
+		// if (totalDuration > 0) {
+		// result.setAverageDuration(totalDuration / answers.size());
+		// result.setTotalOfToday(totalOfToday);
+		// }
 	}
 
 	@Override

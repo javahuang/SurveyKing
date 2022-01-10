@@ -53,8 +53,11 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	@Override
 	public PaginationResponse<AnswerView> listAnswer(AnswerQuery query) {
 		Page<Answer> page = new Page<>(query.getCurrent(), query.getPageSize());
-		super.page(page, Wrappers.<Answer>lambdaQuery().eq(Answer::getProjectId, query.getShortId())
-				.in(query.getIds() != null, Answer::getId, query.getIds()).orderByDesc(Answer::getCreateAt));
+		super.page(page,
+				Wrappers.<Answer>lambdaQuery()
+						.eq(query.getProjectId() != null, Answer::getProjectId, query.getProjectId())
+						.in(query.getIds() != null && query.getIds().size() > 0, Answer::getId, query.getIds())
+						.orderByDesc(Answer::getCreateAt));
 		List<AnswerView> list = answerViewMapper.toAnswerView(page.getRecords());
 		return new PaginationResponse<>(page.getTotal(), list);
 	}
@@ -63,7 +66,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	public AnswerView getAnswer(AnswerQuery query) {
 		QueryWrapper<Answer> wrapper = new QueryWrapper<>();
 		wrapper.eq("id", query.getId());
-		return answerViewMapper.toAnswerView(super.getOne(wrapper));
+		return answerViewMapper.toAnswerView(super.getOne(wrapper, false));
 	}
 
 	@Override
@@ -89,7 +92,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	public DownloadData downloadSurvey(String id) {
 		Project project = projectMapper.selectById(id);
 
-		List<SurveySchemaType> schemaDataTypes = SchemaParser.parseDataTypes(project.getSurvey());
+		List<SurveySchema> schemaDataTypes = SchemaParser.parseDataTypes(project.getSurvey());
 		List<Answer> answers = list(
 				Wrappers.<Answer>lambdaQuery().select(Answer::getId, Answer::getAnswer, Answer::getMetaInfo,
 						Answer::getAttachment, Answer::getCreateAt, Answer::getCreateBy).eq(Answer::getProjectId, id));
@@ -159,10 +162,10 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
 	private DownloadData generateSurveyAttachment(Answer answer) {
 		DownloadData downloadData = new DownloadData();
-		List<Answer.Attachment> attachments = answer.getAttachment();
+		List<Attachment> attachments = answer.getAttachment();
 		// 如果只有一个附件，则直接返回附件的结果
 		if (attachments.size() == 1) {
-			Answer.Attachment attachment = attachments.get(0);
+			Attachment attachment = attachments.get(0);
 			downloadData.setFileName(attachment.getOriginalName());
 			downloadData.setResource(fileService.loadAsResource(attachment.getId()));
 		}

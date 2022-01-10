@@ -1,7 +1,7 @@
 package cn.surveyking.server.domain.handler;
 
 import cn.surveyking.server.core.mybatis.ListTypeHandler;
-import cn.surveyking.server.domain.model.Answer;
+import cn.surveyking.server.domain.dto.Attachment;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.io.IOException;
@@ -11,9 +11,9 @@ import java.util.List;
  * @author javahuang
  * @date 2021/9/17
  */
-public class AttachmentListTypeHandler extends ListTypeHandler<List<Answer.Attachment>> {
+public class AttachmentListTypeHandler extends ListTypeHandler<List<Attachment>> {
 
-	private TypeReference typeReference = new TypeReference<List<Answer.Attachment>>() {
+	private TypeReference typeReference = new TypeReference<List<Attachment>>() {
 	};
 
 	/**

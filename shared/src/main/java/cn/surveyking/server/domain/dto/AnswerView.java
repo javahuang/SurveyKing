@@ -15,9 +15,7 @@ public class AnswerView {
 
 	private String id;
 
-	private String shortId;
-
-	private String surveyId;
+	private String projectId;
 
 	private LinkedHashMap<String, Object> answer;
 
@@ -37,25 +35,5 @@ public class AnswerView {
 	private Date updateAt;
 
 	private String updateBy;
-
-	@Data
-	public static class Attachment {
-
-		/**
-		 * 附件id
-		 */
-		private String id;
-
-		/**
-		 * 附件原始名字
-		 */
-		private String originalName;
-
-		/**
-		 * 内容类型
-		 */
-		private String contentType;
-
-	}
 
 }

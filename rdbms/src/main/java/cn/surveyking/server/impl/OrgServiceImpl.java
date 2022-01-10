@@ -41,7 +41,7 @@ public class OrgServiceImpl extends BaseService<OrgMapper, Org> implements OrgSe
 		result.forEach(orgView -> {
 			String managerId = orgView.getManagerId();
 			if (isNotBlank(managerId)) {
-				orgView.setManagerName(userService.currentUser(managerId).getName());
+				orgView.setManagerName(userService.loadUserById(managerId).getName());
 			}
 		});
 		return result;

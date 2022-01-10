@@ -13,7 +13,7 @@ public class ProjectRequest {
 
 	private String name;
 
-	private SurveySchemaType survey;
+	private SurveySchema survey;
 
 	private ProjectSetting setting;
 
