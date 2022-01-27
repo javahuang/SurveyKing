@@ -6,20 +6,24 @@ import cn.surveyking.server.domain.dto.AnswerRequest;
 import cn.surveyking.server.domain.dto.AnswerView;
 import cn.surveyking.server.flow.constant.FieldPermissionType;
 import cn.surveyking.server.flow.constant.FlowApprovalType;
+import cn.surveyking.server.flow.constant.FlowConstant;
 import cn.surveyking.server.flow.constant.FlowTaskType;
 import cn.surveyking.server.flow.domain.dto.ApprovalTaskRequest;
+import cn.surveyking.server.flow.domain.dto.UpdateFlowOperationUserRequest;
+import cn.surveyking.server.flow.domain.model.FlowEntry;
 import cn.surveyking.server.flow.domain.model.FlowEntryNode;
 import cn.surveyking.server.flow.domain.model.FlowOperation;
-import cn.surveyking.server.flow.domain.model.FlowOperationIdentitylink;
-import cn.surveyking.server.flow.service.FlowEntryNodeService;
-import cn.surveyking.server.flow.service.FlowInstanceService;
-import cn.surveyking.server.flow.service.FlowOperationIdentitylinkService;
-import cn.surveyking.server.flow.service.FlowOperationService;
+import cn.surveyking.server.flow.domain.model.FlowOperationUser;
+import cn.surveyking.server.flow.mapper.FlowOperationMapper;
+import cn.surveyking.server.flow.service.*;
 import cn.surveyking.server.service.AnswerService;
 import cn.surveyking.server.service.UserService;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.Data;
+import org.flowable.bpmn.model.BpmnModel;
+import org.flowable.bpmn.model.StartEvent;
 import org.flowable.engine.HistoryService;
+import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
 import org.flowable.engine.history.HistoricActivityInstance;
@@ -56,13 +60,19 @@ public abstract class AbstractTaskHandler implements TaskHandler {
 	protected FlowEntryNodeService entryNodeService;
 
 	@Autowired
+	protected FlowEntryService entryService;
+
+	@Autowired
 	protected FlowOperationService flowOperationService;
 
 	@Autowired
 	private HistoryService historyService;
 
 	@Autowired
-	protected FlowOperationIdentitylinkService flowOperationIdentitylinkService;
+	protected FlowOperationUserService flowOperationUserService;
+
+	@Autowired
+	protected RepositoryService repositoryService;
 
 	public abstract void innerProcess(ApprovalTaskRequest request);
 
@@ -102,10 +112,7 @@ public abstract class AbstractTaskHandler implements TaskHandler {
 		if (request.getAnswer() == null) {
 			return;
 		}
-		FlowEntryNode flowElement = entryNodeService
-				.getOne(Wrappers.<FlowEntryNode>lambdaQuery().eq(FlowEntryNode::getActivityId, request.getActivityId())
-						.eq(FlowEntryNode::getProjectId, request.getProjectId()));
-
+		FlowEntryNode flowElement = entryNodeService.getById(request.getActivityId());
 		AnswerQuery answerQuery = new AnswerQuery();
 		answerQuery.setId(request.getAnswerId());
 		AnswerView answerView = answerService.getAnswer(answerQuery);
@@ -119,28 +126,47 @@ public abstract class AbstractTaskHandler implements TaskHandler {
 	}
 
 	private void saveOperation(ApprovalTaskRequest request) {
+		// 更新审批记录为历史审批记录，目的是只有最新操作记录的对应的人才能进行撤回操作
+		FlowOperationMapper flowOperationMapper = (FlowOperationMapper) flowOperationService.getBaseMapper();
+		flowOperationMapper.updateOperationLatest(request.getProcessInstanceId());
+
+		// 添加新的操作记录
 		FlowOperation operation = new FlowOperation();
+		operation.setAnswerId(request.getAnswerId());
 		operation.setAnswer(request.getAnswer());
 		operation.setComment(request.getComment());
 		operation.setApprovalType(request.getType());
 		operation.setTaskType(FlowTaskType.userTask);
-		operation.setCreateAt(new Date());
+		operation.setTaskId(request.getTaskId());
 		operation.setProjectId(request.getProjectId());
-		operation.setProcessInstanceId(request.getProcessInstanceId());
-
+		operation.setActivityId(request.getActivityId());
+		operation.setNewActivityId(request.getNewActivityId());
+		operation.setInstanceId(request.getProcessInstanceId());
+		operation.setCreateAt(new Date());
 		operation.setCreateBy(SecurityContextUtils.getUserId());
+		operation.setLatest(true);
 		flowOperationService.save(operation);
-		saveOperationIdentityLink(operation);
+
+		// 更新操作人历史
+		// 如果一个人参与了多个流程节点，只显示最近参与的流程节点
+		UpdateFlowOperationUserRequest updateFlowOperationUserRequest = new UpdateFlowOperationUserRequest();
+		updateFlowOperationUserRequest.setTaskType(FlowTaskType.userTask);
+		updateFlowOperationUserRequest.setUserId(SecurityContextUtils.getUserId());
+		updateFlowOperationUserRequest.setInstanceId(request.getProcessInstanceId());
+		flowOperationMapper.updateOperationUserLatest(updateFlowOperationUserRequest);
+		// 更新操作人为最新的操作人
+		saveOperationUser(operation);
 	}
 
-	private void saveOperationIdentityLink(FlowOperation operation) {
-		FlowOperationIdentitylink link = new FlowOperationIdentitylink();
-		link.setCreateAt(new Date());
+	private void saveOperationUser(FlowOperation operation) {
+		FlowOperationUser user = new FlowOperationUser();
+		user.setLatest(true);
 		String userId = SecurityContextUtils.getUserId();
-		link.setCreateBy(userId);
-		link.setOperationId(operation.getId());
-		link.setUserId(userId);
-		flowOperationIdentitylinkService.save(link);
+		user.setUserId(userId);
+		user.setOperationId(operation.getId());
+		user.setCreateAt(new Date());
+		user.setCreateBy(userId);
+		flowOperationUserService.save(user);
 	}
 
 	protected Task getCurrentRunningTask(String taskId) {
@@ -157,33 +183,63 @@ public abstract class AbstractTaskHandler implements TaskHandler {
 
 	protected List<FlowOperation> getOperations(String processInstanceId) {
 		return flowOperationService
-				.list(Wrappers.<FlowOperation>lambdaQuery().eq(FlowOperation::getProcessInstanceId, processInstanceId)
+				.list(Wrappers.<FlowOperation>lambdaQuery().eq(FlowOperation::getInstanceId, processInstanceId)
 						.eq(FlowOperation::getTaskType, FlowTaskType.userTask).orderByDesc(FlowOperation::getCreateAt));
 	}
 
+	private StartEvent getStartNode(String projectId) {
+		FlowEntry flowEntry = entryService
+				.getOne(Wrappers.<FlowEntry>lambdaQuery().eq(FlowEntry::getProjectId, projectId));
+		BpmnModel bpmnModel = repositoryService.getBpmnModel(flowEntry.getProcessDefinitionId());
+		org.flowable.bpmn.model.Process process = bpmnModel.getProcesses().get(0);
+		List<StartEvent> startEvents = process.findFlowElementsOfType(StartEvent.class);
+		return startEvents.get(0);
+	}
+
+	protected boolean rollbackToStartEvent(ApprovalTaskRequest request) {
+		if (!request.getNewActivityId().equals(request.getProjectId())) {
+			return false;
+		}
+		// StartEvent event = getStartNode(request.getProjectId());
+		String starterActivityId = FlowConstant.STARTER_ACTIVITY_ID;
+		String currentActivityId = getProcessInstanceActiveTaskList(request.getProcessInstanceId()).get(0)
+				.getTaskDefinitionKey();
+		request.setNewActivityId(starterActivityId);
+		// runtimeService.createChangeActivityStateBuilder().processInstanceId(request.getProcessInstanceId())
+		// .moveActivityIdTo(currentActivityId, starterActivityId);
+		// 回滚至开始节点之后，任务自动流程到了下一节点，所以需要暂停任务
+		runtimeService.suspendProcessInstanceById(request.getProcessInstanceId());
+		return true;
+	}
+
+	/**
+	 * 将任务流转记录转换成一棵节点树
+	 * @param processInstanceId 任务实例 ID
+	 * @return 最后一个操作节点
+	 */
 	protected TaskTreeNode getHistoricTree(String processInstanceId) {
 		List<String> approvalTypes = new ArrayList<>();
 		approvalTypes.add(FlowApprovalType.SAVE);
 		approvalTypes.add(FlowApprovalType.AGREE);
-		approvalTypes.add(FlowApprovalType.REJECT);
-		approvalTypes.add(FlowApprovalType.REVOKE);
+		approvalTypes.add(FlowApprovalType.ROLLBACK);
+		approvalTypes.add(FlowApprovalType.REVERT);
 		List<FlowOperation> operations = flowOperationService
-				.list(Wrappers.<FlowOperation>lambdaQuery().eq(FlowOperation::getProcessInstanceId, processInstanceId)
+				.list(Wrappers.<FlowOperation>lambdaQuery().eq(FlowOperation::getInstanceId, processInstanceId)
 						.in(FlowOperation::getApprovalType, approvalTypes).orderByAsc(FlowOperation::getCreateAt));
 		TaskTreeNode rootNode = null, lastNode = null;
-		TaskTreeNode result = null;
 		for (int i = 0; i < operations.size(); i++) {
 			FlowOperation operation = operations.get(i);
 			TaskTreeNode currNode = new TaskTreeNode();
 			currNode.setId(operation.getId());
-			currNode.setTaskDefKey(operation.getActivityId());
+			currNode.setActivityId(operation.getActivityId());
 
 			if (i == 0) {
 				rootNode = currNode;
 				lastNode = currNode;
 				continue;
 			}
-			if (lastNode.getTaskDefKey().equals(currNode.getTaskDefKey())) {
+			if (lastNode != null && lastNode.getActivityId() != null
+					&& lastNode.getActivityId().equals(currNode.getActivityId())) {
 				continue;
 			}
 			if (FlowApprovalType.SAVE.equals(operation.getApprovalType())) {
@@ -193,15 +249,15 @@ public abstract class AbstractTaskHandler implements TaskHandler {
 			else if (FlowApprovalType.AGREE.equals(operation.getApprovalType())) {
 				currNode.setParent(lastNode);
 				if (lastNode.getChildren().stream()
-						.noneMatch(node -> node.getTaskDefKey().equals(currNode.getTaskDefKey()))) {
+						.noneMatch(node -> node.getActivityId().equals(currNode.getActivityId()))) {
 					lastNode.getChildren().add(currNode);
 				}
 			}
-			else if (FlowApprovalType.REJECT.equals(operation.getApprovalType())) {
-				lastNode = lastNode.findParentByKey(operation.getActivityId());
+			else if (FlowApprovalType.ROLLBACK.equals(operation.getApprovalType())) {
+				lastNode = lastNode.findParentByKey(operation.getNewActivityId());
 				continue;
 			}
-			else if (FlowApprovalType.REVOKE.equals(operation.getApprovalType())) {
+			else if (FlowApprovalType.REVERT.equals(operation.getApprovalType())) {
 				// 撤回节点的 taskDefKey 和已完成节点是一致的
 			}
 			lastNode = currNode;
@@ -211,24 +267,29 @@ public abstract class AbstractTaskHandler implements TaskHandler {
 	}
 
 	@Data
-	protected static class TaskTreeNode {
+	public static class TaskTreeNode {
 
 		private String id;
 
-		private String taskDefKey;
+		private String activityId;
 
 		private TaskTreeNode parent;
 
 		private List<TaskTreeNode> children = new ArrayList<>();
 
 		public TaskTreeNode findParentByKey(String key) {
+			if (this.getActivityId().equals(key)) {
+				return this;
+			}
 			if (this.parent == null) {
 				return null;
 			}
-			if (this.getTaskDefKey().equals(key)) {
-				return this;
-			}
 			return this.parent.findParentByKey(key);
+		}
+
+		@Override
+		public String toString() {
+			return "TaskTreeNode{" + "id='" + id + '\'' + ", activityId='" + activityId + '\'' + '}';
 		}
 
 	}

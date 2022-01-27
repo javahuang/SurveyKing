@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 
 /**
- * 流程节点
+ * 已发布的流程节点
  *
  * @TableName t_flow_entry_node
  */
@@ -37,12 +37,6 @@ public class FlowEntryNode implements Serializable {
 	 */
 	@TableField(value = "project_id")
 	private String projectId;
-
-	/**
-	 * 任务对应的xml节点id
-	 */
-	@TableField(value = "activity_id")
-	private String activityId;
 
 	/**
 	 * 流程节点类型

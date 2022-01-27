@@ -4,6 +4,8 @@ import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.domain.dto.SurveySchema;
 import cn.surveyking.server.flow.domain.dto.*;
 
+import java.util.List;
+
 /**
  * @author javahuang
  * @date 2022/1/5
@@ -56,5 +58,19 @@ public interface FlowService {
 	 * @return
 	 */
 	SurveySchema loadSchemaByPermission(SchemaQuery query);
+
+	/**
+	 * 获取当前流程实例的审核记录
+	 * @param processInstanceId
+	 * @return
+	 */
+	List<FlowOperationView> getAuditRecord(String processInstanceId);
+
+	/**
+	 * 获取可以回退的任务节点
+	 * @param processInstanceId
+	 * @return
+	 */
+	List<RevokeView> getRevertNodes(String processInstanceId);
 
 }

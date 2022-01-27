@@ -20,7 +20,12 @@ public class FlowTaskView {
 	private String projectId;
 
 	/** 任务状态 */
-	private String taskStatus;
+	private Integer status;
+
+	private String approvalStage;
+
+	/** 审批类型 */
+	private String approvalType;
 
 	/** 任务定义 key */
 	private String activityId;
@@ -35,6 +40,14 @@ public class FlowTaskView {
 	private String processInstanceId;
 
 	private String answerId;
+
+	/**
+	 * 字段权限
+	 */
+	LinkedHashMap<String, Integer> fieldPermission;
+
+	/** 当前实例最新的操作记录 */
+	private Boolean latest;
 
 	private LinkedHashMap<String, Object> answer;
 

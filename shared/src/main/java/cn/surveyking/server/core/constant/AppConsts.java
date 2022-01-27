@@ -7,6 +7,33 @@ package cn.surveyking.server.core.constant;
 public class AppConsts {
 
 	/**
+	 * 支持的图片类型
+	 */
+	public static final String[] SUPPORT_IMAGE_TYPE = { "JPG", "JPEG", "PNG", "GIF", "BMP", "WBMP" };
+
+	/**
+	 * 逻辑删除列名
+	 */
+	public static final String COLUMN_IS_DELETED = "is_deleted";
+
+	public static final String ROLE_ADMIN = "ROLE_admin";
+
+	/**
+	 * 匿名用户 ID
+	 */
+	public static final String ANONYMOUS_USER_ID = "guest";
+
+	/**
+	 * 当前机构 ID 变量名
+	 */
+	public static final String VARIABLE_CURRENT_ORG_ID = "currentOrgId";
+
+	/**
+	 * 父机构 ID 变量名
+	 */
+	public static final String VARIABLE_PARENT_ORG_ID = "parentOrgId";
+
+	/**
 	 * 存储的文件类型
 	 */
 	public enum StorageType {
@@ -31,18 +58,6 @@ public class AppConsts {
 		}
 
 	}
-
-	/**
-	 * 支持的图片类型
-	 */
-	public static final String[] SUPPORT_IMAGE_TYPE = { "JPG", "JPEG", "PNG", "GIF", "BMP", "WBMP" };
-
-	/**
-	 * 逻辑删除列名
-	 */
-	public static final String COLUMN_IS_DELETED = "is_deleted";
-
-	public static final String ROLE_ADMIN = "ROLE_admin";
 
 	/**
 	 * 字典编码 - 权限类型

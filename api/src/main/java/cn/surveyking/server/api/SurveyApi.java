@@ -64,6 +64,7 @@ public class SurveyApi {
 		approvalTaskRequest.setType(FlowApprovalType.SAVE);
 		approvalTaskRequest.setAnswerId(answerId);
 		approvalTaskRequest.setProjectId(answer.getProjectId());
+		approvalTaskRequest.setActivityId(answer.getProjectId());
 		flowService.approvalTask(approvalTaskRequest);
 	}
 

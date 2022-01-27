@@ -14,13 +14,13 @@ public class SecurityContextUtils {
 	public static UserInfo getUser() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (authentication == null) {
-			return new UserInfo("guest");
+			return new UserInfo(AppConsts.ANONYMOUS_USER_ID);
 		}
 		Object principal = authentication.getPrincipal();
 		if (principal instanceof UserInfo) {
 			return (UserInfo) principal;
 		}
-		return new UserInfo("guest");
+		return new UserInfo(AppConsts.ANONYMOUS_USER_ID);
 	}
 
 	public static String getUsername() {

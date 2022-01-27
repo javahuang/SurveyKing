@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.Data;
-import org.apache.ibatis.type.JdbcType;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -27,28 +26,40 @@ public class FlowOperation implements Serializable {
 	private String id;
 
 	/**
-	 * 项目ID
+	 * 流程实例Id
+	 */
+	@TableField(value = "instance_id")
+	private String instanceId;
+
+	/**
+	 * 项目Id
 	 */
 	@TableField(value = "project_id")
 	private String projectId;
 
 	/**
-	 * 流程实例Id
-	 */
-	@TableField(value = "process_instance_id")
-	private String processInstanceId;
-
-	/**
-	 * 任务对应的xml节点id
+	 * xml 节点Id
 	 */
 	@TableField(value = "activity_id")
 	private String activityId;
+
+	/**
+	 * 新的任务节点 id
+	 */
+	@TableField(value = "new_activity_id")
+	private String newActivityId;
 
 	/**
 	 * 任务Id
 	 */
 	@TableField(value = "task_id")
 	private String taskId;
+
+	/**
+	 * 当前答案ID
+	 */
+	@TableField(value = "answer_id")
+	private String answerId;
 
 	/**
 	 * 任务名称
@@ -83,8 +94,13 @@ public class FlowOperation implements Serializable {
 	/**
 	 * 当前节点答案
 	 */
-	@TableField(typeHandler = JacksonTypeHandler.class, jdbcType = JdbcType.LONGVARCHAR)
-	private LinkedHashMap answer;
+	@TableField(typeHandler = JacksonTypeHandler.class, value = "answer")
+	private LinkedHashMap<String, Object> answer;
+
+	/**
+	 * 是否是最新的一条操作记录
+	 */
+	private Boolean latest;
 
 	/**
 	 * 创建时间

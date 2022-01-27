@@ -1,5 +1,6 @@
 package cn.surveyking.server.flow.domain.model;
 
+import cn.surveyking.server.flow.domain.handler.FlowEntryNodeTypeHandler;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -7,6 +8,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 流程实体
@@ -30,10 +32,10 @@ public class FlowEntry implements Serializable {
 	private String projectId;
 
 	/**
-	 * 发布主版本ID
+	 * 流程定义 ID = processKey:version:deploymentId
 	 */
-	@TableField(value = "main_entry_publish_id")
-	private String mainEntryPublishId;
+	@TableField(value = "process_definition_id")
+	private String processDefinitionId;
 
 	/**
 	 * 部署id
@@ -46,6 +48,12 @@ public class FlowEntry implements Serializable {
 	 */
 	@TableField(value = "bpmn_xml")
 	private String bpmnXml;
+
+	/**
+	 * 临时节点
+	 */
+	@TableField(typeHandler = FlowEntryNodeTypeHandler.class, value = "nodes")
+	private List<FlowEntryNode> nodes;
 
 	/**
 	 * 流程图标

@@ -4,27 +4,24 @@ import cn.surveyking.server.core.uitls.ContextHelper;
 import cn.surveyking.server.flow.constant.FlowInstanceStatus;
 import cn.surveyking.server.flow.domain.model.FlowInstance;
 import cn.surveyking.server.flow.service.FlowInstanceService;
-import lombok.extern.slf4j.Slf4j;
 import org.flowable.common.engine.api.delegate.event.FlowableEvent;
 import org.flowable.common.engine.api.delegate.event.FlowableEventListener;
-import org.flowable.engine.delegate.event.impl.FlowableProcessEventImpl;
+import org.flowable.engine.delegate.event.impl.FlowableEntityEventImpl;
 
 /**
- * 流程实例完成之后，更新 instance 状态
- *
  * @author javahuang
- * @date 2022/1/6
+ * @date 2022/1/23
  */
-@Slf4j
-public class ProcessCompletedListener implements FlowableEventListener {
+public class ProcessSuspendedListener implements FlowableEventListener {
 
 	@Override
 	public void onEvent(FlowableEvent event) {
-		FlowableProcessEventImpl entityEvent = (FlowableProcessEventImpl) event;
+		FlowableEntityEventImpl entityEvent = (FlowableEntityEventImpl) event;
 		FlowInstanceService flowInstanceService = ContextHelper.getBean(FlowInstanceService.class);
 		FlowInstance instance = new FlowInstance();
-		instance.setStatus(FlowInstanceStatus.FINISHED);
-		instance.setApprovalStage(FlowInstanceStatus.getDictStatus(FlowInstanceStatus.FINISHED));
+		instance.setStatus(FlowInstanceStatus.SUSPENDED);
+		// 更新当前任务阶段为待申请人完善中
+		instance.setApprovalStage(FlowInstanceStatus.getDictStatus(FlowInstanceStatus.SUSPENDED));
 		instance.setId(entityEvent.getProcessInstanceId());
 		flowInstanceService.updateById(instance);
 	}

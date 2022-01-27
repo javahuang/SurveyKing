@@ -1,7 +1,6 @@
 package cn.surveyking.server.impl;
 
 import cn.surveyking.server.core.common.PaginationResponse;
-import cn.surveyking.server.core.exception.InternalServerError;
 import cn.surveyking.server.core.uitls.NanoIdUtils;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.ProjectQuery;
@@ -18,7 +17,6 @@ import cn.surveyking.server.service.ProjectService;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,7 +39,8 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 	public PaginationResponse<ProjectView> listProject(ProjectQuery query) {
 		Page<Project> page = pageByQuery(query,
 				Wrappers.<Project>lambdaQuery().eq(Project::getCreateBy, SecurityContextUtils.getUserId())
-						.eq(isNotBlank(query.getName()), Project::getName, query.getName()));
+						.eq(isNotBlank(query.getName()), Project::getName, query.getName())
+						.orderByAsc(Project::getCreateAt));
 		PaginationResponse<ProjectView> result = new PaginationResponse<>(page.getTotal(),
 				projectViewMapper.toProjectView(page.getRecords()));
 		result.getList().forEach(view -> {
@@ -83,20 +82,28 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 	@Override
 	public ProjectView addProject(ProjectRequest request) {
 		Project project = projectViewMapper.fromRequest(request);
-		project.setId(NanoIdUtils.randomNanoId());
-		try {
-			project.setName(project.getSurvey().getTitle());
-			save(project);
-			return projectViewMapper.toProjectView(project);
+		project.setId(generateProjectId());
+		project.setName(project.getSurvey().getTitle());
+		save(project);
+		return projectViewMapper.toProjectView(project);
+	}
+
+	private String generateProjectId() {
+		String projectId = NanoIdUtils.randomNanoId();
+		// 不要以数字开头，否则工作流 xml 保存会报错
+		if (Character.isDigit(projectId.charAt(0))) {
+			return generateProjectId();
 		}
-		catch (Exception e) {
-			if (e instanceof DuplicateKeyException) {
-				return addProject(request);
-			}
-			else {
-				throw new InternalServerError(e);
-			}
+		if (getById(projectId) != null) {
+			return generateProjectId();
 		}
+		return projectId;
+	}
+
+	public static void main(String[] args) {
+		String a = "1aa";
+		System.out.println(a.charAt(0) > 57);
+		System.out.println(a.charAt(0) < 48);
 	}
 
 	@Override

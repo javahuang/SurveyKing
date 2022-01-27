@@ -9,17 +9,29 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * @TableName t_flow_operation_identitylink
+ * @TableName t_flow_operation_user
  */
-@TableName(value = "t_flow_operation_identitylink", autoResultMap = true)
+@TableName(value = "t_flow_operation_user")
 @Data
-public class FlowOperationIdentitylink implements Serializable {
+public class FlowOperationUser implements Serializable {
 
 	/**
 	 * 节点id
 	 */
 	@TableId(value = "id")
 	private String id;
+
+	/**
+	 * 操作id
+	 */
+	@TableField(value = "operation_id")
+	private String operationId;
+
+	/**
+	 * 用户id
+	 */
+	@TableField(value = "user_id")
+	private String userId;
 
 	/**
 	 * 组id
@@ -34,22 +46,10 @@ public class FlowOperationIdentitylink implements Serializable {
 	private String linkType;
 
 	/**
-	 * 用户id
-	 */
-	@TableField(value = "user_id")
-	private String userId;
-
-	/**
 	 * 是否最新记录
 	 */
-	@TableField(value = "is_latest")
-	private Boolean isLatest;
-
-	/**
-	 * 操作id
-	 */
-	@TableField(value = "operation_id")
-	private String operationId;
+	@TableField(value = "latest")
+	private Boolean latest;
 
 	/**
 	 * 创建时间

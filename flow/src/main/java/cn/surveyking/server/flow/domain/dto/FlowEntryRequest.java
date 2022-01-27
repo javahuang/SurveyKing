@@ -1,6 +1,5 @@
 package cn.surveyking.server.flow.domain.dto;
 
-import cn.surveyking.server.flow.domain.model.FlowEntryNode;
 import lombok.Data;
 
 import java.util.List;
@@ -17,6 +16,6 @@ public class FlowEntryRequest {
 
 	private String projectId;
 
-	private List<FlowEntryNode> nodes;
+	private List<FlowEntryNodeRequest> nodes;
 
 }

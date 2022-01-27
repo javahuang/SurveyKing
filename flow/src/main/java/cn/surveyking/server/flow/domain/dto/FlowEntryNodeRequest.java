@@ -11,6 +11,8 @@ import java.util.LinkedHashMap;
 @Data
 public class FlowEntryNodeRequest {
 
+	private String id;
+
 	/**
 	 * 节点名称
 	 */
@@ -20,11 +22,6 @@ public class FlowEntryNodeRequest {
 	 * 项目id
 	 */
 	private String projectId;
-
-	/**
-	 * 任务对应的xml节点id
-	 */
-	private String activityId;
 
 	/**
 	 * 流程节点类型

@@ -13,4 +13,16 @@ public class FlowConstant {
 	 */
 	public final static String VARIABLE_ANSWER_KEY = "answerId";
 
+	/**
+	 * 发起用户 ID。
+	 */
+	public final static String VARIABLE_STARTER_USER = "starterUserId";
+
+	/**
+	 * 发起节点 id
+	 */
+	public final static String STARTER_ACTIVITY_ID = "starter";
+
+	public final static String STARTER_ACTIVITY_NAME = "申请人";
+
 }

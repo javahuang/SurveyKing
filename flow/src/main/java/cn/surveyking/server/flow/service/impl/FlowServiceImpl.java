@@ -6,27 +6,30 @@ import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.flow.constant.*;
 import cn.surveyking.server.flow.domain.dto.*;
-import cn.surveyking.server.flow.domain.mapper.FlowEntryModelMapper;
 import cn.surveyking.server.flow.domain.mapper.FlowEntryElementModelMapper;
-import cn.surveyking.server.flow.domain.model.FlowEntry;
-import cn.surveyking.server.flow.domain.model.FlowEntryNode;
-import cn.surveyking.server.flow.domain.model.FlowEntryPublish;
-import cn.surveyking.server.flow.domain.model.FlowInstance;
+import cn.surveyking.server.flow.domain.mapper.FlowEntryModelMapper;
+import cn.surveyking.server.flow.domain.mapper.FlowOperationModelMapper;
+import cn.surveyking.server.flow.domain.model.*;
 import cn.surveyking.server.flow.exception.FlowableRuntimeException;
 import cn.surveyking.server.flow.service.*;
+import cn.surveyking.server.flow.service.impl.taskHandler.RevertTaskHandler;
 import cn.surveyking.server.flow.service.impl.taskHandler.TaskHandler;
 import cn.surveyking.server.service.AnswerService;
 import cn.surveyking.server.service.ProjectService;
 import cn.surveyking.server.service.UserService;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.Cleanup;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.flowable.bpmn.converter.BpmnXMLConverter;
 import org.flowable.bpmn.model.BpmnModel;
 import org.flowable.engine.RepositoryService;
+import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
 import org.flowable.engine.repository.Deployment;
 import org.flowable.engine.repository.ProcessDefinition;
+import org.flowable.engine.runtime.Execution;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
 import org.springframework.stereotype.Service;
@@ -37,10 +40,7 @@ import javax.xml.stream.XMLStreamReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -70,9 +70,17 @@ public class FlowServiceImpl implements FlowService {
 
 	private final FlowEntryElementModelMapper entryNodeModelMapper;
 
+	private final FlowOperationModelMapper flowOperationModelMapper;
+
 	private final FlowInstanceService flowInstanceService;
 
+	private final FlowOperationService flowOperationService;
+
 	private final TaskService taskService;
+
+	private final RuntimeService runtimeService;
+
+	private final RevertTaskHandler revertTaskHandler;
 
 	/**
 	 * 问卷开始之前，根据权限过滤字段。
@@ -85,8 +93,7 @@ public class FlowServiceImpl implements FlowService {
 		if (schema == null) {
 			return null;
 		}
-		FlowEntryNode node = entryNodeService.getOne(Wrappers.<FlowEntryNode>lambdaQuery()
-				.eq(FlowEntryNode::getTaskType, FlowTaskType.starter).eq(FlowEntryNode::getActivityId, schema.getId()));
+		FlowEntryNode node = entryNodeService.getById(schema.getId());
 		// 未设置流程
 		if (node == null) {
 			return schema;
@@ -115,13 +122,14 @@ public class FlowServiceImpl implements FlowService {
 			flow = new FlowEntry();
 			flow.setProjectId(request.getProjectId());
 			flow.setBpmnXml(request.getBpmnXml());
+			flow.setNodes(entryNodeModelMapper.fromRequest(request.getNodes()));
 			entryService.save(flow);
 		}
 		else {
 			flow.setBpmnXml(request.getBpmnXml());
+			flow.setNodes(entryNodeModelMapper.fromRequest(request.getNodes()));
 			entryService.updateById(flow);
 		}
-		saveFlowElement(request, flow.getId());
 	}
 
 	@Override
@@ -143,7 +151,7 @@ public class FlowServiceImpl implements FlowService {
 			ProcessDefinition pd = getProcessDefinitionByDeployId(deployment.getId());
 
 			flowEntry.setDeployId(deployment.getId());
-			flowEntry.setProjectId(deployment.getKey());
+			flowEntry.setProjectId(projectId);
 			entryService.updateById(flowEntry);
 
 			// 更新之前版本为历史版本
@@ -165,8 +173,11 @@ public class FlowServiceImpl implements FlowService {
 			entryPublish.setActiveStatus(true);
 			entryPublishService.save(entryPublish);
 
+			// 更新流程节点
+			saveFlowElement(flowEntry);
+
 			// 更新流程信息
-			flowEntry.setMainEntryPublishId(entryPublish.getId());
+			flowEntry.setProcessDefinitionId(pd.getId());
 			flowEntry.setStatus(FlowEntryStatus.PUBLISHED);
 			entryService.updateById(flowEntry);
 		}
@@ -183,8 +194,7 @@ public class FlowServiceImpl implements FlowService {
 			flow.setProjectId(projectId);
 		}
 		FlowEntryView result = entryModelMapper.toView(flow);
-		result.setNodes(entryNodeModelMapper.toView(entryNodeService
-				.list(Wrappers.<FlowEntryNode>lambdaQuery().eq(FlowEntryNode::getProjectId, flow.getProjectId()))));
+		result.setNodes(entryNodeModelMapper.toView(flow.getNodes()));
 		return result;
 	}
 
@@ -200,6 +210,12 @@ public class FlowServiceImpl implements FlowService {
 		if (query.getType() == FlowTaskQueryType.todo) {
 			result = getTodo(query);
 		}
+		if (query.getType() == FlowTaskQueryType.finished) {
+			result = getFinished(query);
+		}
+		if (query.getType() == FlowTaskQueryType.selfCreated) {
+			result = getSelfCreated(query);
+		}
 		if (result != null) {
 			setFlowTaskAnswer(result.getList());
 			setTaskStatus(result.getList());
@@ -209,11 +225,10 @@ public class FlowServiceImpl implements FlowService {
 
 	private PaginationResponse<FlowTaskView> getTodo(FlowTaskQuery query) {
 		TaskQuery taskQuery = taskService.createTaskQuery().active();
-		taskQuery.processDefinitionKey(query.getProjectId()).includeProcessVariables();
 		String userId = SecurityContextUtils.getUserId();
-		Set<String> userGroups = userService.getUserGroups(userId);
-		taskQuery.or().taskCandidateOrAssigned("U:" + userId).taskCandidateGroupIn(userGroups).endOr();
-		taskQuery.orderByTaskCreateTime().desc();
+		// https://forum.flowable.org/t/sql-exception-with-task-query-after-upgrade-to-6-7-0/8334
+		taskQuery.processDefinitionKey(query.getProjectId()).or().taskCandidateUser(userId).taskAssignee(userId).endOr()
+				.includeProcessVariables().orderByTaskCreateTime().desc();
 		int firstResult = (query.getCurrent() - 1) * query.getPageSize();
 		List<Task> taskList = taskQuery.listPage(firstResult, query.getPageSize());
 		long totalCount = taskQuery.count();
@@ -233,20 +248,149 @@ public class FlowServiceImpl implements FlowService {
 		return new PaginationResponse<>(totalCount, viewList);
 	}
 
+	private PaginationResponse<FlowTaskView> getFinished(FlowTaskQuery query) {
+		Page<FlowOperation> page = new Page<>(query.getCurrent(), query.getPageSize());
+
+		flowOperationService.page(page, Wrappers.<FlowOperation>lambdaQuery()
+				.eq(FlowOperation::getProjectId, query.getProjectId())
+				.eq(FlowOperation::getTaskType, FlowTaskType.userTask)
+				// .ne(FlowOperation::getApprovalType, FlowApprovalType.SAVE)
+				.exists(String.format(
+						"select u.id from t_flow_operation_user u where u.latest = 1 and u.operation_id = t_flow_operation.id and u.user_id = '%s'",
+						SecurityContextUtils.getUserId()))
+				.orderByDesc(FlowOperation::getCreateAt));
+		List<FlowTaskView> viewList = page.getRecords().stream().map(opt -> {
+			FlowTaskView flowTaskView = new FlowTaskView();
+			flowTaskView.setId(opt.getId());
+			flowTaskView.setActivityId(opt.getActivityId());
+			flowTaskView.setProcessInstanceId(opt.getInstanceId());
+			flowTaskView.setAnswerId(opt.getAnswerId());
+			flowTaskView.setProjectId(opt.getProjectId());
+			flowTaskView.setApprovalType(opt.getApprovalType());
+			flowTaskView.setLatest(opt.getLatest());
+			return flowTaskView;
+		}).collect(Collectors.toList());
+		return new PaginationResponse<>(page.getTotal(), viewList);
+	}
+
+	private PaginationResponse<FlowTaskView> getSelfCreated(FlowTaskQuery query) {
+		Page<FlowInstance> page = new Page<>(query.getCurrent(), query.getPageSize());
+		flowInstanceService.page(page, Wrappers.<FlowInstance>lambdaQuery()
+				.eq(FlowInstance::getProjectId, query.getProjectId()).orderByDesc(FlowInstance::getCreateAt));
+		List<FlowTaskView> viewList = page.getRecords().stream().map(instance -> {
+			FlowTaskView flowTaskView = new FlowTaskView();
+			flowTaskView.setCreateAt(instance.getCreateAt());
+			flowTaskView.setApprovalStage(instance.getApprovalStage());
+			flowTaskView.setStatus(instance.getStatus());
+			flowTaskView.setAnswerId(instance.getAnswerId());
+			flowTaskView.setProcessInstanceId(instance.getId());
+			flowTaskView.setProjectId(instance.getProjectId());
+			flowTaskView.setActivityId(instance.getProjectId());
+			flowTaskView.setCreateAt(instance.getCreateAt());
+			flowTaskView.setUpdateAt(instance.getUpdateAt());
+			return flowTaskView;
+		}).collect(Collectors.toList());
+		return new PaginationResponse<>(page.getTotal(), viewList);
+	}
+
 	@Override
 	public SurveySchema loadSchemaByPermission(SchemaQuery query) {
 		ProjectQuery projectQuery = new ProjectQuery();
 		projectQuery.setId(query.getProjectId());
 		ProjectView projectView = projectService.getProject(projectQuery);
 		SurveySchema schema = projectView.getSurvey();
-		FlowEntryNode element = entryNodeService
-				.getOne(Wrappers.<FlowEntryNode>lambdaQuery().eq(FlowEntryNode::getProjectId, query.getProjectId())
-						.eq(FlowEntryNode::getActivityId, query.getTaskDefKey()));
+		FlowEntryNode element = entryNodeService.getById(query.getTaskDefKey());
 		if (element == null) {
 			return schema;
 		}
 		updateSchemaByPermission(element.getFieldPermission(), schema);
 		return schema;
+	}
+
+	@Override
+	public List<FlowOperationView> getAuditRecord(String processInstanceId) {
+		List<FlowOperation> operations = flowOperationService
+				.list(Wrappers.<FlowOperation>lambdaQuery().eq(FlowOperation::getInstanceId, processInstanceId)
+						.eq(FlowOperation::getTaskType, FlowTaskType.userTask).orderByAsc(FlowOperation::getCreateAt));
+		List<FlowOperationView> operationViews = flowOperationModelMapper.toView(operations);
+		FlowInstance flowInstance = flowInstanceService.getById(processInstanceId);
+		if (FlowInstanceStatus.APPROVING == flowInstance.getStatus()) {
+			// 当前任务正在审批，设置审批人
+			Execution execution = runtimeService.createExecutionQuery().processInstanceId(processInstanceId)
+					.onlyChildExecutions().singleResult();
+			if (execution != null) {
+				FlowOperationView runningOperationView = new FlowOperationView();
+				runningOperationView.setActivityId(execution.getActivityId());
+				runningOperationView.setApprovalType(FlowApprovalType.TODO);
+				operationViews.add(runningOperationView);
+				List<Task> tasks = taskService.createTaskQuery().processInstanceId(processInstanceId)
+						.includeIdentityLinks().list();
+				Set<String> waitAuditUserIds = new LinkedHashSet<>();
+				tasks.forEach(t -> {
+					if (t.getAssignee() != null) {
+						waitAuditUserIds.add(t.getAssignee());
+					}
+					t.getIdentityLinks().forEach(link -> {
+						waitAuditUserIds.add(link.getUserId());
+					});
+				});
+				// 设置等待审核用户列表
+				runningOperationView.setWaitAuditUserList(waitAuditUserIds.stream()
+						.map(uid -> userService.loadUserById(uid)).collect(Collectors.toList()));
+			}
+		}
+		else if (FlowInstanceStatus.SUSPENDED == flowInstance.getStatus()) {
+			// 需要申请人完善
+			FlowOperationView runningOperationView = new FlowOperationView();
+			runningOperationView.setActivityId(FlowConstant.STARTER_ACTIVITY_ID);
+			runningOperationView.setActivityName(FlowConstant.STARTER_ACTIVITY_NAME);
+			runningOperationView.setApprovalType(FlowApprovalType.TODO);
+			runningOperationView.setWaitAuditUserList(
+					Collections.singletonList(userService.loadUserById(flowInstance.getCreateBy())));
+			operationViews.add(runningOperationView);
+		}
+
+		// 添加历史节点
+		operationViews.forEach(view -> {
+			if (view.getCreateBy() != null) {
+				view.setAuditUser(userService.loadUserById(view.getCreateBy()));
+			}
+			if (view.getActivityId() != null) {
+				FlowEntryNode node = entryNodeService.getById(view.getActivityId());
+				if (node != null) {
+					view.setActivityName(node.getName());
+				}
+			}
+			if (view.getNewActivityId() != null) {
+				if (FlowConstant.STARTER_ACTIVITY_ID.equals(view.getNewActivityId())) {
+					view.setNewActivityName(FlowConstant.STARTER_ACTIVITY_NAME);
+				}
+				else {
+					FlowEntryNode node = entryNodeService.getById(view.getNewActivityId());
+					if (node != null) {
+						view.setNewActivityName(node.getName());
+					}
+				}
+			}
+			if (view.getApprovalType() != null) {
+				view.setApprovalTypeName(FlowApprovalType.DICT_MAP.get(view.getApprovalType()));
+			}
+			if (StringUtils.isEmpty(view.getActivityName()) && FlowApprovalType.SAVE.equals(view.getApprovalType())) {
+				view.setActivityName("申请人");
+			}
+		});
+
+		return operationViews;
+	}
+
+	@Override
+	public List<RevokeView> getRevertNodes(String processInstanceId) {
+		return revertTaskHandler.getRevertNodes(processInstanceId).stream().map(node -> {
+			RevokeView view = new RevokeView();
+			view.setActivityId(node.getActivityId());
+			view.setActivityName(entryNodeService.getById(node.getActivityId()).getName());
+			return view;
+		}).collect(Collectors.toList());
 	}
 
 	private ProcessDefinition getProcessDefinitionByDeployId(String deployId) {
@@ -264,9 +408,8 @@ public class FlowServiceImpl implements FlowService {
 			if (createUser != null) {
 				view.setCreateUser(createUser.simpleMode());
 			}
-			FlowEntryNode node = entryNodeService
-					.getOne(Wrappers.<FlowEntryNode>lambdaQuery().eq(FlowEntryNode::getProjectId, view.getProjectId())
-							.eq(FlowEntryNode::getActivityId, view.getActivityId()));
+			FlowEntryNode node = entryNodeService.getById(view.getActivityId());
+			view.setFieldPermission(node.getFieldPermission());
 			filterAnswerByPermission(answerView.getAnswer(), node.getFieldPermission());
 			view.setAnswer(answerView.getAnswer());
 		}
@@ -278,25 +421,28 @@ public class FlowServiceImpl implements FlowService {
 	 */
 	private void setTaskStatus(List<FlowTaskView> views) {
 		views.forEach(view -> {
+			if (view.getStatus() != null) {
+				return;
+			}
 			FlowInstance instance = flowInstanceService.getById(view.getProcessInstanceId());
-			FlowTaskStatus.getDictStatus(instance.getStatus());
-			int taskStatus = instance.getStatus();
-			if (taskStatus == FlowTaskStatus.APPROVING) {
-				// 正在审批时，获取当前审批节点名称
-				view.setTaskStatus(instance.getApprovalStage());
-			}
-			else {
-				view.setTaskStatus(FlowTaskStatus.getDictStatus(taskStatus));
-			}
+			view.setStatus(instance.getStatus());
+			view.setApprovalStage(instance.getApprovalStage());
+			view.setCreateAt(instance.getCreateAt());
+			view.setUpdateAt(instance.getUpdateAt());
 		});
 	}
 
-	private void saveFlowElement(FlowEntryRequest request, String flowId) {
+	/**
+	 * 保存流程节点，将 flowEntry 里面的临时节点保存到数据库
+	 * @param flowEntry
+	 */
+	private void saveFlowElement(FlowEntry flowEntry) {
+		// 不能直接删除当前项目下面的所有流程节点，因为多次部署，旧的部署版本可能需要之前的流程节点
 		entryNodeService
-				.remove(Wrappers.<FlowEntryNode>lambdaQuery().eq(FlowEntryNode::getProjectId, request.getProjectId()));
-		if (request.getNodes() != null) {
-			request.getNodes().forEach(node -> {
-				node.setProjectId(request.getProjectId());
+				.removeBatchByIds(flowEntry.getNodes().stream().map(x -> x.getId()).collect(Collectors.toList()));
+		if (flowEntry.getNodes() != null) {
+			flowEntry.getNodes().forEach(node -> {
+				node.setProjectId(flowEntry.getProjectId());
 				entryNodeService.save(node);
 			});
 		}

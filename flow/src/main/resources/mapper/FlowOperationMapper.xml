@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.surveyking.server.flow.mapper.FlowOperationMapper">
+
+    <resultMap id="BaseResultMap" type="cn.surveyking.server.flow.domain.model.FlowOperation">
+            <id property="id" column="id" jdbcType="VARCHAR"/>
+            <result property="instanceId" column="instance_id" jdbcType="VARCHAR"/>
+            <result property="projectId" column="project_id" jdbcType="VARCHAR"/>
+            <result property="taskId" column="task_id" jdbcType="VARCHAR"/>
+            <result property="taskName" column="task_name" jdbcType="VARCHAR"/>
+            <result property="taskType" column="task_type" jdbcType="INTEGER"/>
+            <result property="approvalType" column="approval_type" jdbcType="VARCHAR"/>
+            <result property="comment" column="comment" jdbcType="VARCHAR"/>
+            <result property="delegateAssignee" column="delegate_assignee" jdbcType="VARCHAR"/>
+            <result property="answer" column="answer" jdbcType="VARCHAR" typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+            <result property="createAt" column="create_at" jdbcType="TIMESTAMP"/>
+            <result property="createBy" column="create_by" jdbcType="VARCHAR"/>
+            <result property="updateAt" column="update_at" jdbcType="TIMESTAMP"/>
+            <result property="updateBy" column="update_by" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,process_instance_id,project_id,
+        task_id,task_name,task_type,
+        approval_type,comment,delegate_assignee,
+        answer,create_at,create_by,
+        update_at,update_by
+    </sql>
+
+    <update id="updateOperationLatest" parameterType="string">
+        UPDATE t_flow_operation
+        SET latest = 0
+        WHERE instance_id = #{instanceId}
+    </update>
+
+    <update id="updateOperationUserLatest" parameterType="cn.surveyking.server.flow.domain.dto.UpdateFlowOperationUserRequest">
+        UPDATE t_flow_operation_user u
+        SET u.latest = 0
+        WHERE u.user_id = #{userId}
+            AND EXISTS (
+        SELECT
+            opt.id
+        FROM
+            t_flow_operation opt
+        WHERE
+            opt.instance_id = #{instanceId}
+        AND opt.task_type = #{taskType}
+        AND opt.id = u.operation_id)
+    </update>
+
+</mapper>

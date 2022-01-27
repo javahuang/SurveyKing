@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.flowable.task.api.Task;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,16 +16,18 @@ import java.util.List;
  * @author javahuang
  * @date 2022/1/7
  */
-@Component("revokeTaskHandler")
+@Component("revertTaskHandler")
 @Slf4j
-public class RevokeTaskHandler extends AbstractTaskHandler {
+public class RevertTaskHandler extends AbstractTaskHandler {
 
 	@Override
 	public void innerProcess(ApprovalTaskRequest request) {
-		if (!canRevoke(request.getTaskId(), request.getProcessInstanceId())) {
+		if (!canRevert(request.getTaskId(), request.getProcessInstanceId())) {
 			throw new FlowableRuntimeException("当前节点不能进行驳回操作");
 		}
-		getHistoricTree(request.getProcessInstanceId());
+		if (rollbackToStartEvent(request)) {
+			return;
+		}
 		// TODO: 会签撤回
 		List<Task> tasks = getProcessInstanceActiveTaskList(request.getProcessInstanceId());
 		runtimeService.createChangeActivityStateBuilder().processInstanceId(request.getProcessInstanceId())
@@ -33,16 +36,34 @@ public class RevokeTaskHandler extends AbstractTaskHandler {
 
 	/**
 	 * 只有最近一条的操作记录是自己才能进行驳回操作
-	 * @param taskId
+	 * @param taskId 当前操作记录的 id
 	 * @param processInstanceId
 	 * @return
 	 */
-	public boolean canRevoke(String taskId, String processInstanceId) {
+	public boolean canRevert(String taskId, String processInstanceId) {
 		List<FlowOperation> operationList = getOperations(processInstanceId);
-		if (operationList.size() > 0 && taskId.equals(operationList.get(0).getTaskId())) {
+		if (operationList.size() > 0 && taskId.equals(operationList.get(0).getId())) {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * 获取当前可以回退的节点列表
+	 * @param processInstanceId
+	 * @return
+	 */
+	public List<TaskTreeNode> getRevertNodes(String processInstanceId) {
+		// 不能包含当前节点
+		TaskTreeNode lastNode = getHistoricTree(processInstanceId).getParent();
+		List<TaskTreeNode> nodes = new ArrayList<>();
+		while (true) {
+			if (lastNode == null) {
+				return nodes;
+			}
+			nodes.add(lastNode);
+			lastNode = lastNode.getParent();
+		}
 	}
 
 }

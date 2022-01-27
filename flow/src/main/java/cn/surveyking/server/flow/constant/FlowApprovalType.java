@@ -1,7 +1,10 @@
 package cn.surveyking.server.flow.constant;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
- * 工作流任务触发 BUTTON。
+ * 审批类型
  *
  * @author javahuang
  * @date 2022/1/6
@@ -24,14 +27,14 @@ public final class FlowApprovalType {
 	public static final String REFUSE = "refuse";
 
 	/**
-	 * 驳回。
+	 * 驳回到之前的某个节点。
 	 */
-	public static final String REJECT = "reject";
+	public static final String ROLLBACK = "rollback";
 
 	/**
 	 * 撤销，发起人撤销任务。
 	 */
-	public static final String REVOKE = "revoke";
+	public static final String REVERT = "revert";
 
 	/**
 	 * 指派。
@@ -67,5 +70,25 @@ public final class FlowApprovalType {
 	 * 中止。
 	 */
 	public static final String STOP = "stop";
+
+	/**
+	 * 待办
+	 */
+	public static final String TODO = "todo";
+
+	public static final Map<Object, String> DICT_MAP = new HashMap<>(2);
+	static {
+		DICT_MAP.put(SAVE, "保存");
+		DICT_MAP.put(AGREE, "同意");
+		DICT_MAP.put(REFUSE, "拒绝");
+		DICT_MAP.put(TRANSFER, "指派");
+		DICT_MAP.put(MULTI_SIGN, "多实例会签");
+		DICT_MAP.put(MULTI_AGREE, "会签同意");
+		DICT_MAP.put(MULTI_REFUSE, "会签拒绝");
+		DICT_MAP.put(MULTI_ABSTAIN, "会签弃权");
+		DICT_MAP.put(MULTI_CONSIGN, "多实例加签");
+		DICT_MAP.put(STOP, "中止");
+		DICT_MAP.put(TODO, "待处理");
+	}
 
 }

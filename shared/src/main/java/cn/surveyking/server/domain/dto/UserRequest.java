@@ -2,8 +2,6 @@ package cn.surveyking.server.domain.dto;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,17 +15,22 @@ public class UserRequest {
 
 	private String orgId;
 
-	@NotNull
 	private String name;
 
+	private String avatar;
+
+	private String profile;
+
 	/** 登录账号 */
-	@NotNull
 	private String username;
 
 	/** 密码 */
 	private String password;
 
-	private List<String> roles = new ArrayList<>();
+	/** 密码修改原密码 */
+	private String oldPassword;
+
+	private List<String> roles;
 
 	private String phone;
 
@@ -37,6 +40,6 @@ public class UserRequest {
 
 	private Integer status;
 
-	private List<UserPositionRequest> userPositions = new ArrayList<>();
+	private List<UserPositionRequest> userPositions;
 
 }

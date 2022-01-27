@@ -3,7 +3,7 @@ package cn.surveyking.server.flow.listener;
 import cn.surveyking.server.core.uitls.ContextHelper;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.flow.constant.FlowConstant;
-import cn.surveyking.server.flow.constant.FlowTaskStatus;
+import cn.surveyking.server.flow.constant.FlowInstanceStatus;
 import cn.surveyking.server.flow.domain.model.FlowInstance;
 import cn.surveyking.server.flow.service.FlowInstanceService;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +33,7 @@ public class ProcessStartedListener implements FlowableEventListener {
 		instance.setAnswerId(answerId);
 		instance.setProjectId(entity.getProcessDefinitionKey());
 		instance.setId(entity.getProcessInstanceId());
-		instance.setStatus(FlowTaskStatus.SUBMITTED);
+		instance.setStatus(FlowInstanceStatus.APPROVING);
 		instance.setCreateAt(new Date());
 		instance.setCreateBy(SecurityContextUtils.getUserId());
 		FlowInstanceService flowInstanceService = ContextHelper.getBean(FlowInstanceService.class);

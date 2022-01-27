@@ -1,12 +1,11 @@
 package cn.surveyking.server.flow.listener;
 
 import cn.surveyking.server.core.uitls.ContextHelper;
-import cn.surveyking.server.flow.constant.FlowTaskStatus;
+import cn.surveyking.server.flow.constant.FlowInstanceStatus;
 import cn.surveyking.server.flow.domain.model.FlowEntryNode;
 import cn.surveyking.server.flow.domain.model.FlowInstance;
 import cn.surveyking.server.flow.service.FlowEntryNodeService;
 import cn.surveyking.server.flow.service.FlowInstanceService;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.flowable.common.engine.api.delegate.event.FlowableEvent;
@@ -25,7 +24,6 @@ public class ActivityStartedListener implements FlowableEventListener {
 	@Override
 	public void onEvent(FlowableEvent event) {
 		FlowableActivityEvent activityEvent = (FlowableActivityEvent) event;
-		System.out.println(activityEvent.getActivityId());
 		if ("userTask".equals(activityEvent.getActivityType())) {
 			String processInstanceId = activityEvent.getProcessInstanceId();
 			String taskDefKey = activityEvent.getActivityId();
@@ -34,14 +32,13 @@ public class ActivityStartedListener implements FlowableEventListener {
 
 			FlowInstance flowInstance = new FlowInstance();
 			flowInstance.setId(processInstanceId);
-			FlowEntryNode flowEntryNode = flowEntryNodeService
-					.getOne(Wrappers.<FlowEntryNode>lambdaQuery().eq(FlowEntryNode::getActivityId, taskDefKey));
+			FlowEntryNode flowEntryNode = flowEntryNodeService.getById(taskDefKey);
 			String approvalStage = flowEntryNode.getName();
 			if (StringUtils.isBlank(approvalStage)) {
-				approvalStage = FlowTaskStatus.getDictStatus(FlowTaskStatus.APPROVING);
+				approvalStage = FlowInstanceStatus.getDictStatus(FlowInstanceStatus.APPROVING);
 			}
 			flowInstance.setApprovalStage(approvalStage);
-			flowInstance.setStatus(FlowTaskStatus.APPROVING);
+			flowInstance.setStatus(FlowInstanceStatus.APPROVING);
 			flowInstanceService.updateById(flowInstance);
 		}
 	}

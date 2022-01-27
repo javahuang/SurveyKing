@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * @TableName t_flow_entry_publish
+ * @TableName 发布版本
  */
 @TableName(value = "t_flow_entry_publish", autoResultMap = true)
 @Data

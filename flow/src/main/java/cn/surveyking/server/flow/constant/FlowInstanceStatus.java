@@ -9,7 +9,7 @@ import java.util.Map;
  * @author javahuang
  * @date 2022/1/6
  */
-public final class FlowTaskStatus {
+public final class FlowInstanceStatus {
 
 	/**
 	 * 已提交。
@@ -41,14 +41,20 @@ public final class FlowTaskStatus {
 	 */
 	public static final int CANCELLED = 5;
 
+	/**
+	 * 申请人完善中
+	 */
+	public static final int SUSPENDED = 6;
+
 	private static final Map<Object, String> DICT_MAP = new HashMap<>(2);
 	static {
 		DICT_MAP.put(SUBMITTED, "已提交");
 		DICT_MAP.put(APPROVING, "审批中");
-		DICT_MAP.put(REFUSED, "被拒绝");
+		DICT_MAP.put(REFUSED, "已拒绝");
 		DICT_MAP.put(FINISHED, "已结束");
 		DICT_MAP.put(STOPPED, "提前停止");
 		DICT_MAP.put(CANCELLED, "已取消");
+		DICT_MAP.put(SUSPENDED, "申请人完善中");
 	}
 
 	public static String getDictStatus(int status) {

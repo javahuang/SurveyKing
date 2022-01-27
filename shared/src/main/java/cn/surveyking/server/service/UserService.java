@@ -31,6 +31,8 @@ public interface UserService extends UserDetailsService {
 
 	Set<String> getUserGroups(String userId);
 
+	Set<String> getUsersByGroup(String groupId, String currentUser);
+
 	/**
 	 * 系统用户初始化
 	 */

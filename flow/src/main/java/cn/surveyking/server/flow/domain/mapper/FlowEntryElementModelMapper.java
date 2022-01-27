@@ -5,7 +5,6 @@ import cn.surveyking.server.flow.domain.dto.FlowEntryNodeRequest;
 import cn.surveyking.server.flow.domain.dto.FlowEntryNodeView;
 import cn.surveyking.server.flow.domain.model.FlowEntryNode;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 /**
  * @author javahuang
@@ -14,8 +13,5 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface FlowEntryElementModelMapper
 		extends BaseModelMapper<FlowEntryNodeRequest, FlowEntryNodeView, FlowEntryNode> {
-
-	@Mapping(source = "activityId", target = "id")
-	FlowEntryNodeView toView(FlowEntryNode model);
 
 }

@@ -24,11 +24,13 @@ public class User extends BaseModel {
 
 	private String email;
 
-	private String avatarUrl;
+	private String avatar;
 
 	private String gender;
 
 	private String birthday;
+
+	private String profile;
 
 	/**
 	 * 0失活 1 激活

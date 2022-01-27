@@ -2,15 +2,16 @@ package cn.surveyking.server.impl;
 
 import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.constant.AppConsts;
+import cn.surveyking.server.core.exception.InternalServerError;
 import cn.surveyking.server.core.security.PreAuthorizeAnnotationExtractor;
 import cn.surveyking.server.domain.dto.UserInfo;
 import cn.surveyking.server.domain.dto.UserQuery;
 import cn.surveyking.server.domain.dto.UserRequest;
 import cn.surveyking.server.domain.dto.UserView;
-import cn.surveyking.server.domain.model.*;
 import cn.surveyking.server.domain.mapper.RoleViewMapper;
 import cn.surveyking.server.domain.mapper.UserPositionDtoMapper;
 import cn.surveyking.server.domain.mapper.UserViewMapper;
+import cn.surveyking.server.domain.model.*;
 import cn.surveyking.server.mapper.*;
 import cn.surveyking.server.service.BaseService;
 import cn.surveyking.server.service.UserService;
@@ -19,6 +20,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.GrantedAuthority;
@@ -26,6 +28,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -165,17 +169,19 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 	}
 
 	private void addUserRoles(UserRequest request) {
-		request.getRoles().forEach(roleId -> {
-			UserRole userRole = new UserRole();
-			userRole.setUserId(request.getId());
-			userRole.setRoleId(roleId);
-			userRole.setUserType(AppConsts.USER_TYPE.SysUser.name());
-			userRoleMapper.insert(userRole);
-		});
+		if (!CollectionUtils.isEmpty(request.getRoles())) {
+			request.getRoles().forEach(roleId -> {
+				UserRole userRole = new UserRole();
+				userRole.setUserId(request.getId());
+				userRole.setRoleId(roleId);
+				userRole.setUserType(AppConsts.USER_TYPE.SysUser.name());
+				userRoleMapper.insert(userRole);
+			});
+		}
 	}
 
 	private void addUserPositions(UserRequest request) {
-		if (request.getUserPositions() != null) {
+		if (!CollectionUtils.isEmpty(request.getUserPositions())) {
 			request.getUserPositions().forEach(userPositionRequest -> {
 				UserPosition userPosition = userPositionDtoMapper.fromRequest(userPositionRequest);
 				userPosition.setUserId(request.getId());
@@ -185,6 +191,7 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 	}
 
 	@Override
+	@CacheEvict(cacheNames = "userCache", key = "#request.id")
 	public void updateUser(UserRequest request) {
 		if (request.getId() == null) {
 			return;
@@ -192,22 +199,39 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 		User user = userViewMapper.toUser(request);
 		this.updateById(user);
 
-		// 更新登录账号
-		Account account = userViewMapper.toAccount(request);
-		if (isNotBlank(request.getPassword())) {
-			account.setAuthSecret(passwordEncoder.encode(request.getPassword()));
+		if (request.getStatus() != null || isNotBlank(request.getPassword())) {
+			// 更新登录账号
+			Account account = accountMapper
+					.selectOne(Wrappers.<Account>lambdaQuery().eq(Account::getUserId, request.getId()));
+			if (isNotBlank(request.getPassword()) && isNotBlank(request.getOldPassword())) {
+				if (!passwordEncoder.matches(request.getOldPassword(), account.getAuthSecret())) {
+					throw new InternalServerError("密码验证失败");
+				}
+			}
+			if (request.getStatus() != null) {
+				account.setStatus(request.getStatus());
+			}
+			if (isNotBlank(request.getPassword())) {
+				account.setAuthSecret(passwordEncoder.encode(request.getPassword()));
+			}
+			accountMapper.updateById(account);
 		}
-		accountMapper.update(account, Wrappers.<Account>lambdaQuery().eq(Account::getUserId, request.getId()));
 
 		// 更新用户角色
-		userRoleMapper.delete(Wrappers.<UserRole>lambdaQuery().eq(UserRole::getUserId, request.getId()));
-		addUserRoles(request);
+		if (request.getRoles() != null) {
+			userRoleMapper.delete(Wrappers.<UserRole>lambdaQuery().eq(UserRole::getUserId, request.getId()));
+			addUserRoles(request);
+		}
 		// 更新用户岗位
-		userPositionMapper.delete(Wrappers.<UserPosition>lambdaQuery().eq(UserPosition::getUserId, request.getId()));
-		addUserPositions(request);
+		if (request.getUserPositions() != null) {
+			userPositionMapper
+					.delete(Wrappers.<UserPosition>lambdaQuery().eq(UserPosition::getUserId, request.getId()));
+			addUserPositions(request);
+		}
 	}
 
 	@Override
+	@CacheEvict(cacheNames = "userCache", key = "#id")
 	public void deleteUser(String id) {
 		removeById(id);
 		accountMapper.delete(Wrappers.<Account>lambdaQuery().eq(Account::getUserId, id));
@@ -227,11 +251,13 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 	public void updateUserPosition(UserRequest request) {
 		userPositionMapper
 				.delete(Wrappers.<UserPosition>lambdaQuery().eq(UserPosition::getPositionId, request.getId()));
-		request.getUserPositions().forEach(userPositionRequest -> {
-			UserPosition position = userPositionDtoMapper.fromRequest(userPositionRequest);
-			position.setUserId(request.getId());
-			userPositionMapper.insert(position);
-		});
+		if (!CollectionUtils.isEmpty(request.getUserPositions())) {
+			request.getUserPositions().forEach(userPositionRequest -> {
+				UserPosition position = userPositionDtoMapper.fromRequest(userPositionRequest);
+				position.setUserId(request.getId());
+				userPositionMapper.insert(position);
+			});
+		}
 	}
 
 	@Override
@@ -252,6 +278,33 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 		// groups.add("U:" + current.getId());
 		// groups.add("P:" + current.getOrgId() + ":");
 		return groups;
+	}
+
+	@Override
+	public Set<String> getUsersByGroup(String groupId, String currentUser) {
+		// 获取角色下面的所有用户
+		if (groupId.startsWith("R:")) {
+			return userRoleMapper
+					.selectList(Wrappers.<UserRole>lambdaQuery().eq(UserRole::getRoleId, groupId.split(":")[1]))
+					.stream().map(x -> x.getUserId()).collect(Collectors.toSet());
+		}
+		if (groupId.startsWith("P:")) {
+			String[] orgAndPositionId = groupId.split(":");
+			String orgId = orgAndPositionId[1], positionId = orgAndPositionId[2];
+			if (orgId.contains(AppConsts.VARIABLE_CURRENT_ORG_ID)) {
+				orgId = loadUserById(currentUser).getOrgId();
+			}
+			else if (orgId.contains(AppConsts.VARIABLE_PARENT_ORG_ID)) {
+				orgId = loadUserById(currentUser).getOrgId();
+				orgId = orgMapper.selectById(orgId).getParentId();
+			}
+			return userPositionMapper
+					.selectList(Wrappers.<UserPosition>lambdaQuery()
+							.eq(StringUtils.hasText(orgId), UserPosition::getOrgId, orgId)
+							.eq(StringUtils.hasText(positionId), UserPosition::getPositionId, positionId))
+					.stream().map(up -> up.getUserId()).collect(Collectors.toSet());
+		}
+		return Collections.EMPTY_SET;
 	}
 
 	@Override

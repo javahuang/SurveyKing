@@ -1,8 +1,6 @@
 package cn.surveyking.server.flow.config;
 
-import cn.surveyking.server.flow.listener.ActivityStartedListener;
-import cn.surveyking.server.flow.listener.ProcessCompletedListener;
-import cn.surveyking.server.flow.listener.ProcessStartedListener;
+import cn.surveyking.server.flow.listener.*;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.common.engine.api.delegate.event.FlowableEngineEventType;
 import org.flowable.common.engine.api.delegate.event.FlowableEventListener;
@@ -33,14 +31,20 @@ public class WorkflowConfig {
 		return processEngineConfiguration -> {
 			log.info("Overriding process engine configuration");
 
-			Map<String, List<FlowableEventListener>> instanceFinishListener = new HashMap<>();
-			instanceFinishListener.put(FlowableEngineEventType.PROCESS_COMPLETED.name(),
+			Map<String, List<FlowableEventListener>> instanceListener = new HashMap<>();
+			instanceListener.put(FlowableEngineEventType.PROCESS_COMPLETED.name(),
 					Collections.singletonList(new ProcessCompletedListener()));
-			instanceFinishListener.put(FlowableEngineEventType.ACTIVITY_STARTED.name(),
+			instanceListener.put(FlowableEngineEventType.ACTIVITY_STARTED.name(),
 					Collections.singletonList(new ActivityStartedListener()));
-			instanceFinishListener.put(FlowableEngineEventType.PROCESS_STARTED.name(),
+			instanceListener.put(FlowableEngineEventType.PROCESS_STARTED.name(),
 					Collections.singletonList(new ProcessStartedListener()));
-			processEngineConfiguration.setTypedEventListeners(instanceFinishListener);
+			instanceListener.put(FlowableEngineEventType.PROCESS_CANCELLED.name(),
+					Collections.singletonList(new ProcessCancelledListener()));
+			instanceListener.put(FlowableEngineEventType.ENTITY_SUSPENDED.name(),
+					Collections.singletonList(new ProcessSuspendedListener()));
+			instanceListener.put(FlowableEngineEventType.ENTITY_ACTIVATED.name(),
+					Collections.singletonList(new ProcessSuspendedListener()));
+			processEngineConfiguration.setTypedEventListeners(instanceListener);
 		};
 	}
 

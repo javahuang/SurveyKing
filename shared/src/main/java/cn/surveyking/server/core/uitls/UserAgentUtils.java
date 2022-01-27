@@ -3,6 +3,9 @@ package cn.surveyking.server.core.uitls;
 import cn.surveyking.server.domain.dto.AnswerMetaInfo;
 import com.blueconic.browscap.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -12,10 +15,18 @@ import java.util.Arrays;
  * @date 2021/8/8
  */
 @Slf4j
+@Component
 public class UserAgentUtils {
 
 	static UserAgentParser parser;
 
+	/**
+	 * 应用启动之后，初始化 parser，该操作耗时长（避免首次答案保存耗时长）。
+	 * @return
+	 * @throws IOException
+	 * @throws ParseException
+	 */
+	@EventListener(ApplicationReadyEvent.class)
 	public static UserAgentParser getUserAgent() throws IOException, ParseException {
 		if (parser == null) {
 			parser = new UserAgentService().loadParser(Arrays.asList(BrowsCapField.BROWSER, BrowsCapField.BROWSER_TYPE,

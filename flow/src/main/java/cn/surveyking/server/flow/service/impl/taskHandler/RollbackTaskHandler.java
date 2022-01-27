@@ -12,20 +12,22 @@ import org.springframework.stereotype.Component;
  * @author javahuang
  * @date 2022/1/7
  */
-@Component("rejectTaskHandler")
+@Component("rollbackTaskHandler")
 @Slf4j
-public class RejectTaskHandler extends AbstractTaskHandler {
+public class RollbackTaskHandler extends AbstractTaskHandler {
 
 	@Override
 	public void innerProcess(ApprovalTaskRequest request) {
 		Task task = getCurrentRunningTask(request.getTaskId());
 		String currentActivityId = task.getTaskDefinitionKey();
 		String newActivityId = request.getNewActivityId();
-
+		if (rollbackToStartEvent(request)) {
+			return;
+		}
 		TaskTreeNode taskTreeNode = getHistoricTree(task.getProcessInstanceId());
 		if (StringUtils.isEmpty(request.getNewActivityId())) {
 			// 如果未指定，默认驳回到上一个节点
-			newActivityId = taskTreeNode.getParent().getTaskDefKey();
+			newActivityId = taskTreeNode.getParent().getActivityId();
 			request.setActivityId(newActivityId);
 		}
 		if (StringUtils.isNotBlank(newActivityId)) {
@@ -33,7 +35,6 @@ public class RejectTaskHandler extends AbstractTaskHandler {
 			runtimeService.createChangeActivityStateBuilder().processInstanceId(task.getProcessInstanceId())
 					.moveActivityIdTo(currentActivityId, newActivityId).changeState();
 		}
-
 	}
 
 }

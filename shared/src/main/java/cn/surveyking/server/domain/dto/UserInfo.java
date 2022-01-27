@@ -27,6 +27,21 @@ public class UserInfo implements UserDetails, Serializable {
 
 	private Boolean enabled;
 
+	/** 头像 */
+	private String avatar;
+
+	private String orgId;
+
+	private String orgName;
+
+	private String gender;
+
+	private String phone;
+
+	private String email;
+
+	private String profile;
+
 	@JsonIgnore
 	private Integer status;
 
