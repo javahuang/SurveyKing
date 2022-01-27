@@ -2,6 +2,8 @@ package cn.surveyking.server.domain.dto;
 
 import lombok.Data;
 
+import java.util.LinkedHashMap;
+
 /**
  * @author javahuang
  * @date 2021/8/6
@@ -33,6 +35,7 @@ public class ProjectSetting {
 		/** 允许更新答案 */
 		private Boolean enableUpdate;
 
+		private LinkedHashMap initialValues;
 	}
 
 }
