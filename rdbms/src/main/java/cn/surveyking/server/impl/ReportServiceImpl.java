@@ -25,7 +25,7 @@ public class ReportServiceImpl implements ReportService {
 	@Override
 	public ReportData getData(String shortId) {
 		QueryWrapper<Answer> wrapper = new QueryWrapper<>();
-		wrapper.select("answer").eq("short_id", shortId);
+		wrapper.select("answer").eq("project_id", shortId);
 		List<Answer> answerList = answerMapper.selectList(wrapper);
 		ReportData result = new ReportData();
 		result.setTotal(answerList.size());

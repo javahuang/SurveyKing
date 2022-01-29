@@ -256,7 +256,7 @@ public class FlowServiceImpl implements FlowService {
 				.eq(FlowOperation::getTaskType, FlowTaskType.userTask)
 				// .ne(FlowOperation::getApprovalType, FlowApprovalType.SAVE)
 				.exists(String.format(
-						"select u.id from t_flow_operation_user u where u.latest = 1 and u.operation_id = t_flow_operation.id and u.user_id = '%s'",
+						"select 1 from t_flow_operation_user u where u.latest = 1 and u.operation_id = t_flow_operation.id and u.user_id = '%s'",
 						SecurityContextUtils.getUserId()))
 				.orderByDesc(FlowOperation::getCreateAt));
 		List<FlowTaskView> viewList = page.getRecords().stream().map(opt -> {

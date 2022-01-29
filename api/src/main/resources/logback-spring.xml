@@ -1,83 +1,88 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-  <jmxConfigurator/>
-  <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
-  <conversionRule conversionWord="wex"
-                  converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter"/>
-  <conversionRule conversionWord="wEx"
-                  converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
-  <property name="CONSOLE_LOG_PATTERN"
-            value="${CONSOLE_LOG_PATTERN:-%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
+    <jmxConfigurator/>
+    <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
+    <conversionRule conversionWord="wex"
+                    converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter"/>
+    <conversionRule conversionWord="wEx"
+                    converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
+    <property name="CONSOLE_LOG_PATTERN"
+              value="${CONSOLE_LOG_PATTERN:-%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
 
-  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-    <encoder>
-      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-    </encoder>
-    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-      <level>debug</level>
-    </filter>
-  </appender>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>debug</level>
+        </filter>
+    </appender>
 
-  <appender name="INFO_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-      <fileNamePattern>./survey/logs/info/info.%d{yyyy-MM-dd}-%i.log.zip</fileNamePattern>
-      <maxFileSize>60MB</maxFileSize>
-      <totalSizeCap>5GB</totalSizeCap>
-      <maxHistory>30</maxHistory>
-    </rollingPolicy>
-    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-      <level>INFO</level>
-    </filter>
-    <encoder>
-      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] [%thread] %logger{50} - %msg%n
-      </pattern>
-      <charset>UTF-8</charset>
-    </encoder>
-  </appender>
+    <appender name="INFO_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>./survey/logs/info/info.%d{yyyy-MM-dd}-%i.log.zip</fileNamePattern>
+            <maxFileSize>60MB</maxFileSize>
+            <totalSizeCap>5GB</totalSizeCap>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] [%thread] %logger{50} - %msg%n
+            </pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
 
-  <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>./survey/logs/error/error.%d{yyyy-MM-dd}-%i.log.zip
-      </fileNamePattern>
-      <maxHistory>90</maxHistory>
-      <totalSizeCap>10GB</totalSizeCap>
-      <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-        <maxFileSize>128 MB</maxFileSize>
-      </timeBasedFileNamingAndTriggeringPolicy>
-    </rollingPolicy>
-    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-      <level>ERROR</level>
-    </filter>
-    <encoder>
-      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-      <charset>UTF-8</charset>
-    </encoder>
-  </appender>
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>./survey/logs/error/error.%d{yyyy-MM-dd}-%i.log.zip
+            </fileNamePattern>
+            <maxHistory>90</maxHistory>
+            <totalSizeCap>10GB</totalSizeCap>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>128 MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
 
 
-  <appender name="ASYNC_ERROR" class="ch.qos.logback.classic.AsyncAppender">
-    <discardingThreshold>0</discardingThreshold>
-    <queueSize>1024</queueSize>
-    <neverBlock>true</neverBlock>
-    <appender-ref ref="ERROR_FILE"/>
-  </appender>
+    <appender name="ASYNC_ERROR" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>1024</queueSize>
+        <neverBlock>true</neverBlock>
+        <appender-ref ref="ERROR_FILE"/>
+    </appender>
 
-  <logger name="org.springframework.web" level="info"/>
-  <logger name="org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor" level="INFO"/>
-  <logger name="cn.surveyking.server" level="info"/>
+    <logger name="org.springframework.web" level="info"/>
+    <logger name="org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor" level="info"/>
+    <logger name="cn.surveyking.server" level="info"/>
+    <logger name="org.flowable" level="info">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="INFO_FILE"/>
+        <appender-ref ref="ERROR_FILE"/>
+    </logger>
 
-  <springProfile name="dev">
-    <root level="info">
-      <appender-ref ref="CONSOLE"/>
-      <appender-ref ref="INFO_FILE"/>
-      <appender-ref ref="ERROR_FILE"/>
-    </root>
-  </springProfile>
+    <springProfile name="dev">
+        <root level="info">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="INFO_FILE"/>
+            <appender-ref ref="ERROR_FILE"/>
+        </root>
+    </springProfile>
 
-  <springProfile name="pro">
-    <root level="error">
-      <appender-ref ref="CONSOLE"/>
-      <appender-ref ref="ASYNC_ERROR"/>
-    </root>
-  </springProfile>
+    <springProfile name="pro">
+        <root level="error">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ASYNC_ERROR"/>
+        </root>
+    </springProfile>
 </configuration>

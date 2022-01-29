@@ -121,4 +121,31 @@ public class AppConsts {
 
 	}
 
+	/**
+	 * 仪表盘类型
+	 */
+	public interface DashboardType {
+
+		/** 首页 */
+		int HOMEPAGE = 1;
+
+		/** 项目概要页面 */
+		int PROJECT_OVERVIEW = 2;
+
+	}
+
+	public interface ProjectPartnerType {
+
+		/**
+		 * 所有者
+		 */
+		Integer OWNER = 1;
+
+		/**
+		 * 协作者
+		 */
+		Integer COLLABORATOR = 2;
+
+	}
+
 }

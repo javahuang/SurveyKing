@@ -1,14 +1,14 @@
 package cn.surveyking.server.api;
 
 import cn.surveyking.server.core.common.PaginationResponse;
-import cn.surveyking.server.domain.dto.ProjectQuery;
-import cn.surveyking.server.domain.dto.ProjectRequest;
-import cn.surveyking.server.domain.dto.ProjectSetting;
-import cn.surveyking.server.domain.dto.ProjectView;
+import cn.surveyking.server.domain.dto.*;
+import cn.surveyking.server.service.ProjectPartnerService;
 import cn.surveyking.server.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @author javahuang
@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 public class ProjectApi {
 
 	private final ProjectService projectService;
+
+	private final ProjectPartnerService projectPartnerService;
 
 	@GetMapping
 	@PreAuthorize("hasAuthority('project:list')")
@@ -57,6 +59,21 @@ public class ProjectApi {
 	@PreAuthorize("hasAuthority('project:delete')")
 	public void deleteProject(@PathVariable String id) {
 		projectService.deleteProject(id);
+	}
+
+	@GetMapping("/listPartner")
+	public List<ProjectPartnerView> listProjectPartner(String projectId) {
+		return projectPartnerService.listProjectPartner(projectId);
+	}
+
+	@PostMapping("/addPartner")
+	public void addProjectPartner(@RequestBody ProjectPartnerRequest request) {
+		projectPartnerService.addProjectPartner(request);
+	}
+
+	@DeleteMapping("/deletePartner")
+	public void deleteProjectPartner(String id) {
+		projectPartnerService.deleteProjectPartner(id);
 	}
 
 }

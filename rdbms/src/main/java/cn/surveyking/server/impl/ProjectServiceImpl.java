@@ -1,6 +1,7 @@
 package cn.surveyking.server.impl;
 
 import cn.surveyking.server.core.common.PaginationResponse;
+import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.uitls.NanoIdUtils;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.ProjectQuery;
@@ -10,8 +11,10 @@ import cn.surveyking.server.domain.dto.ProjectView;
 import cn.surveyking.server.domain.mapper.ProjectViewMapper;
 import cn.surveyking.server.domain.model.Answer;
 import cn.surveyking.server.domain.model.Project;
+import cn.surveyking.server.domain.model.ProjectPartner;
 import cn.surveyking.server.mapper.AnswerMapper;
 import cn.surveyking.server.mapper.ProjectMapper;
+import cn.surveyking.server.mapper.ProjectPartnerMapper;
 import cn.surveyking.server.service.BaseService;
 import cn.surveyking.server.service.ProjectService;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -35,12 +38,16 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 
 	private final ProjectViewMapper projectViewMapper;
 
+	private final ProjectPartnerMapper projectPartnerMapper;
+
 	@Override
 	public PaginationResponse<ProjectView> listProject(ProjectQuery query) {
-		Page<Project> page = pageByQuery(query,
-				Wrappers.<Project>lambdaQuery().eq(Project::getCreateBy, SecurityContextUtils.getUserId())
-						.eq(isNotBlank(query.getName()), Project::getName, query.getName())
-						.orderByAsc(Project::getCreateAt));
+		Page<Project> page = pageByQuery(query, Wrappers.<Project>lambdaQuery()
+				.eq(isNotBlank(query.getName()), Project::getName, query.getName())
+				.exists(String.format(
+						"select 1 from t_project_partner t where t.user_id = '%s' and t.project_id = t_project.id",
+						SecurityContextUtils.getUserId()))
+				.orderByAsc(Project::getCreateAt));
 		PaginationResponse<ProjectView> result = new PaginationResponse<>(page.getTotal(),
 				projectViewMapper.toProjectView(page.getRecords()));
 		result.getList().forEach(view -> {
@@ -85,6 +92,12 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 		project.setId(generateProjectId());
 		project.setName(project.getSurvey().getTitle());
 		save(project);
+
+		ProjectPartner partner = new ProjectPartner();
+		partner.setType(AppConsts.ProjectPartnerType.OWNER);
+		partner.setProjectId(project.getId());
+		partner.setUserId(SecurityContextUtils.getUserId());
+		projectPartnerMapper.insert(partner);
 		return projectViewMapper.toProjectView(project);
 	}
 

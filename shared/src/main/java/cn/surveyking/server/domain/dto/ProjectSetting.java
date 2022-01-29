@@ -36,6 +36,7 @@ public class ProjectSetting {
 		private Boolean enableUpdate;
 
 		private LinkedHashMap initialValues;
+
 	}
 
 }

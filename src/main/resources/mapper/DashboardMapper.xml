@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.surveyking.server.mapper.DashboardMapper">
+
+    <resultMap id="BaseResultMap" type="cn.surveyking.server.domain.model.Dashboard">
+            <id property="id" column="id" jdbcType="VARCHAR"/>
+            <result property="key" column="key" jdbcType="VARCHAR"/>
+            <result property="category" column="category" jdbcType="VARCHAR"/>
+            <result property="projectId" column="project_id" jdbcType="VARCHAR"/>
+            <result property="setting" column="setting" jdbcType="VARCHAR"/>
+            <result property="createAt" column="create_at" jdbcType="TIMESTAMP"/>
+            <result property="createBy" column="create_by" jdbcType="VARCHAR"/>
+            <result property="updateAt" column="update_at" jdbcType="TIMESTAMP"/>
+            <result property="updateBy" column="update_by" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,key,category,
+        project_id,setting,create_at,
+        create_by,update_at,update_by
+    </sql>
+</mapper>
