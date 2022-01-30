@@ -42,9 +42,9 @@
 
 目前已适配 h2 数据库和 mysql 数据库
 
-点击[下载 surveyking-h2 版本](https://gitee.com/surveyking/surveyking/attach_files/864427/download/surveyking-h2-v0.2.0.jar)到本地
+点击[下载 surveyking-h2 版本](https://gitee.com/surveyking/surveyking/attach_files/948414/download/surveyking-h2-v0.2.1.jar)到本地
 
-点击[下载 surveyking-mysql 版本](https://gitee.com/surveyking/surveyking/attach_files/864426/download/surveyking-mysql-v0.2.0.jar)到本地
+点击[下载 surveyking-mysql 版本](https://gitee.com/surveyking/surveyking/attach_files/948412/download/surveyking-mysql-v0.2.1.jar)到本地
 
 ### 使用源码编译安装
 
@@ -79,7 +79,7 @@ docker run -p 1991:1991 -v /surveyking:/surveyking surveyking/surveyking
 - **运行**，支持所有平台部署，windows 和 mac 支持双击运行，或者打开命令行窗口执行如下命令
 
 ```bash
-java -jar surveyking-v0.1.0.jar
+java -jar surveyking-h2-v0.2.1.jar
 ```
 
 打开浏览器，访问 <http://localhost:1991> 即可，系统首次启动之后会自动创建 admin 用户，账号/密码（*admin/surveyking*），登录系统之后可以通过用户管理界面来修改密码。
@@ -110,7 +110,7 @@ java -jar surveyking-v0.1.0.jar
 
 演示地址： <https://surveyking.cn>
 
-点击 *试一试*，无需注册登录（由于作者比较穷 -_-||，服务器带宽只有1M，首次加载稍慢）
+点击 *试一试*，无需注册登录（服务器带宽只有1M，首次加载稍慢）
 
 ## 联系作者
 
@@ -119,7 +119,7 @@ java -jar surveyking-v0.1.0.jar
 如果遇到任何问题或者建议，欢迎加群讨论。
 
 <div>
-<img width="200" src="./docs/wechat.jpeg">
+ QQ群：338461197
 </div>
 
 ## 开源协议
