@@ -13,3 +13,4 @@ custom-cache:
   entries:
     fileCache: 1h
     userCache: 1d
+    projectPermissionCache: 1d

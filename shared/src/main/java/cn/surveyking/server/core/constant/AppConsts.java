@@ -148,4 +148,10 @@ public class AppConsts {
 
 	}
 
+	public interface PermType {
+
+		String PROJECT = "project";
+
+	}
+
 }

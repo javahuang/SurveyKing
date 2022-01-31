@@ -1,6 +1,7 @@
 package cn.surveyking.server.impl;
 
 import cn.surveyking.server.core.constant.AppConsts;
+import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.ProjectPartnerRequest;
 import cn.surveyking.server.domain.dto.ProjectPartnerView;
 import cn.surveyking.server.domain.model.ProjectPartner;
@@ -61,8 +62,14 @@ public class ProjectPartnerServiceImpl extends BaseService<ProjectPartnerMapper,
 	}
 
 	@Override
-	public void deleteProjectPartner(String id) {
-		removeById(id);
+	public void deleteProjectPartner(String projectId, String id) {
+		remove(Wrappers.<ProjectPartner>lambdaQuery().eq(ProjectPartner::getProjectId, projectId)
+				.eq(ProjectPartner::getId, id));
+	}
+
+	@Override
+	public List<String> getProjectPerms() {
+		return getBaseMapper().getProjectPerms(SecurityContextUtils.getUserId());
 	}
 
 }

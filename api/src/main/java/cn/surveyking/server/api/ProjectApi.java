@@ -1,5 +1,6 @@
 package cn.surveyking.server.api;
 
+import cn.surveyking.server.core.annotation.EnableDataPerm;
 import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.service.ProjectPartnerService;
@@ -31,6 +32,7 @@ public class ProjectApi {
 
 	@GetMapping("/{id}")
 	@PreAuthorize("hasAuthority('project:detail')")
+	@EnableDataPerm(key = "#id")
 	public ProjectView getProject(@PathVariable String id, ProjectQuery query) {
 		query.setId(id);
 		return projectService.getProject(query);
@@ -38,6 +40,7 @@ public class ProjectApi {
 
 	@GetMapping("/{id}/settings")
 	@PreAuthorize("hasAuthority('project:detail')")
+	@EnableDataPerm(key = "#id")
 	public ProjectSetting getSetting(@PathVariable String id, ProjectQuery query) {
 		query.setId(id);
 		return projectService.getSetting(query);
@@ -51,29 +54,34 @@ public class ProjectApi {
 
 	@PatchMapping
 	@PreAuthorize("hasAuthority('project:update')")
+	@EnableDataPerm(key = "#project.id")
 	public void updateProject(@RequestBody ProjectRequest project) {
 		projectService.updateProject(project);
 	}
 
 	@DeleteMapping("{id}")
 	@PreAuthorize("hasAuthority('project:delete')")
+	@EnableDataPerm(key = "#id")
 	public void deleteProject(@PathVariable String id) {
 		projectService.deleteProject(id);
 	}
 
 	@GetMapping("/listPartner")
+	@EnableDataPerm(key = "#projectId")
 	public List<ProjectPartnerView> listProjectPartner(String projectId) {
 		return projectPartnerService.listProjectPartner(projectId);
 	}
 
 	@PostMapping("/addPartner")
+	@EnableDataPerm(key = "#request.projectId")
 	public void addProjectPartner(@RequestBody ProjectPartnerRequest request) {
 		projectPartnerService.addProjectPartner(request);
 	}
 
 	@DeleteMapping("/deletePartner")
-	public void deleteProjectPartner(String id) {
-		projectPartnerService.deleteProjectPartner(id);
+	@EnableDataPerm(key = "#projectId")
+	public void deleteProjectPartner(String projectId, String id) {
+		projectPartnerService.deleteProjectPartner(projectId, id);
 	}
 
 }

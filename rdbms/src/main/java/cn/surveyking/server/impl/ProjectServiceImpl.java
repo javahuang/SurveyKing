@@ -113,12 +113,6 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 		return projectId;
 	}
 
-	public static void main(String[] args) {
-		String a = "1aa";
-		System.out.println(a.charAt(0) > 57);
-		System.out.println(a.charAt(0) < 48);
-	}
-
 	@Override
 	public void updateProject(ProjectRequest request) {
 		updateById(projectViewMapper.fromRequest(request));

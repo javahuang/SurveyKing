@@ -21,5 +21,10 @@ spring:
       FAIL_ON_EMPTY_BEANS: false
     deserialization:
       FAIL_ON_UNKNOWN_PROPERTIES: false # 反序列化时允许未知属性
+
+flowable:
+  async-executor-activate: false
+  database-schema-update: false
+
 api:
   prefix: /api

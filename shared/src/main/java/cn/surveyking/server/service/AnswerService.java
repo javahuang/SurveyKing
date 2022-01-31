@@ -44,7 +44,7 @@ public interface AnswerService {
 		DownloadData download;
 		// 下载问卷答案
 		if (query.getType() == DownloadQuery.DownloadType.SURVEY_ANSWER) {
-			download = downloadSurvey(query.getProjectId());
+			download = downloadSurvey(query.getId());
 		}
 		// 下载附件
 		else if (query.getType() == DownloadQuery.DownloadType.ANSWER_ATTACHMENT) {

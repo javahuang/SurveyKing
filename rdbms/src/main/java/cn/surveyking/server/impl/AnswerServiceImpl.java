@@ -142,7 +142,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	 */
 	@Override
 	public DownloadData downloadAttachment(DownloadQuery query) {
-		Project project = projectMapper.selectById(query.getProjectId());
+		Project project = projectMapper.selectById(query.getId());
 		DownloadData downloadData = new DownloadData();
 		// 下载某个问卷答案的附件
 		if (query.getAnswerId() != null) {
@@ -152,7 +152,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		else {
 			// 下载所有问卷答案的附件
 			QueryWrapper<Answer> answerQuery = new QueryWrapper<>();
-			answerQuery.eq("short_id", query.getProjectId());
+			answerQuery.eq("project_id", query.getProjectId());
 			downloadData.setResource(new InputStreamResource(answerAttachToZip(list(answerQuery))));
 			downloadData.setFileName(project.getName() + ".zip");
 			downloadData.setMediaType(MediaType.parseMediaType("application/zip"));
