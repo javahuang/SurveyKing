@@ -13,7 +13,7 @@ public class UserRequest {
 
 	private String id;
 
-	private String orgId;
+	private String deptId;
 
 	private String name;
 

@@ -1,12 +1,10 @@
 package cn.surveyking.server.service;
 
 import cn.surveyking.server.core.common.PaginationResponse;
-import cn.surveyking.server.domain.dto.UserInfo;
-import cn.surveyking.server.domain.dto.UserQuery;
-import cn.surveyking.server.domain.dto.UserRequest;
-import cn.surveyking.server.domain.dto.UserView;
+import cn.surveyking.server.domain.dto.*;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -37,5 +35,7 @@ public interface UserService extends UserDetailsService {
 	 * 系统用户初始化
 	 */
 	void init();
+
+	List<UserInfo> selectUsers(SelectUserQuery query);
 
 }

@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 public class UserPositionRequest {
 
-	private String orgId;
+	private String deptId;
 
 	private String positionId;
 

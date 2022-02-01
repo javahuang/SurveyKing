@@ -2,7 +2,7 @@ package cn.surveyking.server.api;
 
 import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.domain.dto.*;
-import cn.surveyking.server.service.OrgService;
+import cn.surveyking.server.service.DeptService;
 import cn.surveyking.server.service.PositionService;
 import cn.surveyking.server.service.SystemService;
 import cn.surveyking.server.service.UserService;
@@ -28,7 +28,7 @@ public class SystemApi {
 
 	private final PositionService positionService;
 
-	private final OrgService orgService;
+	private final DeptService deptService;
 
 	@RequestMapping("/roles")
 	@PreAuthorize("hasAuthority('system:role:list')")
@@ -130,34 +130,34 @@ public class SystemApi {
 		positionService.deletePosition(id);
 	}
 
-	@GetMapping("/orgs")
-	@PreAuthorize("hasAuthority('system:org:list')")
-	public List<OrgView> listOrg() {
-		return orgService.listOrg();
+	@GetMapping("/depts")
+	@PreAuthorize("hasAuthority('system:dept:list')")
+	public List<DeptView> listOrg() {
+		return deptService.listOrg();
 	}
 
-	@PostMapping("/orgs")
-	@PreAuthorize("hasAuthority('system:org:create')")
-	public void addOrg(@RequestBody OrgRequest request) {
-		orgService.addOrg(request);
+	@PostMapping("/depts")
+	@PreAuthorize("hasAuthority('system:dept:create')")
+	public void addOrg(@RequestBody DeptRequest request) {
+		deptService.addDept(request);
 	}
 
-	@PatchMapping("/orgs")
-	@PreAuthorize("hasAuthority('system:org:update')")
-	public void updateOrg(@RequestBody OrgRequest request) {
-		orgService.updateOrg(request);
+	@PatchMapping("/depts")
+	@PreAuthorize("hasAuthority('system:dept:update')")
+	public void updateOrg(@RequestBody DeptRequest request) {
+		deptService.updateDept(request);
 	}
 
-	@DeleteMapping("/orgs/{id}")
-	@PreAuthorize("hasAuthority('system:org:delete')")
+	@DeleteMapping("/depts/{id}")
+	@PreAuthorize("hasAuthority('system:dept:delete')")
 	public void deleteOrg(@PathVariable String id) {
-		orgService.deleteOrg(id);
+		deptService.deleteDept(id);
 	}
 
-	@PostMapping("/orgs/sort")
-	@PreAuthorize("hasAuthority('system:org:create')")
-	public void sortOrg(@RequestBody OrgSortRequest request) {
-		orgService.sortOrg(request);
+	@PostMapping("/depts/sort")
+	@PreAuthorize("hasAuthority('system:dept:create')")
+	public void sortOrg(@RequestBody DeptSortRequest request) {
+		deptService.sortDept(request);
 	}
 
 }

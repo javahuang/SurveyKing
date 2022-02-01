@@ -9,7 +9,7 @@ import java.util.List;
  * @date 2021/11/4
  */
 @Data
-public class OrgSortRequest {
+public class DeptSortRequest {
 
 	List<String> nodes;
 

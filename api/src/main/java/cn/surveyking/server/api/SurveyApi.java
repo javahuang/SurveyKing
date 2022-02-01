@@ -9,6 +9,7 @@ import cn.surveyking.server.flow.service.FlowService;
 import cn.surveyking.server.service.AnswerService;
 import cn.surveyking.server.service.FileService;
 import cn.surveyking.server.service.SurveyService;
+import cn.surveyking.server.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
@@ -19,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.Duration;
+import java.util.List;
 
 /**
  * 答卷页面
@@ -38,6 +40,8 @@ public class SurveyApi {
 	private final FileService fileService;
 
 	private final FlowService flowService;
+
+	private final UserService userService;
 
 	@GetMapping("/loadProject")
 	public PublicProjectView loadProject(ProjectQuery query) {
@@ -78,6 +82,15 @@ public class SurveyApi {
 		Resource file = fileService.loadAsResource(attachmentId);
 		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofDays(30)))
 				.contentType(MediaType.IMAGE_JPEG).body(file);
+	}
+
+	@GetMapping("/selectUsers")
+	public List<UserInfo> selectUsers(SelectUserQuery query) {
+		return userService.selectUsers(query);
+	}
+
+	@GetMapping("/selectOrgs")
+	public void selectDepts() {
 	}
 
 }

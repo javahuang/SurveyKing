@@ -12,9 +12,9 @@ import lombok.EqualsAndHashCode;
  * @date 2021/11/2
  */
 @Data
-@TableName(value = "t_org", autoResultMap = true)
+@TableName(value = "t_dept", autoResultMap = true)
 @EqualsAndHashCode(callSuper = false)
-public class Org extends BaseModel {
+public class Dept extends BaseModel {
 
 	private String parentId;
 

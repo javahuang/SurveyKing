@@ -13,9 +13,9 @@ public class UserPositionView {
 
 	private String userId;
 
-	private String orgId;
+	private String deptId;
 
-	private String orgName;
+	private String deptName;
 
 	private String positionId;
 

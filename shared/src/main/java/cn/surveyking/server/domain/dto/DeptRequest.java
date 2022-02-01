@@ -4,10 +4,10 @@ import lombok.Data;
 
 /**
  * @author javahuang
- * @date 2021/11/2
+ * @date 2021/10/6
  */
 @Data
-public class OrgView {
+public class DeptRequest {
 
 	private String id;
 
@@ -21,9 +21,6 @@ public class OrgView {
 
 	/** 负责人id */
 	private String managerId;
-
-	/** 负责人名字 */
-	private String managerName;
 
 	private String remark;
 

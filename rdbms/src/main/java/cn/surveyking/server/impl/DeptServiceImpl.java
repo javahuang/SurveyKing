@@ -1,15 +1,15 @@
 package cn.surveyking.server.impl;
 
-import cn.surveyking.server.domain.dto.OrgRequest;
-import cn.surveyking.server.domain.dto.OrgSortRequest;
-import cn.surveyking.server.domain.dto.OrgView;
-import cn.surveyking.server.domain.mapper.OrgDtoMapper;
-import cn.surveyking.server.domain.model.Org;
+import cn.surveyking.server.domain.dto.DeptRequest;
+import cn.surveyking.server.domain.dto.DeptView;
+import cn.surveyking.server.domain.dto.DeptSortRequest;
+import cn.surveyking.server.domain.mapper.DeptDtoMapper;
+import cn.surveyking.server.domain.model.Dept;
 import cn.surveyking.server.domain.model.UserPosition;
-import cn.surveyking.server.mapper.OrgMapper;
+import cn.surveyking.server.mapper.DeptMapper;
 import cn.surveyking.server.mapper.UserPositionMapper;
 import cn.surveyking.server.service.BaseService;
-import cn.surveyking.server.service.OrgService;
+import cn.surveyking.server.service.DeptService;
 import cn.surveyking.server.service.UserService;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
@@ -27,17 +27,17 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Service
 @Transactional(rollbackFor = Exception.class)
 @RequiredArgsConstructor
-public class OrgServiceImpl extends BaseService<OrgMapper, Org> implements OrgService {
+public class DeptServiceImpl extends BaseService<DeptMapper, Dept> implements DeptService {
 
-	private final OrgDtoMapper orgDtoMapper;
+	private final DeptDtoMapper orgDtoMapper;
 
 	private final UserService userService;
 
 	private final UserPositionMapper userPositionMapper;
 
 	@Override
-	public List<OrgView> listOrg() {
-		List<OrgView> result = orgDtoMapper.toView(list(Wrappers.<Org>lambdaQuery().orderByAsc(Org::getSortCode)));
+	public List<DeptView> listOrg() {
+		List<DeptView> result = orgDtoMapper.toView(list(Wrappers.<Dept>lambdaQuery().orderByAsc(Dept::getSortCode)));
 		result.forEach(orgView -> {
 			String managerId = orgView.getManagerId();
 			if (isNotBlank(managerId)) {
@@ -48,29 +48,29 @@ public class OrgServiceImpl extends BaseService<OrgMapper, Org> implements OrgSe
 	}
 
 	@Override
-	public void addOrg(OrgRequest request) {
-		Org org = orgDtoMapper.fromRequest(request);
-		org.setSortCode((int) count(Wrappers.<Org>lambdaQuery().eq(Org::getParentId, request.getParentId())));
-		save(org);
+	public void addDept(DeptRequest request) {
+		Dept dept = orgDtoMapper.fromRequest(request);
+		dept.setSortCode((int) count(Wrappers.<Dept>lambdaQuery().eq(Dept::getParentId, request.getParentId())));
+		save(dept);
 	}
 
 	@Override
-	public void updateOrg(OrgRequest request) {
+	public void updateDept(DeptRequest request) {
 		updateById(orgDtoMapper.fromRequest(request));
 	}
 
 	@Override
-	public void deleteOrg(String id) {
+	public void deleteDept(String id) {
 		removeById(id);
 		userPositionMapper.delete(Wrappers.<UserPosition>lambdaQuery().eq(UserPosition::getOrgId, id));
 	}
 
 	@Override
-	public void sortOrg(OrgSortRequest request) {
+	public void sortDept(DeptSortRequest request) {
 		for (int i = 0; i < request.getNodes().size(); i++) {
-			Org org = getById(request.getNodes().get(i));
-			org.setSortCode(i);
-			updateById(org);
+			Dept dept = getById(request.getNodes().get(i));
+			dept.setSortCode(i);
+			updateById(dept);
 		}
 	}
 

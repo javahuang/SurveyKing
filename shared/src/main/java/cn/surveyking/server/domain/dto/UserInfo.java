@@ -30,9 +30,9 @@ public class UserInfo implements UserDetails, Serializable {
 	/** 头像 */
 	private String avatar;
 
-	private String orgId;
+	private String deptId;
 
-	private String orgName;
+	private String deptName;
 
 	private String gender;
 

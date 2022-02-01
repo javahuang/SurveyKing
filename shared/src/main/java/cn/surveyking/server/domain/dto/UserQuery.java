@@ -13,7 +13,7 @@ public class UserQuery extends PageQuery {
 
 	private String name;
 
-	private String orgId;
+	private String deptId;
 
 	private String[] ids;
 

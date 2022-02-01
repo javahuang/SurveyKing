@@ -21,7 +21,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.Cleanup;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.flowable.bpmn.converter.BpmnXMLConverter;
 import org.flowable.bpmn.model.BpmnModel;
 import org.flowable.engine.RepositoryService;
@@ -34,6 +33,7 @@ import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
@@ -375,7 +375,7 @@ public class FlowServiceImpl implements FlowService {
 			if (view.getApprovalType() != null) {
 				view.setApprovalTypeName(FlowApprovalType.DICT_MAP.get(view.getApprovalType()));
 			}
-			if (StringUtils.isEmpty(view.getActivityName()) && FlowApprovalType.SAVE.equals(view.getApprovalType())) {
+			if (!StringUtils.hasText(view.getActivityName()) && FlowApprovalType.SAVE.equals(view.getApprovalType())) {
 				view.setActivityName("申请人");
 			}
 		});

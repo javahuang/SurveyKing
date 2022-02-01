@@ -28,9 +28,9 @@ public class UserView {
 
 	private Date createAt;
 
-	private String orgId;
+	private String deptId;
 
-	private String orgName;
+	private String deptName;
 
 	private List<RoleView> roles;
 

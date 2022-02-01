@@ -3,11 +3,9 @@ package cn.surveyking.server.impl;
 import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.exception.InternalServerError;
+import cn.surveyking.server.core.security.PasswordEncoder;
 import cn.surveyking.server.core.security.PreAuthorizeAnnotationExtractor;
-import cn.surveyking.server.domain.dto.UserInfo;
-import cn.surveyking.server.domain.dto.UserQuery;
-import cn.surveyking.server.domain.dto.UserRequest;
-import cn.surveyking.server.domain.dto.UserView;
+import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.domain.mapper.RoleViewMapper;
 import cn.surveyking.server.domain.mapper.UserPositionDtoMapper;
 import cn.surveyking.server.domain.mapper.UserViewMapper;
@@ -25,7 +23,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -63,7 +60,7 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 
 	private final UserPositionDtoMapper userPositionDtoMapper;
 
-	private final OrgMapper orgMapper;
+	private final DeptMapper deptMapper;
 
 	/**
 	 * @param username 账号密码登录认证使用
@@ -110,7 +107,7 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 
 	@Override
 	public PaginationResponse<UserView> getUsers(UserQuery query) {
-		List<String> orgIds = getChildOrgIds(query.getOrgId());
+		List<String> orgIds = getChildOrgIds(query.getDeptId());
 		Page<User> userPage = pageByQuery(query,
 				Wrappers.<User>lambdaQuery().like(isNotBlank(query.getName()), User::getName, query.getName())
 						.in(orgIds.size() > 0, User::getOrgId, orgIds).in(query.getIds() != null, User::getId,
@@ -120,9 +117,9 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 			userView.setUsername(accountMapper
 					.selectOne(Wrappers.<Account>lambdaQuery().eq(Account::getUserId, x.getId())).getAuthAccount());
 			// 设置用户部门
-			Org org = orgMapper.selectById(x.getOrgId());
-			if (org != null) {
-				userView.setOrgName(org.getName());
+			Dept dept = deptMapper.selectById(x.getOrgId());
+			if (dept != null) {
+				userView.setDeptName(dept.getName());
 			}
 			// 设置用户角色
 			userView.setRoles(
@@ -142,8 +139,8 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 			return result;
 		}
 		result.add(parentOrgId);
-		orgMapper.selectList(Wrappers.<Org>lambdaQuery().eq(Org::getParentId, parentOrgId)).forEach(org -> {
-			result.addAll(getChildOrgIds(org.getId()));
+		deptMapper.selectList(Wrappers.<Dept>lambdaQuery().eq(Dept::getParentId, parentOrgId)).forEach(dept -> {
+			result.addAll(getChildOrgIds(dept.getId()));
 		});
 		return result;
 	}
@@ -292,11 +289,11 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 			String[] orgAndPositionId = groupId.split(":");
 			String orgId = orgAndPositionId[1], positionId = orgAndPositionId[2];
 			if (orgId.contains(AppConsts.VARIABLE_CURRENT_ORG_ID)) {
-				orgId = loadUserById(currentUser).getOrgId();
+				orgId = loadUserById(currentUser).getDeptId();
 			}
 			else if (orgId.contains(AppConsts.VARIABLE_PARENT_ORG_ID)) {
-				orgId = loadUserById(currentUser).getOrgId();
-				orgId = orgMapper.selectById(orgId).getParentId();
+				orgId = loadUserById(currentUser).getDeptId();
+				orgId = deptMapper.selectById(orgId).getParentId();
 			}
 			return userPositionMapper
 					.selectList(Wrappers.<UserPosition>lambdaQuery()
@@ -305,6 +302,11 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 					.stream().map(up -> up.getUserId()).collect(Collectors.toSet());
 		}
 		return Collections.EMPTY_SET;
+	}
+
+	@Override
+	public List<UserInfo> selectUsers(SelectUserQuery query) {
+		return null;
 	}
 
 	@Override
