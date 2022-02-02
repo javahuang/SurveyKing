@@ -1,6 +1,7 @@
 package cn.surveyking.server.service;
 
 import cn.surveyking.server.core.constant.AppConsts;
+import cn.surveyking.server.domain.dto.FileQuery;
 import cn.surveyking.server.domain.dto.FileView;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,9 +19,9 @@ public interface FileService {
 
 	FileView upload(MultipartFile file, AppConsts.StorageType storageType);
 
-	List<FileView> listImages(AppConsts.StorageType storageType);
+	List<FileView> listFiles(FileQuery query);
 
-	void deleteImage(String id);
+	void deleteFile(String id);
 
 	Resource loadAsResource(String attachmentId);
 

@@ -1,6 +1,7 @@
 package cn.surveyking.server.impl;
 
 import cn.surveyking.server.core.common.PaginationResponse;
+import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.exception.InternalServerError;
 import cn.surveyking.server.core.uitls.ExcelExporter;
 import cn.surveyking.server.core.uitls.SchemaParser;
@@ -12,6 +13,7 @@ import cn.surveyking.server.mapper.AnswerMapper;
 import cn.surveyking.server.mapper.ProjectMapper;
 import cn.surveyking.server.service.AnswerService;
 import cn.surveyking.server.service.FileService;
+import cn.surveyking.server.service.UserService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -28,9 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -50,6 +50,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
 	private final AnswerViewMapper answerViewMapper;
 
+	private final UserService userService;
+
 	@Override
 	public PaginationResponse<AnswerView> listAnswer(AnswerQuery query) {
 		Page<Answer> page = new Page<>(query.getCurrent(), query.getPageSize());
@@ -59,7 +61,47 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 						.in(query.getIds() != null && query.getIds().size() > 0, Answer::getId, query.getIds())
 						.orderByDesc(Answer::getCreateAt));
 		List<AnswerView> list = answerViewMapper.toAnswerView(page.getRecords());
+		Project project = projectMapper.selectById(query.getProjectId());
+		List<SurveySchema> schemaDataTypes = SchemaParser.flatSurveySchema(project.getSurvey());
+		List<SurveySchema> userQuestions = schemaDataTypes.stream()
+				.filter(x -> x.getType() == SurveySchema.QuestionType.User).collect(Collectors.toList());
+		List<SurveySchema> fileQuestions = schemaDataTypes.stream()
+				.filter(x -> x.getType() == SurveySchema.QuestionType.Signature
+						|| x.getType() == SurveySchema.QuestionType.Upload)
+				.collect(Collectors.toList());
+		list.forEach(view -> {
+			LinkedHashMap<String, Object> answers = view.getAnswer();
+			setAnswerTypeInfo(userQuestions, view);
+			setAnswerTypeInfo(fileQuestions, view);
+		});
 		return new PaginationResponse<>(page.getTotal(), list);
+	}
+
+	private void setAnswerTypeInfo(List<SurveySchema> flatQuestionSchema, AnswerView view) {
+		if (flatQuestionSchema.size() == 0) {
+			return;
+		}
+		LinkedHashMap<String, Object> answers = view.getAnswer();
+		SurveySchema.QuestionType questionType = flatQuestionSchema.get(0).getType();
+		flatQuestionSchema.forEach(question -> {
+			String questionId = question.getId();
+			Object option2value = answers.get(questionId);
+			if (option2value != null && option2value instanceof Map) {
+				((Map<String, List<String>>) option2value).values().forEach(ids -> {
+					if (questionType == SurveySchema.QuestionType.User) {
+						view.setUsers(ids.stream().map(userId -> userService.loadUserById(userId).simpleMode())
+								.collect(Collectors.toList()));
+					}
+					else if (questionType == SurveySchema.QuestionType.Signature
+							|| questionType == SurveySchema.QuestionType.Upload) {
+						FileQuery query = new FileQuery();
+						query.setStorageType(AppConsts.StorageType.ANSWER_ATTACHMENT);
+						query.setIds(ids);
+						view.setAttachment(fileService.listFiles(query));
+					}
+				});
+			}
+		});
 	}
 
 	@Override
@@ -91,8 +133,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	@Override
 	public DownloadData downloadSurvey(String id) {
 		Project project = projectMapper.selectById(id);
-
-		List<SurveySchema> schemaDataTypes = SchemaParser.parseDataTypes(project.getSurvey());
+		List<SurveySchema> schemaDataTypes = SchemaParser.flatSurveySchema(project.getSurvey());
 		List<Answer> answers = list(
 				Wrappers.<Answer>lambdaQuery().select(Answer::getId, Answer::getAnswer, Answer::getMetaInfo,
 						Answer::getAttachment, Answer::getCreateAt, Answer::getCreateBy).eq(Answer::getProjectId, id));

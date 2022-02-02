@@ -84,13 +84,14 @@ public class SurveyApi {
 				.contentType(MediaType.IMAGE_JPEG).body(file);
 	}
 
-	@GetMapping("/selectUsers")
-	public List<UserInfo> selectUsers(SelectUserQuery query) {
+	@PostMapping("/selectUsers")
+	public List<UserInfo> selectUsers(@RequestBody SelectUserQuery query) {
 		return userService.selectUsers(query);
 	}
 
-	@GetMapping("/selectOrgs")
-	public void selectDepts() {
+	@PostMapping("/selectDepts")
+	public void selectDepts(@RequestBody SelectDeptQuery query) {
+
 	}
 
 }

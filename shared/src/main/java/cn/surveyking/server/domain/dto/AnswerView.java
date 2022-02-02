@@ -19,7 +19,9 @@ public class AnswerView {
 
 	private LinkedHashMap<String, Object> answer;
 
-	private List<Attachment> attachment;
+	private List<FileView> attachment;
+
+	private List<UserInfo> users;
 
 	private AnswerMetaInfo metaInfo;
 

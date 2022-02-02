@@ -2,6 +2,7 @@ package cn.surveyking.server.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -111,9 +112,7 @@ public class UserInfo implements UserDetails, Serializable {
 
 	public UserInfo simpleMode() {
 		UserInfo userInfo = new UserInfo();
-		userInfo.setUserId(this.getUserId());
-		userInfo.setName(this.getName());
-		userInfo.setAuthorityList(null);
+		BeanUtils.copyProperties(this, userInfo, "authorityList");
 		return userInfo;
 	}
 

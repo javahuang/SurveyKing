@@ -4,8 +4,6 @@ import cn.surveyking.server.domain.dto.FileView;
 import cn.surveyking.server.domain.model.File;
 import cn.surveyking.server.storage.StorePath;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
@@ -16,14 +14,8 @@ import java.util.List;
 @Mapper
 public interface FileViewMapper {
 
-	FileViewMapper INSTANCE = Mappers.getMapper(FileViewMapper.class);
-
-	@Mapping(source = "id", target = "attachmentId")
-	@Mapping(source = "originalName", target = "fileName")
 	FileView toFileView(File file);
 
-	@Mapping(source = "id", target = "attachmentId")
-	@Mapping(source = "originalName", target = "fileName")
 	List<FileView> toFileView(List<File> fileList);
 
 	File toFile(StorePath storePath, String originalName, int storageType);

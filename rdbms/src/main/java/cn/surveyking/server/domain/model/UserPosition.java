@@ -21,7 +21,7 @@ public class UserPosition extends BaseModel {
 
 	private String userId;
 
-	private String orgId;
+	private String deptId;
 
 	private String positionId;
 

@@ -12,12 +12,12 @@ public class FileView {
 	/**
 	 * 附件id
 	 */
-	private String attachmentId;
+	private String id;
 
 	/**
 	 * 文件名
 	 */
-	private String fileName;
+	private String originalName;
 
 	/**
 	 * 预览地址

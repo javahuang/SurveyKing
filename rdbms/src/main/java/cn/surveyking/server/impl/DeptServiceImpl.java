@@ -62,7 +62,7 @@ public class DeptServiceImpl extends BaseService<DeptMapper, Dept> implements De
 	@Override
 	public void deleteDept(String id) {
 		removeById(id);
-		userPositionMapper.delete(Wrappers.<UserPosition>lambdaQuery().eq(UserPosition::getOrgId, id));
+		userPositionMapper.delete(Wrappers.<UserPosition>lambdaQuery().eq(UserPosition::getDeptId, id));
 	}
 
 	@Override

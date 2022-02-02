@@ -39,7 +39,7 @@ public class SchemaParser {
 	 * @param schema
 	 * @return 有数据
 	 */
-	public static List<SurveySchema> parseDataTypes(SurveySchema schema) {
+	public static List<SurveySchema> flatSurveySchema(SurveySchema schema) {
 		List<SurveySchema> dataTypes = new ArrayList<>();
 		if (SurveySchema.QuestionType.dataType().contains(schema.getType())) {
 			SurveySchema dataType = (SurveySchema) schema.clone();
@@ -48,7 +48,7 @@ public class SchemaParser {
 		}
 		if (schema.getChildren() != null) {
 			schema.getChildren().forEach(child -> {
-				dataTypes.addAll(parseDataTypes(child));
+				dataTypes.addAll(flatSurveySchema(child));
 			});
 		}
 

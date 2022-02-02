@@ -1,6 +1,7 @@
 package cn.surveyking.server.api;
 
 import cn.surveyking.server.core.constant.AppConsts;
+import cn.surveyking.server.domain.dto.FileQuery;
 import cn.surveyking.server.domain.dto.FileView;
 import cn.surveyking.server.service.FileService;
 import lombok.AllArgsConstructor;
@@ -34,8 +35,8 @@ public class FileApi {
 
 	@GetMapping
 	@PreAuthorize("hasAuthority('file:list')")
-	public List<FileView> listImages(AppConsts.StorageType storageType) {
-		return fileService.listImages(storageType);
+	public List<FileView> listImages(FileQuery query) {
+		return fileService.listFiles(query);
 	}
 
 	@PostMapping
@@ -47,7 +48,7 @@ public class FileApi {
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasAuthority('file:delete')")
 	public void deleteImage(@PathVariable() String id) {
-		fileService.deleteImage(id);
+		fileService.deleteFile(id);
 	}
 
 }

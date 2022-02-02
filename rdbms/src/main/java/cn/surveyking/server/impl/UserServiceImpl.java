@@ -5,6 +5,7 @@ import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.exception.InternalServerError;
 import cn.surveyking.server.core.security.PasswordEncoder;
 import cn.surveyking.server.core.security.PreAuthorizeAnnotationExtractor;
+import cn.surveyking.server.core.uitls.ContextHelper;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.domain.mapper.RoleViewMapper;
 import cn.surveyking.server.domain.mapper.UserPositionDtoMapper;
@@ -30,6 +31,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -110,14 +112,14 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 		List<String> orgIds = getChildOrgIds(query.getDeptId());
 		Page<User> userPage = pageByQuery(query,
 				Wrappers.<User>lambdaQuery().like(isNotBlank(query.getName()), User::getName, query.getName())
-						.in(orgIds.size() > 0, User::getOrgId, orgIds).in(query.getIds() != null, User::getId,
+						.in(orgIds.size() > 0, User::getDeptId, orgIds).in(query.getIds() != null, User::getId,
 								Arrays.asList(query.getIds() != null ? query.getIds() : new String[0])));
 		return new PaginationResponse<>(userPage.getTotal(), userPage.getRecords().stream().map(x -> {
 			UserView userView = userViewMapper.toUserView(x);
 			userView.setUsername(accountMapper
 					.selectOne(Wrappers.<Account>lambdaQuery().eq(Account::getUserId, x.getId())).getAuthAccount());
 			// 设置用户部门
-			Dept dept = deptMapper.selectById(x.getOrgId());
+			Dept dept = deptMapper.selectById(x.getDeptId());
 			if (dept != null) {
 				userView.setDeptName(dept.getName());
 			}
@@ -267,9 +269,9 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 		// 获取用户的用户岗位
 		userPositionMapper.selectList(Wrappers.<UserPosition>lambdaQuery().eq(UserPosition::getUserId, userId))
 				.forEach(userPosition -> {
-					groups.add("P:" + userPosition.getOrgId() + ":" + userPosition.getPositionId());
+					groups.add("P:" + userPosition.getDeptId() + ":" + userPosition.getPositionId());
 					groups.add("P:" + "ALL:" + userPosition.getPositionId());
-					groups.add("P:" + userPosition.getOrgId() + ":ALL");
+					groups.add("P:" + userPosition.getDeptId() + ":ALL");
 				});
 		User current = getById(userId);
 		// groups.add("U:" + current.getId());
@@ -297,7 +299,7 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 			}
 			return userPositionMapper
 					.selectList(Wrappers.<UserPosition>lambdaQuery()
-							.eq(StringUtils.hasText(orgId), UserPosition::getOrgId, orgId)
+							.eq(StringUtils.hasText(orgId), UserPosition::getDeptId, orgId)
 							.eq(StringUtils.hasText(positionId), UserPosition::getPositionId, positionId))
 					.stream().map(up -> up.getUserId()).collect(Collectors.toSet());
 		}
@@ -306,7 +308,12 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 
 	@Override
 	public List<UserInfo> selectUsers(SelectUserQuery query) {
-		return null;
+		List<User> users = pageByQuery(query, Wrappers.<User>lambdaQuery().select(User::getId)
+				.like(StringUtils.hasText(query.getName()), User::getName, query.getName())).getRecords();
+		return Stream.concat(users.stream().map(user -> user.getId()), query.getSelected().stream())
+				.collect(Collectors.toSet()).stream()
+				.map(userId -> ContextHelper.getBean(UserService.class).loadUserById(userId).simpleMode())
+				.collect(Collectors.toList());
 	}
 
 	@Override
