@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 public class FileQuery {
 
-	AppConsts.StorageType storageType;
+	AppConsts.StorageType type;
 
 	List<String> ids;
 

@@ -17,12 +17,12 @@ import org.springframework.stereotype.Component;
 public class RollbackTaskHandler extends AbstractTaskHandler {
 
 	@Override
-	public void innerProcess(ApprovalTaskRequest request) {
+	public boolean innerProcess(ApprovalTaskRequest request) {
 		Task task = getCurrentRunningTask(request.getTaskId());
 		String currentActivityId = task.getTaskDefinitionKey();
 		String newActivityId = request.getNewActivityId();
 		if (rollbackToStartEvent(request)) {
-			return;
+			return true;
 		}
 		TaskTreeNode taskTreeNode = getHistoricTree(task.getProcessInstanceId());
 		if (StringUtils.isEmpty(request.getNewActivityId())) {
@@ -35,6 +35,7 @@ public class RollbackTaskHandler extends AbstractTaskHandler {
 			runtimeService.createChangeActivityStateBuilder().processInstanceId(task.getProcessInstanceId())
 					.moveActivityIdTo(currentActivityId, newActivityId).changeState();
 		}
+		return true;
 	}
 
 }

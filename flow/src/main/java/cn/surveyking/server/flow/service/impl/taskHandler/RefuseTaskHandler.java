@@ -13,8 +13,9 @@ import org.springframework.stereotype.Component;
 public class RefuseTaskHandler extends AbstractTaskHandler {
 
 	@Override
-	public void innerProcess(ApprovalTaskRequest request) {
+	public boolean innerProcess(ApprovalTaskRequest request) {
 		runtimeService.deleteProcessInstance(request.getProcessInstanceId(), request.getComment());
+		return true;
 	}
 
 }

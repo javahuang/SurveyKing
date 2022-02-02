@@ -13,8 +13,9 @@ import org.springframework.stereotype.Component;
 public class AgreeTaskHandler extends AbstractTaskHandler {
 
 	@Override
-	public void innerProcess(ApprovalTaskRequest request) {
+	public boolean innerProcess(ApprovalTaskRequest request) {
 		taskService.complete(request.getTaskId());
+		return true;
 	}
 
 }

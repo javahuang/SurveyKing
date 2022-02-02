@@ -74,11 +74,14 @@ public abstract class AbstractTaskHandler implements TaskHandler {
 	@Autowired
 	protected RepositoryService repositoryService;
 
-	public abstract void innerProcess(ApprovalTaskRequest request);
+	public abstract boolean innerProcess(ApprovalTaskRequest request);
 
 	@Override
 	public void process(ApprovalTaskRequest request) {
-		innerProcess(request);
+		boolean success = innerProcess(request);
+		if (!success) {
+			return;
+		}
 		saveOperation(request);
 		updateTaskAnswer(request);
 	}
@@ -194,6 +197,10 @@ public abstract class AbstractTaskHandler implements TaskHandler {
 		org.flowable.bpmn.model.Process process = bpmnModel.getProcesses().get(0);
 		List<StartEvent> startEvents = process.findFlowElementsOfType(StartEvent.class);
 		return startEvents.get(0);
+	}
+
+	protected FlowEntry getFlowEntry(String projectId) {
+		return entryService.getOne(Wrappers.<FlowEntry>lambdaQuery().eq(FlowEntry::getProjectId, projectId));
 	}
 
 	protected boolean rollbackToStartEvent(ApprovalTaskRequest request) {

@@ -3,6 +3,7 @@ package cn.surveyking.server.flow.service.impl.taskHandler;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.flow.constant.FlowConstant;
 import cn.surveyking.server.flow.domain.dto.ApprovalTaskRequest;
+import cn.surveyking.server.flow.domain.model.FlowEntry;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.springframework.stereotype.Component;
 
@@ -19,10 +20,15 @@ import java.util.Map;
 public class SaveTaskHandler extends AbstractTaskHandler {
 
 	@Override
-	public void innerProcess(ApprovalTaskRequest request) {
+	public boolean innerProcess(ApprovalTaskRequest request) {
 		Map<String, Object> variables = new HashMap<>();
 		variables.put(FlowConstant.VARIABLE_ANSWER_KEY, request.getAnswerId());
 		variables.put(FlowConstant.VARIABLE_STARTER_USER, SecurityContextUtils.getUserId());
+		FlowEntry entry = getFlowEntry(request.getProjectId());
+		// 当前问卷未绑定工作流
+		if (entry == null) {
+			return false;
+		}
 		// 表示首次提交
 		if (request.getProcessInstanceId() == null) {
 			ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(request.getProjectId(),
@@ -40,7 +46,7 @@ public class SaveTaskHandler extends AbstractTaskHandler {
 			runtimeService.createChangeActivityStateBuilder().processInstanceId(request.getProcessInstanceId())
 					.moveActivityIdTo(currentActivityId, starterActivityId).changeState();
 		}
-
+		return true;
 	}
 
 }

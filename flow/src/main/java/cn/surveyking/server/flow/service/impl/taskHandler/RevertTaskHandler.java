@@ -21,17 +21,18 @@ import java.util.List;
 public class RevertTaskHandler extends AbstractTaskHandler {
 
 	@Override
-	public void innerProcess(ApprovalTaskRequest request) {
+	public boolean innerProcess(ApprovalTaskRequest request) {
 		if (!canRevert(request.getTaskId(), request.getProcessInstanceId())) {
 			throw new FlowableRuntimeException("当前节点不能进行驳回操作");
 		}
 		if (rollbackToStartEvent(request)) {
-			return;
+			return true;
 		}
 		// TODO: 会签撤回
 		List<Task> tasks = getProcessInstanceActiveTaskList(request.getProcessInstanceId());
 		runtimeService.createChangeActivityStateBuilder().processInstanceId(request.getProcessInstanceId())
 				.moveActivityIdTo(tasks.get(0).getTaskDefinitionKey(), request.getActivityId()).changeState();
+		return true;
 	}
 
 	/**

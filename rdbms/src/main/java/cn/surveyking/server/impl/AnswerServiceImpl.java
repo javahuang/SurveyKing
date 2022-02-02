@@ -95,7 +95,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 					else if (questionType == SurveySchema.QuestionType.Signature
 							|| questionType == SurveySchema.QuestionType.Upload) {
 						FileQuery query = new FileQuery();
-						query.setStorageType(AppConsts.StorageType.ANSWER_ATTACHMENT);
+						query.setType(AppConsts.StorageType.ANSWER_ATTACHMENT);
 						query.setIds(ids);
 						view.setAttachment(fileService.listFiles(query));
 					}
