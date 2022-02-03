@@ -59,7 +59,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 				Wrappers.<Answer>lambdaQuery()
 						.eq(query.getProjectId() != null, Answer::getProjectId, query.getProjectId())
 						.in(query.getIds() != null && query.getIds().size() > 0, Answer::getId, query.getIds())
-						.orderByDesc(Answer::getCreateAt));
+						.eq(query.getId() != null, Answer::getId, query.getId()).orderByDesc(Answer::getCreateAt));
 		List<AnswerView> list = answerViewMapper.toAnswerView(page.getRecords());
 		Project project = projectMapper.selectById(query.getProjectId());
 		List<SurveySchema> schemaDataTypes = SchemaParser.flatSurveySchema(project.getSurvey());
@@ -70,7 +70,6 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 						|| x.getType() == SurveySchema.QuestionType.Upload)
 				.collect(Collectors.toList());
 		list.forEach(view -> {
-			LinkedHashMap<String, Object> answers = view.getAnswer();
 			setAnswerTypeInfo(userQuestions, view);
 			setAnswerTypeInfo(fileQuestions, view);
 		});
@@ -134,9 +133,11 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	public DownloadData downloadSurvey(String id) {
 		Project project = projectMapper.selectById(id);
 		List<SurveySchema> schemaDataTypes = SchemaParser.flatSurveySchema(project.getSurvey());
-		List<Answer> answers = list(
-				Wrappers.<Answer>lambdaQuery().select(Answer::getId, Answer::getAnswer, Answer::getMetaInfo,
-						Answer::getAttachment, Answer::getCreateAt, Answer::getCreateBy).eq(Answer::getProjectId, id));
+
+		AnswerQuery query = new AnswerQuery();
+		query.setProjectId(id);
+		query.setPageSize(Integer.MAX_VALUE);
+		List<AnswerView> answerViews = listAnswer(query).getList();
 
 		DownloadData download = new DownloadData();
 		download.setFileName(project.getName() + ".xlsx");
@@ -148,10 +149,9 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 				try {
 					new ExcelExporter.Builder().setSheetName(project.getName()).setOutputStream(outputStream)
 							.setColumns(SchemaParser.parseColumns(schemaDataTypes))
-							.setRows(answers.stream().map(answer -> {
+							.setRows(answerViews.stream().map(answer -> {
 								indexArr[0] = indexArr[0] += 1;
-								return SchemaParser.parseRowData(answerViewMapper.toAnswerView(answer), schemaDataTypes,
-										indexArr[0]);
+								return SchemaParser.parseRowData(answer, schemaDataTypes, indexArr[0]);
 							}).collect(Collectors.toList())).build().exportToStream();
 				}
 				catch (Exception e) {
@@ -183,36 +183,37 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	 */
 	@Override
 	public DownloadData downloadAttachment(DownloadQuery query) {
-		Project project = projectMapper.selectById(query.getId());
+		Project project = projectMapper.selectById(query.getProjectId());
 		DownloadData downloadData = new DownloadData();
+		AnswerQuery answerQuery = new AnswerQuery();
+		answerQuery.setProjectId(query.getProjectId());
+		answerQuery.setPageSize(Integer.MAX_VALUE);
 		// 下载某个问卷答案的附件
 		if (query.getAnswerId() != null) {
-			Answer answer = getById(query.getAnswerId());
-			return generateSurveyAttachment(answer);
+			answerQuery.setId(query.getAnswerId());
+			return generateSurveyAttachment(listAnswer(answerQuery).getList().get(0));
 		}
 		else {
 			// 下载所有问卷答案的附件
-			QueryWrapper<Answer> answerQuery = new QueryWrapper<>();
-			answerQuery.eq("project_id", query.getProjectId());
-			downloadData.setResource(new InputStreamResource(answerAttachToZip(list(answerQuery))));
+			downloadData.setResource(new InputStreamResource(answerAttachToZip(listAnswer(answerQuery).getList())));
 			downloadData.setFileName(project.getName() + ".zip");
 			downloadData.setMediaType(MediaType.parseMediaType("application/zip"));
 		}
 		return downloadData;
 	}
 
-	private DownloadData generateSurveyAttachment(Answer answer) {
+	private DownloadData generateSurveyAttachment(AnswerView answer) {
 		DownloadData downloadData = new DownloadData();
-		List<Attachment> attachments = answer.getAttachment();
+		List<FileView> files = answer.getAttachment();
 		// 如果只有一个附件，则直接返回附件的结果
-		if (attachments.size() == 1) {
-			Attachment attachment = attachments.get(0);
+		if (files.size() == 1) {
+			FileView attachment = files.get(0);
 			downloadData.setFileName(attachment.getOriginalName());
 			downloadData.setResource(fileService.loadAsResource(attachment.getId()));
 		}
 		else {
 			// 多个附件，压缩包
-			downloadData.setResource(new InputStreamResource(answerAttachToZip(Arrays.asList(answer))));
+			downloadData.setResource(new InputStreamResource(answerAttachToZip(Collections.singletonList(answer))));
 			downloadData.setFileName(answer.getId() + ".zip");
 			downloadData.setMediaType(MediaType.parseMediaType("application/zip"));
 		}
@@ -224,7 +225,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	 * @param answers
 	 * @return
 	 */
-	private InputStream answerAttachToZip(List<Answer> answers) {
+	private InputStream answerAttachToZip(List<AnswerView> answers) {
 		try {
 			PipedOutputStream outputStream = new PipedOutputStream();
 			PipedInputStream inputStream = new PipedInputStream(outputStream);

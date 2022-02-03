@@ -77,7 +77,7 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 		if (existAccount == null) {
 			throw new UsernameNotFoundException(format("用户: {}, 不存在", username));
 		}
-		if (existAccount.getStatus() != AppConsts.USER_STATUS.VALID.getStatus()) {
+		if (existAccount.getStatus() != AppConsts.USER_STATUS.VALID) {
 			throw new AccessDeniedException("用户: {}, 被禁用");
 		}
 
@@ -334,7 +334,7 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 		User user = new User();
 		user.setName("Admin");
 		user.setGender("M");
-		user.setStatus(AppConsts.USER_STATUS.VALID.getStatus());
+		user.setStatus(AppConsts.USER_STATUS.VALID);
 		save(user);
 
 		// 绑定用户角色
@@ -350,7 +350,7 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 		account.setAuthSecret(passwordEncoder.encode("surveyking"));
 		account.setUserId(user.getId());
 		account.setUserType(AppConsts.USER_TYPE.SysUser.name());
-		account.setStatus(AppConsts.USER_STATUS.VALID.getStatus());
+		account.setStatus(AppConsts.USER_STATUS.VALID);
 		accountMapper.insert(account);
 		log.info("系统用户初始化完成(admin/surveyking)");
 	}

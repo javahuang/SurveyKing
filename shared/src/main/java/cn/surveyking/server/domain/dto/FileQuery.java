@@ -1,6 +1,5 @@
 package cn.surveyking.server.domain.dto;
 
-import cn.surveyking.server.core.constant.AppConsts;
 import lombok.Data;
 
 import java.util.List;
@@ -12,7 +11,7 @@ import java.util.List;
 @Data
 public class FileQuery {
 
-	AppConsts.StorageType type;
+	Integer type;
 
 	List<String> ids;
 

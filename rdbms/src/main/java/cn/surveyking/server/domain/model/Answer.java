@@ -2,8 +2,6 @@ package cn.surveyking.server.domain.model;
 
 import cn.surveyking.server.core.model.BaseModel;
 import cn.surveyking.server.domain.dto.AnswerMetaInfo;
-import cn.surveyking.server.domain.dto.Attachment;
-import cn.surveyking.server.domain.handler.AttachmentListTypeHandler;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -14,7 +12,6 @@ import org.apache.ibatis.type.JdbcType;
 
 import java.util.Date;
 import java.util.LinkedHashMap;
-import java.util.List;
 
 /**
  * @author javahuang
@@ -29,9 +26,6 @@ public class Answer extends BaseModel {
 
 	@TableField(typeHandler = JacksonTypeHandler.class, jdbcType = JdbcType.LONGVARCHAR)
 	private LinkedHashMap answer;
-
-	@TableField(typeHandler = AttachmentListTypeHandler.class, jdbcType = JdbcType.LONGVARCHAR)
-	private List<Attachment> attachment;
 
 	@TableField(typeHandler = JacksonTypeHandler.class, jdbcType = JdbcType.LONGVARCHAR)
 	private AnswerMetaInfo metaInfo;

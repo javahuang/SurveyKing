@@ -1,6 +1,5 @@
 package cn.surveyking.server.api;
 
-import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.domain.dto.FileQuery;
 import cn.surveyking.server.domain.dto.FileView;
 import cn.surveyking.server.service.FileService;
@@ -41,7 +40,7 @@ public class FileApi {
 
 	@PostMapping
 	@PreAuthorize("hasAuthority('file:import')")
-	public FileView upload(@RequestParam("file") MultipartFile file, AppConsts.StorageType storageType) {
+	public FileView upload(@RequestParam("file") MultipartFile file, int storageType) {
 		return fileService.upload(file, storageType);
 	}
 

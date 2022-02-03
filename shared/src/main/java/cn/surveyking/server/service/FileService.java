@@ -17,7 +17,7 @@ public interface FileService {
 
 	List<String> SUPPORT_IMAGE_LIST = Arrays.asList(AppConsts.SUPPORT_IMAGE_TYPE);
 
-	FileView upload(MultipartFile file, AppConsts.StorageType storageType);
+	FileView upload(MultipartFile file, int storageType);
 
 	List<FileView> listFiles(FileQuery query);
 

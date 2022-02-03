@@ -11,10 +11,8 @@ import javax.validation.constraints.NotNull;
 @Data
 public class DownloadQuery {
 
-	private String id;
-
 	/**
-	 * 问卷id
+	 * 问卷 id
 	 */
 	@NotNull
 	private String projectId;

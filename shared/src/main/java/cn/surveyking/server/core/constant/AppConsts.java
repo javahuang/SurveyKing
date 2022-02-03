@@ -36,26 +36,22 @@ public class AppConsts {
 	/**
 	 * 存储的文件类型
 	 */
-	public enum StorageType {
+	public interface StorageType {
 
-		/**
-		 * 1.背景图片 2.顶部图片 3.问题图片 4.答卷附件 5.问卷模板预览图
-		 */
-		BACKGROUND_IMAGE(1), HEADER_IMAGE(2), QUESTION_IMAGE(3), ANSWER_ATTACHMENT(4), TEMPLATE_PREVIEW_IMAGE(5);
+		/** 背景图片 */
+		int BACKGROUND_IMAGE = 1;
 
-		private int type;
+		/** 顶部图片 */
+		int HEADER_IMAGE = 2;
 
-		StorageType(int type) {
-			this.type = type;
-		}
+		/** 问题图片 */
+		int QUESTION_IMAGE = 3;
 
-		public int getType() {
-			return type;
-		}
+		/** 答卷附件 */
+		int ANSWER_ATTACHMENT = 4;
 
-		public void setType(int type) {
-			this.type = type;
-		}
+		/** 问题模板预览图 */
+		int TEMPLATE_PREVIEW_IMAGE = 5;
 
 	}
 
@@ -90,24 +86,10 @@ public class AppConsts {
 
 	}
 
-	public enum USER_STATUS {
+	public interface USER_STATUS {
 
 		/** 正常用户 */
-		VALID(1);
-
-		private int status;
-
-		USER_STATUS(int type) {
-			this.status = type;
-		}
-
-		public int getStatus() {
-			return status;
-		}
-
-		public void setStatus(int status) {
-			this.status = status;
-		}
+		int VALID = 1;
 
 	}
 

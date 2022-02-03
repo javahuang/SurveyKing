@@ -3,7 +3,6 @@ package cn.surveyking.server.domain.dto;
 import lombok.Data;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 
 /**
  * @author javahuang
@@ -17,8 +16,6 @@ public class AnswerRequest {
 	private String projectId;
 
 	private LinkedHashMap answer;
-
-	private List<Attachment> attachment;
 
 	private AnswerMetaInfo metaInfo;
 

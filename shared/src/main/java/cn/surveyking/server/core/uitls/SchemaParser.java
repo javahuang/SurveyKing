@@ -80,6 +80,16 @@ public class SchemaParser {
 							.collect(Collectors.joining(","));
 				}).collect(Collectors.joining(",")));
 			}
+			else if (questionType == SurveySchema.QuestionType.User) {
+				Map mapValue = (Map) valueObj;
+				rowData.add(mapValue.values().stream().map((x) -> {
+					List<String> userIds = (List<String>) x;
+					return userIds
+							.stream().map(id -> answerInfo.getUsers().stream()
+									.filter(user -> user.getUserId().equals(id)).findFirst().get().getName())
+							.collect(Collectors.joining(","));
+				}).collect(Collectors.joining(",")));
+			}
 			else if (!questionType.name().startsWith("Matrix")) {
 				// 需要将数字类型转换成字符串
 				List<String> result = new ArrayList<>();

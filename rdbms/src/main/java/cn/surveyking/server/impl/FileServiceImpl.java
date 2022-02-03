@@ -1,6 +1,5 @@
 package cn.surveyking.server.impl;
 
-import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.exception.InternalServerError;
 import cn.surveyking.server.domain.dto.FileQuery;
 import cn.surveyking.server.domain.dto.FileView;
@@ -40,7 +39,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 	}
 
 	@Override
-	public FileView upload(MultipartFile uploadFile, AppConsts.StorageType storageType) {
+	public FileView upload(MultipartFile uploadFile, int storageType) {
 		StorePath storePath;
 		if (isSupportImage(uploadFile.getOriginalFilename())) {
 			storePath = storageService.uploadImage(uploadFile);
@@ -48,7 +47,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 		else {
 			storePath = storageService.uploadFile(uploadFile);
 		}
-		File file = fileViewMapper.toFile(storePath, uploadFile.getOriginalFilename(), storageType.getType());
+		File file = fileViewMapper.toFile(storePath, uploadFile.getOriginalFilename(), storageType);
 		save(file);
 		FileView fileView = fileViewMapper.toFileView(file);
 		return fileView;
@@ -78,9 +77,9 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 
 	@Override
 	public List<FileView> listFiles(FileQuery query) {
-		return fileViewMapper.toFileView(
-				list(Wrappers.<File>lambdaQuery().eq(query.getType() != null, File::getStorageType, query.getType())
-						.in(query.getIds() != null && query.getIds().size() > 0, File::getId, query.getIds())));
+		return fileViewMapper.toFileView(list(Wrappers.<File>lambdaQuery()
+				.eq(query.getType() != null, File::getStorageType, query.getType())
+				.in(query.getIds() != null && query.getIds().size() > 0, File::getId, query.getIds())));
 	}
 
 }
