@@ -7,7 +7,7 @@ import lombok.Data;
  * @date 2022/2/1
  */
 @Data
-public class SelectDeptQuery {
+public class SelectDeptRequest {
 
 	private String name;
 

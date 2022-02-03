@@ -2,10 +2,7 @@ package cn.surveyking.server.api;
 
 import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.domain.dto.*;
-import cn.surveyking.server.service.DeptService;
-import cn.surveyking.server.service.PositionService;
-import cn.surveyking.server.service.SystemService;
-import cn.surveyking.server.service.UserService;
+import cn.surveyking.server.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +26,8 @@ public class SystemApi {
 	private final PositionService positionService;
 
 	private final DeptService deptService;
+
+	private final RoleService roleService;
 
 	@RequestMapping("/roles")
 	@PreAuthorize("hasAuthority('system:role:list')")
@@ -160,4 +159,23 @@ public class SystemApi {
 		deptService.sortDept(request);
 	}
 
+	@PostMapping("/selectUsers")
+	public List<UserInfo> selectUsers(@RequestBody SelectUserRequest request) {
+		return userService.selectUsers(request);
+	}
+
+	@PostMapping("/selectDepts")
+	public List<DeptView> selectDepts(@RequestBody SelectDeptRequest request) {
+		return deptService.listDept();
+	}
+
+	@PostMapping("/selectRoles")
+	public List<RoleView> selectRoles(@RequestBody SelectRoleRequest request) {
+		return roleService.selectRoles(request);
+	}
+
+	@PostMapping("/selectPositions")
+	public List<PositionView> selectPositions(@RequestBody SelectPositionRequest request) {
+		return positionService.selectPositions(request);
+	}
 }

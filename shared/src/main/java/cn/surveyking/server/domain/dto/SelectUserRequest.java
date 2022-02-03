@@ -10,11 +10,13 @@ import java.util.List;
  * @date 2022/2/1
  */
 @Data
-public class SelectUserQuery extends PageQuery {
+public class SelectUserRequest extends PageQuery {
 
 	private String name;
 
 	private String projectId;
+
+	private String deptId;
 
 	private List<String> selected = new ArrayList<>();
 

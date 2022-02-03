@@ -36,6 +36,6 @@ public interface UserService extends UserDetailsService {
 	 */
 	void init();
 
-	List<UserInfo> selectUsers(SelectUserQuery query);
+	List<UserInfo> selectUsers(SelectUserRequest request);
 
 }

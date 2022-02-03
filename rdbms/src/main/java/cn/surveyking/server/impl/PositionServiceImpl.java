@@ -4,6 +4,7 @@ import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.domain.dto.PositionQuery;
 import cn.surveyking.server.domain.dto.PositionRequest;
 import cn.surveyking.server.domain.dto.PositionView;
+import cn.surveyking.server.domain.dto.SelectPositionRequest;
 import cn.surveyking.server.domain.mapper.PositionDtoMapper;
 import cn.surveyking.server.domain.model.Position;
 import cn.surveyking.server.mapper.PositionMapper;
@@ -14,6 +15,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static com.baomidou.mybatisplus.core.toolkit.StringUtils.isNotBlank;
 
@@ -50,6 +53,11 @@ public class PositionServiceImpl extends BaseService<PositionMapper, Position> i
 	@Override
 	public void deletePosition(String id) {
 		deletePosition(id);
+	}
+
+	@Override
+	public List<PositionView> selectPositions(SelectPositionRequest request) {
+		return positionDtoMapper.toView(list());
 	}
 
 }

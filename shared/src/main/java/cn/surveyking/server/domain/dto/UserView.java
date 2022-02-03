@@ -22,6 +22,8 @@ public class UserView {
 
 	private String email;
 
+	private String avatar;
+
 	private String gender;
 
 	private int status;

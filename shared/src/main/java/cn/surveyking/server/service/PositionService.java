@@ -4,6 +4,9 @@ import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.domain.dto.PositionQuery;
 import cn.surveyking.server.domain.dto.PositionRequest;
 import cn.surveyking.server.domain.dto.PositionView;
+import cn.surveyking.server.domain.dto.SelectPositionRequest;
+
+import java.util.List;
 
 /**
  * @author javahuang
@@ -19,4 +22,5 @@ public interface PositionService {
 
 	void deletePosition(String id);
 
+    List<PositionView> selectPositions(SelectPositionRequest request);
 }
