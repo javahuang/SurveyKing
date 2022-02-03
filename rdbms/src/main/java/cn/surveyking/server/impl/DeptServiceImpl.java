@@ -29,15 +29,15 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @RequiredArgsConstructor
 public class DeptServiceImpl extends BaseService<DeptMapper, Dept> implements DeptService {
 
-	private final DeptDtoMapper orgDtoMapper;
+	private final DeptDtoMapper deptDtoMapper;
 
 	private final UserService userService;
 
 	private final UserPositionMapper userPositionMapper;
 
 	@Override
-	public List<DeptView> listOrg() {
-		List<DeptView> result = orgDtoMapper.toView(list(Wrappers.<Dept>lambdaQuery().orderByAsc(Dept::getSortCode)));
+	public List<DeptView> listDept() {
+		List<DeptView> result = deptDtoMapper.toView(list(Wrappers.<Dept>lambdaQuery().orderByAsc(Dept::getSortCode)));
 		result.forEach(orgView -> {
 			String managerId = orgView.getManagerId();
 			if (isNotBlank(managerId)) {
@@ -48,15 +48,20 @@ public class DeptServiceImpl extends BaseService<DeptMapper, Dept> implements De
 	}
 
 	@Override
+	public DeptView getDept(String id) {
+		return deptDtoMapper.toView(getById(id));
+	}
+
+	@Override
 	public void addDept(DeptRequest request) {
-		Dept dept = orgDtoMapper.fromRequest(request);
+		Dept dept = deptDtoMapper.fromRequest(request);
 		dept.setSortCode((int) count(Wrappers.<Dept>lambdaQuery().eq(Dept::getParentId, request.getParentId())));
 		save(dept);
 	}
 
 	@Override
 	public void updateDept(DeptRequest request) {
-		updateById(orgDtoMapper.fromRequest(request));
+		updateById(deptDtoMapper.fromRequest(request));
 	}
 
 	@Override

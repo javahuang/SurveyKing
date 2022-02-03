@@ -6,10 +6,7 @@ import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.flow.constant.FlowApprovalType;
 import cn.surveyking.server.flow.domain.dto.ApprovalTaskRequest;
 import cn.surveyking.server.flow.service.FlowService;
-import cn.surveyking.server.service.AnswerService;
-import cn.surveyking.server.service.FileService;
-import cn.surveyking.server.service.SurveyService;
-import cn.surveyking.server.service.UserService;
+import cn.surveyking.server.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
@@ -42,6 +39,8 @@ public class SurveyApi {
 	private final FlowService flowService;
 
 	private final UserService userService;
+
+	private final DeptService deptService;
 
 	@GetMapping("/loadProject")
 	public PublicProjectView loadProject(ProjectQuery query) {
@@ -90,8 +89,8 @@ public class SurveyApi {
 	}
 
 	@PostMapping("/selectDepts")
-	public void selectDepts(@RequestBody SelectDeptQuery query) {
-
+	public List<DeptView> selectDepts(@RequestBody SelectDeptQuery query) {
+		return deptService.listDept();
 	}
 
 }

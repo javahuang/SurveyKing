@@ -12,6 +12,7 @@ import cn.surveyking.server.domain.model.Project;
 import cn.surveyking.server.mapper.AnswerMapper;
 import cn.surveyking.server.mapper.ProjectMapper;
 import cn.surveyking.server.service.AnswerService;
+import cn.surveyking.server.service.DeptService;
 import cn.surveyking.server.service.FileService;
 import cn.surveyking.server.service.UserService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -52,6 +53,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
 	private final UserService userService;
 
+	private final DeptService deptService;
+
 	@Override
 	public PaginationResponse<AnswerView> listAnswer(AnswerQuery query) {
 		Page<Answer> page = new Page<>(query.getCurrent(), query.getPageSize());
@@ -65,6 +68,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		List<SurveySchema> schemaDataTypes = SchemaParser.flatSurveySchema(project.getSurvey());
 		List<SurveySchema> userQuestions = schemaDataTypes.stream()
 				.filter(x -> x.getType() == SurveySchema.QuestionType.User).collect(Collectors.toList());
+		List<SurveySchema> deptQuestions = schemaDataTypes.stream()
+				.filter(x -> x.getType() == SurveySchema.QuestionType.Dept).collect(Collectors.toList());
 		List<SurveySchema> fileQuestions = schemaDataTypes.stream()
 				.filter(x -> x.getType() == SurveySchema.QuestionType.Signature
 						|| x.getType() == SurveySchema.QuestionType.Upload)
@@ -72,6 +77,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		list.forEach(view -> {
 			setAnswerTypeInfo(userQuestions, view);
 			setAnswerTypeInfo(fileQuestions, view);
+			setAnswerTypeInfo(deptQuestions, view);
 		});
 		return new PaginationResponse<>(page.getTotal(), list);
 	}
@@ -96,7 +102,12 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 						FileQuery query = new FileQuery();
 						query.setType(AppConsts.StorageType.ANSWER_ATTACHMENT);
 						query.setIds(ids);
-						view.setAttachment(fileService.listFiles(query));
+						// 图片上传和签名需要做一个合并
+						view.getAttachment().addAll(fileService.listFiles(query));
+					}
+					else if (questionType == SurveySchema.QuestionType.Dept) {
+						view.setDepts(ids.stream().map(id -> deptService.listDept().stream()
+								.filter(x -> x.getId().equals(id)).findFirst().get()).collect(Collectors.toList()));
 					}
 				});
 			}

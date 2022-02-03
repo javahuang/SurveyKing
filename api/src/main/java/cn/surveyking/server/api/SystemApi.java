@@ -133,7 +133,7 @@ public class SystemApi {
 	@GetMapping("/depts")
 	@PreAuthorize("hasAuthority('system:dept:list')")
 	public List<DeptView> listOrg() {
-		return deptService.listOrg();
+		return deptService.listDept();
 	}
 
 	@PostMapping("/depts")

@@ -1,7 +1,6 @@
 package cn.surveyking.server.core.uitls;
 
-import cn.surveyking.server.domain.dto.AnswerView;
-import cn.surveyking.server.domain.dto.SurveySchema;
+import cn.surveyking.server.domain.dto.*;
 
 import java.text.Format;
 import java.text.SimpleDateFormat;
@@ -56,7 +55,7 @@ public class SchemaParser {
 	}
 
 	public static List<Object> parseRowData(AnswerView answerInfo, List<SurveySchema> dataTypes, int index) {
-		LinkedHashMap answer = answerInfo.getAnswer();
+		LinkedHashMap<String, Object> answer = answerInfo.getAnswer();
 		List<Object> rowData = new ArrayList<>();
 		rowData.add(index);
 		// 转换答案
@@ -69,14 +68,14 @@ public class SchemaParser {
 				rowData.add(null);
 				continue;
 			}
-			if (questionType == SurveySchema.QuestionType.Upload) {
+			if (questionType == SurveySchema.QuestionType.Upload || questionType == SurveySchema.QuestionType.Signature) {
 				Map mapValue = (Map) valueObj;
 				rowData.add(mapValue.values().stream().map((x) -> {
 					List<String> fileIds = (List<String>) x;
 					return fileIds.stream()
 							.map(id -> answerInfo.getAttachment().stream()
-									.filter(attachment -> attachment.getId().equals(id)).findFirst().get()
-									.getOriginalName())
+									.filter(attachment -> attachment.getId().equals(id)).findFirst()
+									.orElse(new FileView()).getOriginalName())
 							.collect(Collectors.joining(","));
 				}).collect(Collectors.joining(",")));
 			}
@@ -84,9 +83,17 @@ public class SchemaParser {
 				Map mapValue = (Map) valueObj;
 				rowData.add(mapValue.values().stream().map((x) -> {
 					List<String> userIds = (List<String>) x;
-					return userIds
-							.stream().map(id -> answerInfo.getUsers().stream()
-									.filter(user -> user.getUserId().equals(id)).findFirst().get().getName())
+					return userIds.stream().map(id -> answerInfo.getUsers().stream()
+							.filter(user -> user.getUserId().equals(id)).findFirst().orElse(new UserInfo()).getName())
+							.collect(Collectors.joining(","));
+				}).collect(Collectors.joining(",")));
+			}
+			else if (questionType == SurveySchema.QuestionType.Dept) {
+				Map mapValue = (Map) valueObj;
+				rowData.add(mapValue.values().stream().map((x) -> {
+					List<String> userIds = (List<String>) x;
+					return userIds.stream().map(id -> answerInfo.getDepts().stream()
+							.filter(dept -> dept.getId().equals(id)).findFirst().orElse(new DeptView()).getName())
 							.collect(Collectors.joining(","));
 				}).collect(Collectors.joining(",")));
 			}
