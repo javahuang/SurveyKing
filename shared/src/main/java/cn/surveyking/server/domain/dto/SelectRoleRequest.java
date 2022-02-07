@@ -12,6 +12,6 @@ import java.util.List;
 @Data
 public class SelectRoleRequest {
 
-    private List<String> selected = new ArrayList<>();
+	private List<String> selected = new ArrayList<>();
 
 }

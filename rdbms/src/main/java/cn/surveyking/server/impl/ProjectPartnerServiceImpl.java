@@ -1,6 +1,5 @@
 package cn.surveyking.server.impl;
 
-import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.ProjectPartnerRequest;
 import cn.surveyking.server.domain.dto.ProjectPartnerView;
@@ -45,8 +44,9 @@ public class ProjectPartnerServiceImpl extends BaseService<ProjectPartnerMapper,
 	public void addProjectPartner(ProjectPartnerRequest request) {
 		// 过滤掉已存在的用户
 		List<String> existUserIds = list(
-				Wrappers.<ProjectPartner>lambdaQuery().in(ProjectPartner::getUserId, request.getUserIds())).stream()
-						.map(x -> x.getUserId()).collect(Collectors.toList());
+				Wrappers.<ProjectPartner>lambdaQuery().in(ProjectPartner::getUserId, request.getUserIds())
+						.eq(ProjectPartner::getProjectId, request.getProjectId())).stream().map(x -> x.getUserId())
+								.collect(Collectors.toList());
 		saveBatch(request.getUserIds().stream().filter(userId -> {
 			if (existUserIds.contains(userId)) {
 				return false;
@@ -56,7 +56,7 @@ public class ProjectPartnerServiceImpl extends BaseService<ProjectPartnerMapper,
 			ProjectPartner partner = new ProjectPartner();
 			partner.setProjectId(request.getProjectId());
 			partner.setUserId(userId);
-			partner.setType(AppConsts.ProjectPartnerType.COLLABORATOR);
+			partner.setType(request.getType());
 			return partner;
 		}).collect(Collectors.toList()));
 	}

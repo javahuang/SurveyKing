@@ -68,7 +68,8 @@ public class SchemaParser {
 				rowData.add(null);
 				continue;
 			}
-			if (questionType == SurveySchema.QuestionType.Upload || questionType == SurveySchema.QuestionType.Signature) {
+			if (questionType == SurveySchema.QuestionType.Upload
+					|| questionType == SurveySchema.QuestionType.Signature) {
 				Map mapValue = (Map) valueObj;
 				rowData.add(mapValue.values().stream().map((x) -> {
 					List<String> fileIds = (List<String>) x;

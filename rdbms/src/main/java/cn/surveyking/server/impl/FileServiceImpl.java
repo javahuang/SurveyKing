@@ -77,9 +77,9 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 
 	@Override
 	public List<FileView> listFiles(FileQuery query) {
-		return fileViewMapper.toFileView(list(Wrappers.<File>lambdaQuery()
-				.eq(query.getType() != null, File::getStorageType, query.getType())
-				.in(query.getIds() != null && query.getIds().size() > 0, File::getId, query.getIds())));
+		return fileViewMapper.toFileView(
+				list(Wrappers.<File>lambdaQuery().eq(query.getType() != null, File::getStorageType, query.getType())
+						.in(query.getIds() != null && query.getIds().size() > 0, File::getId, query.getIds())));
 	}
 
 }

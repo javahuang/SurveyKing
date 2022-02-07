@@ -5,6 +5,7 @@ import cn.surveyking.server.core.security.JwtTokenUtil;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.AuthRequest;
 import cn.surveyking.server.domain.dto.UserInfo;
+import cn.surveyking.server.domain.dto.UserRequest;
 import cn.surveyking.server.domain.dto.UserTokenView;
 import cn.surveyking.server.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +54,14 @@ public class UserApi {
 	@GetMapping("/currentUser")
 	@PreAuthorize("isAuthenticated()")
 	public UserInfo currentUser() {
+		return userService.loadUserById(SecurityContextUtils.getUserId());
+	}
+
+	@PostMapping("/user")
+	public UserInfo updateUser(@RequestBody UserRequest request) {
+		// 只有本人才能通过调用这个接口修改个人信息
+		request.setId(SecurityContextUtils.getUserId());
+		userService.updateUser(request);
 		return userService.loadUserById(SecurityContextUtils.getUserId());
 	}
 

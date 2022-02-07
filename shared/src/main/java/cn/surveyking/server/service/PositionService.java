@@ -22,5 +22,6 @@ public interface PositionService {
 
 	void deletePosition(String id);
 
-    List<PositionView> selectPositions(SelectPositionRequest request);
+	List<PositionView> selectPositions(SelectPositionRequest request);
+
 }
