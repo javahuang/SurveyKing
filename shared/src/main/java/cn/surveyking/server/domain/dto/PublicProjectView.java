@@ -23,6 +23,8 @@ public class PublicProjectView {
 
 	private Boolean passwordRequired;
 
+	private Boolean loginRequired;
+
 	private Date createAt;
 
 }

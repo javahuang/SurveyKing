@@ -31,6 +31,14 @@ public class SecurityContextUtils {
 		return getUser().getUserId();
 	}
 
+	/**
+	 * 用户是否已登录
+	 * @return
+	 */
+	public static boolean isAuthenticated() {
+		return getUserId() != null;
+	}
+
 	public static boolean isAdmin() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		return authentication.getAuthorities().stream().filter(s -> AppConsts.ROLE_ADMIN.equals(s.getAuthority()))

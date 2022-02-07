@@ -4,6 +4,7 @@ import cn.surveyking.server.flow.domain.model.FlowEntryNode;
 import cn.surveyking.server.flow.service.FlowEntryNodeService;
 import cn.surveyking.server.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.flowable.engine.delegate.DelegateExecution;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashSet;
@@ -40,6 +41,10 @@ public class TaskHelper {
 			}
 		}
 		return result;
+	}
+
+	public void condition(DelegateExecution execution) {
+
 	}
 
 }

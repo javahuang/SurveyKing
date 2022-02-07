@@ -273,8 +273,8 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 					groups.add("P:" + "ALL:" + userPosition.getPositionId());
 					groups.add("P:" + userPosition.getDeptId() + ":ALL");
 				});
-		User current = getById(userId);
-		// groups.add("U:" + current.getId());
+		// User current = getById(userId);
+		groups.add("U:" + userId);
 		// groups.add("P:" + current.getOrgId() + ":");
 		return groups;
 	}

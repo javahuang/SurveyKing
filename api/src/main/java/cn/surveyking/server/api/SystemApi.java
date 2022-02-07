@@ -178,4 +178,5 @@ public class SystemApi {
 	public List<PositionView> selectPositions(@RequestBody SelectPositionRequest request) {
 		return positionService.selectPositions(request);
 	}
+
 }

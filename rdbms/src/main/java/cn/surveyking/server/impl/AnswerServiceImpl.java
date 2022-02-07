@@ -15,7 +15,6 @@ import cn.surveyking.server.service.AnswerService;
 import cn.surveyking.server.service.DeptService;
 import cn.surveyking.server.service.FileService;
 import cn.surveyking.server.service.UserService;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -65,21 +64,32 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 						.eq(query.getId() != null, Answer::getId, query.getId()).orderByDesc(Answer::getCreateAt));
 		List<AnswerView> list = answerViewMapper.toAnswerView(page.getRecords());
 		Project project = projectMapper.selectById(query.getProjectId());
-		List<SurveySchema> schemaDataTypes = SchemaParser.flatSurveySchema(project.getSurvey());
-		List<SurveySchema> userQuestions = schemaDataTypes.stream()
-				.filter(x -> x.getType() == SurveySchema.QuestionType.User).collect(Collectors.toList());
-		List<SurveySchema> deptQuestions = schemaDataTypes.stream()
-				.filter(x -> x.getType() == SurveySchema.QuestionType.Dept).collect(Collectors.toList());
-		List<SurveySchema> fileQuestions = schemaDataTypes.stream()
-				.filter(x -> x.getType() == SurveySchema.QuestionType.Signature
-						|| x.getType() == SurveySchema.QuestionType.Upload)
-				.collect(Collectors.toList());
-		list.forEach(view -> {
-			setAnswerTypeInfo(userQuestions, view);
-			setAnswerTypeInfo(fileQuestions, view);
-			setAnswerTypeInfo(deptQuestions, view);
-		});
+		FlatSurveySchemaByType schemaByType = parseSurveySchemaByType(project.getSurvey());
+		list.forEach(view -> setAnswerExtraInfo(view, schemaByType));
 		return new PaginationResponse<>(page.getTotal(), list);
+	}
+
+	private FlatSurveySchemaByType parseSurveySchemaByType(SurveySchema schema) {
+		FlatSurveySchemaByType schemaByType = new FlatSurveySchemaByType();
+		List<SurveySchema> schemaDataTypes = SchemaParser.flatSurveySchema(schema);
+		schemaByType.setSchemaDataTypes(schemaDataTypes);
+		schemaByType.setUserQuestions(parseSurveySchemaByType(schemaDataTypes, SurveySchema.QuestionType.User));
+		schemaByType.setDeptQuestions(parseSurveySchemaByType(schemaDataTypes, SurveySchema.QuestionType.Dept));
+		schemaByType.setFileQuestions(parseSurveySchemaByType(schemaDataTypes, SurveySchema.QuestionType.Signature));
+		schemaByType.getFileQuestions()
+				.addAll((parseSurveySchemaByType(schemaDataTypes, SurveySchema.QuestionType.Upload)));
+		return schemaByType;
+	}
+
+	private List<SurveySchema> parseSurveySchemaByType(List<SurveySchema> flattedSurveySchema,
+			SurveySchema.QuestionType questionType) {
+		return flattedSurveySchema.stream().filter(x -> x.getType() == questionType).collect(Collectors.toList());
+	}
+
+	private void setAnswerExtraInfo(AnswerView view, FlatSurveySchemaByType schemaByType) {
+		setAnswerTypeInfo(schemaByType.getDeptQuestions(), view);
+		setAnswerTypeInfo(schemaByType.getFileQuestions(), view);
+		setAnswerTypeInfo(schemaByType.getUserQuestions(), view);
 	}
 
 	private void setAnswerTypeInfo(List<SurveySchema> flatQuestionSchema, AnswerView view) {
@@ -116,9 +126,11 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
 	@Override
 	public AnswerView getAnswer(AnswerQuery query) {
-		QueryWrapper<Answer> wrapper = new QueryWrapper<>();
-		wrapper.eq("id", query.getId());
-		return answerViewMapper.toAnswerView(super.getOne(wrapper, false));
+		AnswerView answerView = answerViewMapper.toAnswerView(getById(query.getId()));
+		String projectId = answerView.getProjectId();
+		FlatSurveySchemaByType schemaByType = parseSurveySchemaByType(projectMapper.selectById(projectId).getSurvey());
+		setAnswerExtraInfo(answerView, schemaByType);
+		return answerView;
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package cn.surveyking.server.flow.service;
 
 import cn.surveyking.server.core.common.PaginationResponse;
+import cn.surveyking.server.domain.dto.PublicProjectView;
 import cn.surveyking.server.domain.dto.SurveySchema;
 import cn.surveyking.server.flow.domain.dto.*;
 
@@ -14,11 +15,10 @@ public interface FlowService {
 
 	/**
 	 * 启动前过滤过滤当前问卷 schema
-	 * @param userId 当前
-	 * @param schema
+	 * @param projectView
 	 * @return
 	 */
-	SurveySchema beforeLaunchProcess(String userId, SurveySchema schema);
+	void beforeLaunchProcess(PublicProjectView projectView);
 
 	/**
 	 * 流程设计保存

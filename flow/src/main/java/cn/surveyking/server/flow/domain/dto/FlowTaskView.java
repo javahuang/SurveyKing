@@ -1,5 +1,6 @@
 package cn.surveyking.server.flow.domain.dto;
 
+import cn.surveyking.server.domain.dto.DeptView;
 import cn.surveyking.server.domain.dto.FileView;
 import cn.surveyking.server.domain.dto.UserInfo;
 import lombok.Data;
@@ -52,5 +53,9 @@ public class FlowTaskView {
 	private LinkedHashMap<String, Object> answer;
 
 	private List<FileView> attachment;
+
+	private List<UserInfo> users;
+
+	private List<DeptView> depts;
 
 }

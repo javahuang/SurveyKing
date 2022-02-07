@@ -84,34 +84,41 @@ public class FlowServiceImpl implements FlowService {
 
 	/**
 	 * 问卷开始之前，根据权限过滤字段。
-	 * @param userId 当前
-	 * @param schema
+	 * @param projectView
 	 * @return
 	 */
 	@Override
-	public SurveySchema beforeLaunchProcess(String userId, SurveySchema schema) {
+	public void beforeLaunchProcess(PublicProjectView projectView) {
+		SurveySchema schema = projectView.getSurvey();
 		if (schema == null) {
-			return null;
+			return;
 		}
 		FlowEntryNode node = entryNodeService.getById(schema.getId());
 		// 未设置流程
 		if (node == null) {
-			return schema;
+			return;
 		}
 		// 流程申请人为空
 		if (node.getIdentity() == null) {
 			updateSchemaByPermission(node.getFieldPermission(), schema);
-			return schema;
+			return;
 		}
+		// 需要登录，如开启了工作流或者设置了成员/部门题都需要登录才能答卷
+		if (!SecurityContextUtils.isAuthenticated()) {
+			projectView.setLoginRequired(true);
+			projectView.setSurvey(null);
+			return;
+		}
+		String userId = SecurityContextUtils.getUserId();
 		Set<String> userGroups = userService.getUserGroups(userId);
 		for (String identity : node.getIdentity()) {
 			if (userGroups.contains(identity)) {
 				updateSchemaByPermission(node.getFieldPermission(), schema);
-				return schema;
+				return;
 			}
 		}
 		// 用户没有发起流程权限
-		return null;
+		projectView.setSurvey(null);
 	}
 
 	@Override
@@ -254,7 +261,7 @@ public class FlowServiceImpl implements FlowService {
 		flowOperationService.page(page, Wrappers.<FlowOperation>lambdaQuery()
 				.eq(FlowOperation::getProjectId, query.getProjectId())
 				.eq(FlowOperation::getTaskType, FlowTaskType.userTask)
-				// .ne(FlowOperation::getApprovalType, FlowApprovalType.SAVE)
+				.ne(FlowOperation::getApprovalType, FlowApprovalType.SAVE)
 				.exists(String.format(
 						"select 1 from t_flow_operation_user u where u.latest = 1 and u.operation_id = t_flow_operation.id and u.user_id = '%s'",
 						SecurityContextUtils.getUserId()))
@@ -403,7 +410,6 @@ public class FlowServiceImpl implements FlowService {
 			AnswerQuery answerQuery = new AnswerQuery();
 			answerQuery.setId(answerId);
 			AnswerView answerView = answerService.getAnswer(answerQuery);
-			view.setAttachment(answerView.getAttachment());
 			UserInfo createUser = userService.loadUserById(answerView.getCreateBy());
 			if (createUser != null) {
 				view.setCreateUser(createUser.simpleMode());
@@ -412,6 +418,9 @@ public class FlowServiceImpl implements FlowService {
 			view.setFieldPermission(node.getFieldPermission());
 			filterAnswerByPermission(answerView.getAnswer(), node.getFieldPermission());
 			view.setAnswer(answerView.getAnswer());
+			view.setAttachment(answerView.getAttachment());
+			view.setUsers(answerView.getUsers());
+			view.setDepts(answerView.getDepts());
 		}
 	}
 

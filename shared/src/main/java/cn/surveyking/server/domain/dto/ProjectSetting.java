@@ -25,6 +25,12 @@ public class ProjectSetting {
 		private Boolean progressBar = true;
 
 		/**
+		 * 是否需要登录才能作答。
+		 * 需要登录答卷的几种场景：1、问卷设置直接设置 2、工作流起始节点指定发起人 3、问卷里面有成员和部门题
+		 */
+		private Boolean loginRequired;
+
+		/**
 		 * 是否显示题号
 		 */
 		private Boolean questionNumber = true;

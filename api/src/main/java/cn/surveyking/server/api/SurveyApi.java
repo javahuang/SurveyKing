@@ -2,7 +2,10 @@ package cn.surveyking.server.api;
 
 import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
-import cn.surveyking.server.domain.dto.*;
+import cn.surveyking.server.domain.dto.AnswerRequest;
+import cn.surveyking.server.domain.dto.FileView;
+import cn.surveyking.server.domain.dto.ProjectQuery;
+import cn.surveyking.server.domain.dto.PublicProjectView;
 import cn.surveyking.server.flow.constant.FlowApprovalType;
 import cn.surveyking.server.flow.domain.dto.ApprovalTaskRequest;
 import cn.surveyking.server.flow.service.FlowService;
@@ -17,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.Duration;
-import java.util.List;
 
 /**
  * 答卷页面
@@ -45,18 +47,22 @@ public class SurveyApi {
 	@GetMapping("/loadProject")
 	public PublicProjectView loadProject(ProjectQuery query) {
 		PublicProjectView projectView = surveyService.loadProject(query);
-		SurveySchema schema = flowService.beforeLaunchProcess(SecurityContextUtils.getUserId(),
-				projectView.getSurvey());
-		projectView.setSurvey(schema);
+		if (Boolean.TRUE
+				.equals(projectView.getSetting().getLoginRequired() && !SecurityContextUtils.isAuthenticated())) {
+			projectView.setLoginRequired(true);
+			projectView.setSurvey(null);
+		}
+		else {
+			flowService.beforeLaunchProcess(projectView);
+		}
+
 		return projectView;
 	}
 
 	@PostMapping("/verifyPassword")
 	public PublicProjectView verifyPassword(@RequestBody ProjectQuery query) {
 		PublicProjectView projectView = surveyService.verifyPassword(query);
-		SurveySchema schema = flowService.beforeLaunchProcess(SecurityContextUtils.getUserId(),
-				projectView.getSurvey());
-		projectView.setSurvey(schema);
+		flowService.beforeLaunchProcess(projectView);
 		return projectView;
 	}
 
