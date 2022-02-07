@@ -47,8 +47,8 @@ public class SurveyApi {
 	@GetMapping("/loadProject")
 	public PublicProjectView loadProject(ProjectQuery query) {
 		PublicProjectView projectView = surveyService.loadProject(query);
-		if (Boolean.TRUE
-				.equals(projectView.getSetting().getLoginRequired() && !SecurityContextUtils.isAuthenticated())) {
+		if (Boolean.TRUE.equals(projectView.getSetting().getLoginRequired())
+				&& !SecurityContextUtils.isAuthenticated()) {
 			projectView.setLoginRequired(true);
 			projectView.setSurvey(null);
 		}
