@@ -1,6 +1,7 @@
 package cn.surveyking.server.impl;
 
-import cn.surveyking.server.core.exception.InternalServerError;
+import cn.surveyking.server.core.constant.AppConsts;
+import cn.surveyking.server.core.uitls.HTTPUtils;
 import cn.surveyking.server.domain.dto.FileQuery;
 import cn.surveyking.server.domain.dto.FileView;
 import cn.surveyking.server.domain.mapper.FileViewMapper;
@@ -12,12 +13,18 @@ import cn.surveyking.server.storage.StorePath;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -54,32 +61,34 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 	}
 
 	@Override
-	public Resource loadAsResource(String attachmentId) {
-		String fileId = attachmentId;
-		if (fileId.contains("@")) {
-			fileId = attachmentId.substring(0, attachmentId.lastIndexOf("@"));
-		}
-		File file = getById(fileId);
-		if (file == null) {
-			throw new InternalServerError("资源不存在");
-		}
-
-		String filePath;
-		// 缩略图
-		if (attachmentId.contains("@")) {
-			filePath = file.getThumbFilePath();
-		}
-		else {
-			filePath = file.getFilePath();
-		}
-		return new ByteArrayResource(storageService.download(filePath));
-	}
-
-	@Override
 	public List<FileView> listFiles(FileQuery query) {
 		return fileViewMapper.toFileView(
 				list(Wrappers.<File>lambdaQuery().eq(query.getType() != null, File::getStorageType, query.getType())
 						.in(query.getIds() != null && query.getIds().size() > 0, File::getId, query.getIds())));
+	}
+
+	@Override
+	@SneakyThrows
+	public ResponseEntity<Resource> loadFile(FileQuery query) {
+		String fileId = query.getId();
+		if (fileId.contains("@")) {
+			fileId = fileId.substring(0, fileId.lastIndexOf("@"));
+		}
+		File file = getById(fileId);
+		MediaType mediaType;
+		try {
+			mediaType = MediaType.parseMediaType(Files.probeContentType(Paths.get(file.getFilePath())));
+		}
+		catch (Exception e) {
+			mediaType = MediaType.APPLICATION_OCTET_STREAM;
+		}
+		return ResponseEntity.ok().contentType(mediaType).headers(query.getHeaders())
+				.header(HttpHeaders.CONTENT_DISPOSITION,
+						query.getDispositionType() == AppConsts.DispositionTypeEnum.inline
+								? AppConsts.DispositionTypeEnum.inline.name()
+								: HTTPUtils.getContentDispositionValue(file.getOriginalName()))
+				.body(new ByteArrayResource(storageService
+						.download(query.getId().contains("@") ? file.getThumbFilePath() : file.getFilePath())));
 	}
 
 }

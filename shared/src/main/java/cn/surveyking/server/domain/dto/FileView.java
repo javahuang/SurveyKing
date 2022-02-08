@@ -1,5 +1,6 @@
 package cn.surveyking.server.domain.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 /**
@@ -23,5 +24,8 @@ public class FileView {
 	 * 预览地址
 	 */
 	private String previewUrl;
+
+	@JsonIgnore
+	private String filePath;
 
 }

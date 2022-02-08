@@ -34,7 +34,7 @@ public class AppConsts {
 	public static final String VARIABLE_PARENT_ORG_ID = "parentOrgId";
 
 	/**
-	 * 存储的文件类型
+	 * 存储的文件类型 TODO: 文件添加权限控制
 	 */
 	public interface StorageType {
 
@@ -96,10 +96,26 @@ public class AppConsts {
 	/**
 	 * 岗位对应的数据权限
 	 */
-	public enum DATA_PERMISSION_TYPE {
+	public enum DataPermissionTypeEnum {
 
 		/** 本人、本人及下属、本部门、本部门及下属部门、全部 */
 		SELF, SELF_AND_SUB, DEPT, DEPT_AND_SUB, ALL;
+
+	}
+
+	/**
+	 * 下载文件方式
+	 */
+	public enum DispositionTypeEnum {
+
+		/**
+		 * 预览
+		 */
+		inline,
+		/**
+		 * 附件方式下载
+		 */
+		attachment
 
 	}
 

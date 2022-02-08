@@ -2,6 +2,7 @@ package cn.surveyking.server.service;
 
 import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.exception.InternalServerError;
+import cn.surveyking.server.core.uitls.HTTPUtils;
 import cn.surveyking.server.core.uitls.IPUtils;
 import cn.surveyking.server.core.uitls.UserAgentUtils;
 import cn.surveyking.server.domain.dto.*;
@@ -10,8 +11,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
 /**
  * @author javahuang
@@ -53,15 +52,9 @@ public interface AnswerService {
 		else {
 			throw new InternalServerError("未知下载类型");
 		}
-		try {
-			String fileName = URLEncoder.encode(download.getFileName(), "UTF-8");
-			return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
-					.contentType(download.getMediaType()).body(download.getResource());
-		}
-		catch (UnsupportedEncodingException e) {
-			throw new InternalServerError("下载失败", e);
-		}
-
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, HTTPUtils.getContentDispositionValue(download.getFileName()))
+				.contentType(download.getMediaType()).body(download.getResource());
 	}
 
 }

@@ -2,18 +2,17 @@ package cn.surveyking.server.api;
 
 import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
-import cn.surveyking.server.domain.dto.AnswerRequest;
-import cn.surveyking.server.domain.dto.FileView;
-import cn.surveyking.server.domain.dto.ProjectQuery;
-import cn.surveyking.server.domain.dto.PublicProjectView;
+import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.flow.constant.FlowApprovalType;
 import cn.surveyking.server.flow.domain.dto.ApprovalTaskRequest;
 import cn.surveyking.server.flow.service.FlowService;
-import cn.surveyking.server.service.*;
+import cn.surveyking.server.service.AnswerService;
+import cn.surveyking.server.service.FileService;
+import cn.surveyking.server.service.SurveyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
-import org.springframework.http.MediaType;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,10 +38,6 @@ public class SurveyApi {
 	private final FileService fileService;
 
 	private final FlowService flowService;
-
-	private final UserService userService;
-
-	private final DeptService deptService;
 
 	@GetMapping("/loadProject")
 	public PublicProjectView loadProject(ProjectQuery query) {
@@ -84,9 +79,11 @@ public class SurveyApi {
 
 	@GetMapping("/preview/{attachmentId}")
 	public ResponseEntity<Resource> preview(@PathVariable String attachmentId) {
-		Resource file = fileService.loadAsResource(attachmentId);
-		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofDays(30)))
-				.contentType(MediaType.IMAGE_JPEG).body(file);
+		FileQuery query = new FileQuery(attachmentId);
+		HttpHeaders headers = new HttpHeaders();
+		headers.add(HttpHeaders.CACHE_CONTROL, CacheControl.maxAge(Duration.ofDays(30)).getHeaderValue());
+		query.setHeaders(headers);
+		return fileService.loadFile(query);
 	}
 
 }

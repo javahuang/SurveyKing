@@ -4,6 +4,7 @@ import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.domain.dto.FileQuery;
 import cn.surveyking.server.domain.dto.FileView;
 import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Arrays;
@@ -21,9 +22,9 @@ public interface FileService {
 
 	List<FileView> listFiles(FileQuery query);
 
-	void deleteFile(String id);
+	ResponseEntity<Resource> loadFile(FileQuery query);
 
-	Resource loadAsResource(String attachmentId);
+	void deleteFile(String id);
 
 	/**
 	 * 是否支持该格式的图片上传

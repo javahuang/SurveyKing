@@ -5,7 +5,6 @@ import cn.surveyking.server.domain.dto.FileView;
 import cn.surveyking.server.service.FileService;
 import lombok.AllArgsConstructor;
 import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -25,11 +24,11 @@ public class FileApi {
 
 	private final FileService fileService;
 
-	@GetMapping("/{attachmentId}")
+	@GetMapping("/{id}")
 	@PreAuthorize("hasAuthority('file:detail')")
-	public ResponseEntity<Resource> preview(@NotEmpty @PathVariable String attachmentId) {
-		Resource file = fileService.loadAsResource(attachmentId);
-		return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(file);
+	public ResponseEntity<Resource> getFile(@NotEmpty @PathVariable String id, FileQuery query) {
+		query.setId(id);
+		return fileService.loadFile(query);
 	}
 
 	@GetMapping

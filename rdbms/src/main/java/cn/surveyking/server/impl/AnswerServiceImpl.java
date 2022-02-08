@@ -232,7 +232,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		if (files.size() == 1) {
 			FileView attachment = files.get(0);
 			downloadData.setFileName(attachment.getOriginalName());
-			downloadData.setResource(fileService.loadAsResource(attachment.getId()));
+			downloadData.setResource(fileService.loadFile(new FileQuery(attachment.getId())).getBody());
 		}
 		else {
 			// 多个附件，压缩包
@@ -257,7 +257,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 					answers.forEach(answer -> {
 						answer.getAttachment().forEach(attachment -> {
 							ByteArrayResource resource = (ByteArrayResource) fileService
-									.loadAsResource(attachment.getId());
+									.loadFile(new FileQuery(attachment.getId())).getBody();
 							ZipEntry entry = new ZipEntry(answer.getId() + "_" + attachment.getOriginalName());
 							try {
 								zout.putNextEntry(entry);
