@@ -116,7 +116,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 						view.getAttachment().addAll(fileService.listFiles(query));
 					}
 					else if (questionType == SurveySchema.QuestionType.Dept) {
-						view.setDepts(ids.stream().map(id -> deptService.listDept().stream()
+						view.setDepts(ids.stream().map(id -> deptService.listDept(null).stream()
 								.filter(x -> x.getId().equals(id)).findFirst().get()).collect(Collectors.toList()));
 					}
 				});

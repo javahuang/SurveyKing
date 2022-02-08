@@ -132,7 +132,7 @@ public class SystemApi {
 	@GetMapping("/depts")
 	@PreAuthorize("hasAuthority('system:dept:list')")
 	public List<DeptView> listOrg() {
-		return deptService.listDept();
+		return deptService.listDept(null);
 	}
 
 	@PostMapping("/depts")
@@ -166,7 +166,7 @@ public class SystemApi {
 
 	@PostMapping("/selectDepts")
 	public List<DeptView> selectDepts(@RequestBody SelectDeptRequest request) {
-		return deptService.listDept();
+		return deptService.listDept(request);
 	}
 
 	@PostMapping("/selectRoles")

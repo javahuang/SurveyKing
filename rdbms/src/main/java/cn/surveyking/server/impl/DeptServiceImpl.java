@@ -3,6 +3,7 @@ package cn.surveyking.server.impl;
 import cn.surveyking.server.domain.dto.DeptRequest;
 import cn.surveyking.server.domain.dto.DeptView;
 import cn.surveyking.server.domain.dto.DeptSortRequest;
+import cn.surveyking.server.domain.dto.SelectDeptRequest;
 import cn.surveyking.server.domain.mapper.DeptDtoMapper;
 import cn.surveyking.server.domain.model.Dept;
 import cn.surveyking.server.domain.model.UserPosition;
@@ -15,6 +16,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -36,8 +38,13 @@ public class DeptServiceImpl extends BaseService<DeptMapper, Dept> implements De
 	private final UserPositionMapper userPositionMapper;
 
 	@Override
-	public List<DeptView> listDept() {
-		List<DeptView> result = deptDtoMapper.toView(list(Wrappers.<Dept>lambdaQuery().orderByAsc(Dept::getSortCode)));
+	public List<DeptView> listDept(SelectDeptRequest request) {
+		if (request == null) {
+			request = new SelectDeptRequest();
+		}
+		List<DeptView> result = deptDtoMapper.toView(list(Wrappers.<Dept>lambdaQuery()
+				.in(!CollectionUtils.isEmpty(request.getSelected()), Dept::getId, request.getSelected())
+				.orderByAsc(Dept::getSortCode)));
 		result.forEach(orgView -> {
 			String managerId = orgView.getManagerId();
 			if (isNotBlank(managerId)) {
