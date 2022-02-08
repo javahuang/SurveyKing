@@ -9,7 +9,9 @@ import cn.surveyking.server.domain.dto.UserRequest;
 import cn.surveyking.server.domain.dto.UserTokenView;
 import cn.surveyking.server.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -47,7 +49,11 @@ public class UserApi {
 		// 将 token 提交给 spring security 的 DaoAuthenticationProvider 进行认证
 		Authentication authenticate = authenticationManager.authenticate(authentication);
 		UserInfo user = (UserInfo) authenticate.getPrincipal();
-		return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION,
+		HttpCookie cookie = ResponseCookie
+				.from(AppConsts.COOKIE_TOKEN_NAME,
+						jwtTokenUtil.generateAccessToken(new UserTokenView(user.getUserId())))
+				.path("/").httpOnly(true).build();
+		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).header(HttpHeaders.AUTHORIZATION,
 				jwtTokenUtil.generateAccessToken(new UserTokenView(user.getUserId()))).build();
 	}
 

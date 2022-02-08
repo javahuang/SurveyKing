@@ -7,6 +7,11 @@ package cn.surveyking.server.core.constant;
 public class AppConsts {
 
 	/**
+	 * cookie 保存的 token
+	 */
+	public static final String COOKIE_TOKEN_NAME = "sk-token";
+
+	/**
 	 * 支持的图片类型
 	 */
 	public static final String[] SUPPORT_IMAGE_TYPE = { "JPG", "JPEG", "PNG", "GIF", "BMP", "WBMP" };

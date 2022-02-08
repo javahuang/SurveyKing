@@ -1,8 +1,8 @@
 package cn.surveyking.server.core.security;
 
+import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -10,16 +10,17 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.WebUtils;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 
 import static java.util.Optional.ofNullable;
-import static org.springframework.util.ObjectUtils.isEmpty;
 
 /**
  * @author javahuang
@@ -38,16 +39,15 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 			throws ServletException, IOException {
-		// Get authorization header and validate
-		final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
-
-		if (isEmpty(header) || !header.startsWith("Bearer ")) {
+		// Get authorization cookie and validate
+		Cookie tokenCookie = WebUtils.getCookie(request, AppConsts.COOKIE_TOKEN_NAME);
+		if (tokenCookie == null) {
 			chain.doFilter(request, response);
 			return;
 		}
 
 		// Get jwt token and validate
-		final String token = header.split(" ")[1].trim();
+		final String token = tokenCookie.getValue().trim();
 		if (!jwtTokenUtil.validate(token)) {
 			chain.doFilter(request, response);
 			return;
