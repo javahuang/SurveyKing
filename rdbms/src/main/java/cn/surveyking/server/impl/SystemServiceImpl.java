@@ -3,18 +3,18 @@ package cn.surveyking.server.impl;
 import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.constant.CacheConsts;
 import cn.surveyking.server.core.security.PreAuthorizeAnnotationExtractor;
-import cn.surveyking.server.domain.dto.PermissionView;
-import cn.surveyking.server.domain.dto.RoleQuery;
-import cn.surveyking.server.domain.dto.RoleRequest;
-import cn.surveyking.server.domain.dto.RoleView;
+import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.domain.mapper.RoleViewMapper;
 import cn.surveyking.server.domain.model.Role;
+import cn.surveyking.server.domain.model.SysInfo;
 import cn.surveyking.server.domain.model.UserRole;
+import cn.surveyking.server.mapper.SysInfoMapper;
 import cn.surveyking.server.mapper.UserRoleMapper;
 import cn.surveyking.server.service.SystemService;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +40,23 @@ public class SystemServiceImpl implements SystemService {
 	private final CacheManager cacheManager;
 
 	private final UserRoleMapper userRoleMapper;
+
+	private final SysInfoMapper sysInfoMapper;
+
+	@Override
+	public SystemInfo getSystemInfo() {
+		SystemInfo systemInfo = new SystemInfo();
+		BeanUtils.copyProperties(
+				sysInfoMapper.selectOne(Wrappers.<SysInfo>lambdaQuery().eq(SysInfo::getIsDefault, true)), systemInfo);
+		return systemInfo;
+	}
+
+	@Override
+	public void updateSystemInfo(SystemInfoRequest request) {
+		SysInfo sysInfo = new SysInfo();
+		BeanUtils.copyProperties(request, sysInfo);
+		sysInfoMapper.updateById(sysInfo);
+	}
 
 	@Override
 	public PaginationResponse<RoleView> getRoles(RoleQuery query) {

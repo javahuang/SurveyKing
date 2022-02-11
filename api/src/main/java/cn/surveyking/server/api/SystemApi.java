@@ -29,6 +29,17 @@ public class SystemApi {
 
 	private final RoleService roleService;
 
+	@GetMapping
+	public SystemInfo getSystemInfo() {
+		return systemService.getSystemInfo();
+	}
+
+	@PostMapping
+	@PreAuthorize("hasRole('admin')")
+	public void updateSystemInfo(@RequestBody SystemInfoRequest request) {
+		systemService.updateSystemInfo(request);
+	}
+
 	@RequestMapping("/roles")
 	@PreAuthorize("hasAuthority('system:role:list')")
 	public PaginationResponse<RoleView> roles(RoleQuery query) {

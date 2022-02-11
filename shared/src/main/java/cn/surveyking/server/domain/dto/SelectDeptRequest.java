@@ -17,4 +17,5 @@ public class SelectDeptRequest {
 	private String projectId;
 
 	private List<String> selected = new ArrayList<>();
+
 }

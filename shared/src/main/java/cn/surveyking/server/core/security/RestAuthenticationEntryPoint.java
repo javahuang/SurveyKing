@@ -34,7 +34,6 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
 		response.setStatus(HttpServletResponse.SC_OK);
 		response.getOutputStream().println(objectMapper.writeValueAsString(apiResponse));
-
 	}
 
 }

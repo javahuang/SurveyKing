@@ -15,3 +15,4 @@ custom-cache:
     userCache: 1d
     deptCache: 1d
     projectPermissionCache: 1d
+    commonCache: 30d

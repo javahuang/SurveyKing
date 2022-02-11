@@ -32,4 +32,5 @@ public class FileQuery {
 	AppConsts.DispositionTypeEnum dispositionType;
 
 	HttpHeaders headers;
+
 }
