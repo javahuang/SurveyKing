@@ -24,6 +24,7 @@ public interface ProjectViewMapper {
 
 	@Mapping(target = "setting", source = "setting.answerSetting")
 	@Mapping(target = "passwordRequired", expression = "java(project.getSurvey() == null)")
+	@Mapping(target = "setting.answerSetting.password", ignore = true)
 	PublicProjectView toPublicProjectView(Project project);
 
 	// @AfterMapping

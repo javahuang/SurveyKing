@@ -13,6 +13,7 @@ public class SurveyServerApplication {
 		// 快速执行数据库初始化操作
 		if (args.length > 0 && "i".equalsIgnoreCase(args[0])) {
 			DatabaseInitHelper.init();
+			return;
 		}
 		SpringApplication.run(SurveyServerApplication.class, args);
 	}

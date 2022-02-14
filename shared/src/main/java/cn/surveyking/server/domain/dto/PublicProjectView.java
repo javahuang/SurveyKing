@@ -17,7 +17,7 @@ public class PublicProjectView {
 
 	private Integer status;
 
-	private ProjectSetting.AnswerSetting setting;
+	private ProjectSetting setting;
 
 	private String name;
 
@@ -26,5 +26,7 @@ public class PublicProjectView {
 	private Boolean loginRequired;
 
 	private Date createAt;
+
+	private String submittedHtml;
 
 }

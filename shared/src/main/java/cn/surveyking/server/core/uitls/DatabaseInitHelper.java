@@ -76,6 +76,8 @@ public class DatabaseInitHelper {
 		createFileFromProperties(properties);
 		// 执行数据库初始化操作
 		initDatabaseSchema(properties);
+		// 完成
+		finish();
 	}
 
 	public static void initH2() {
@@ -192,6 +194,10 @@ public class DatabaseInitHelper {
 			e.printStackTrace();
 		}
 		colorOutput("数据库初始化完成", 1);
+	}
+
+	private static void finish() {
+		colorOutput(String.format("初始化完成，有问题请联系作者。"), 1);
 	}
 
 	@SneakyThrows

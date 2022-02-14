@@ -13,10 +13,14 @@ public class ProjectSetting {
 
 	private AnswerSetting answerSetting = new AnswerSetting();
 
-	@Data
-	public class AnswerSetting {
+	private SubmittedSetting submittedSetting = new SubmittedSetting();
 
-		/** 需要密码填写 */
+	@Data
+	public static class AnswerSetting {
+
+		/**
+		 * 需要密码填写
+		 */
 		private String password;
 
 		/**
@@ -34,13 +38,27 @@ public class ProjectSetting {
 		 */
 		private Boolean questionNumber = true;
 
-		/** 自动保存结果 */
+		/**
+		 * 自动保存结果
+		 */
 		private Boolean autoSave;
 
-		/** 允许更新答案 */
+		/**
+		 * 允许更新答案
+		 */
 		private Boolean enableUpdate;
 
 		private LinkedHashMap initialValues;
+
+	}
+
+	@Data
+	public static class SubmittedSetting {
+
+		/**
+		 * 提交后展示的网页内容
+		 */
+		private String contentHtml;
 
 	}
 
