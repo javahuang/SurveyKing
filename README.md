@@ -2,7 +2,7 @@
 
 简体中文 | [English](./README.en-us.md)
 
-![preview-surveyking](./docs/preview.jpg)
+<img src="./docs/preview.jpg" width = "650" height = "400" alt="" align=center />
 
 <details>
   <summary>预览</summary>
