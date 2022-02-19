@@ -2,7 +2,13 @@
 
 简体中文 | [English](./README.en-us.md)
 
-![preview-surveyking](./docs/preview.gif)
+![preview-surveyking](./docs/preview.jpg)
+
+<details>
+  <summary>预览</summary>
+
+  ![preview-surveyking](./docs/preview.gif)
+</details>
 
 ## 背景
 
