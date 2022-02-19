@@ -14,6 +14,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -34,6 +35,7 @@ import java.util.List;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements FileService {
 
 	private final StorageService storageService;
@@ -75,6 +77,10 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 			fileId = fileId.substring(0, fileId.lastIndexOf("@"));
 		}
 		File file = getById(fileId);
+		if (file == null) {
+			log.error("未找到对应的文件 {}", fileId);
+			return null;
+		}
 		MediaType mediaType;
 		try {
 			mediaType = MediaType.parseMediaType(Files.probeContentType(Paths.get(file.getFilePath())));

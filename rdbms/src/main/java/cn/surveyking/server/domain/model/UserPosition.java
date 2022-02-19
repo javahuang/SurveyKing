@@ -1,6 +1,5 @@
 package cn.surveyking.server.domain.model;
 
-import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.model.BaseModel;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -31,7 +30,7 @@ public class UserPosition extends BaseModel {
 	private Boolean isPrimaryPosition;
 
 	@JsonIgnore
-	@TableField(value = AppConsts.COLUMN_IS_DELETED, select = false)
+	@TableField(exist = false)
 	private boolean deleted = false;
 
 }

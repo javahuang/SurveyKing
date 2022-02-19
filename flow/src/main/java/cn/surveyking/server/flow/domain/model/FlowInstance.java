@@ -42,7 +42,7 @@ public class FlowInstance implements Serializable {
 	private Integer status;
 
 	/**
-	 * 当前所处的审批阶段
+	 * 当前所处的审批阶段，审批节点名称
 	 */
 	@TableField(value = "approval_stage")
 	private String approvalStage;

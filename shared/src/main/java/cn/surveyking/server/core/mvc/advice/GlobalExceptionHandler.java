@@ -2,6 +2,7 @@ package cn.surveyking.server.core.mvc.advice;
 
 import cn.surveyking.server.core.common.ApiResponse;
 import cn.surveyking.server.core.common.ResponseCode;
+import cn.surveyking.server.core.exception.InternalServerError;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -70,13 +71,14 @@ public class GlobalExceptionHandler {
 			AccessDeniedException ex) {
 		log.error("handleAccessDeniedException {}\n", request.getRequestURI());
 
-		return ResponseEntity.ok().body(new ApiResponse<>(ResponseCode.FORBIDDEN.code, ex.getMessage()));
+		return ResponseEntity.ok().body(new ApiResponse<>(ResponseCode.FORBIDDEN.code, "Authentication failed"));
 	}
 
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ApiResponse<String>> handleInternalServerError(HttpServletRequest request, Exception ex) {
 		log.error("handleInternalServerError {}\n", request.getRequestURI(), ex);
-		return ResponseEntity.ok().body(new ApiResponse<>(ResponseCode.INTERNAL_SERVER_ERROR.code, ex.getMessage()));
+		return ResponseEntity.ok().body(new ApiResponse<>(ResponseCode.INTERNAL_SERVER_ERROR.code,
+				ex instanceof InternalServerError ? ex.getMessage() : "Internal server error"));
 	}
 
 }

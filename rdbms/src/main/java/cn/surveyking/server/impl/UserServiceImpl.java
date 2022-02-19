@@ -94,7 +94,7 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 		UserInfo userInfo = userViewMapper.toUserInfo(user);
 		List<Role> roles = userRoleMapper
 				.selectList(Wrappers.<UserRole>lambdaQuery().eq(UserRole::getUserId, user.getId())).stream()
-				.map(ur -> roleService.getById(ur.getRoleId())).collect(Collectors.toList());
+				.map(ur -> roleService.getById(ur.getRoleId())).filter(x -> x != null).collect(Collectors.toList());
 		Set<String> authorities = new HashSet<>();
 		roles.forEach(role -> {
 			authorities.add("ROLE_" + role.getCode());

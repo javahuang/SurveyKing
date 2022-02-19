@@ -400,6 +400,26 @@ public class FlowServiceImpl implements FlowService {
 		}).collect(Collectors.toList());
 	}
 
+	@Override
+	public FlowStaticsView statics() {
+		FlowStaticsView statics = new FlowStaticsView();
+		// 获取我的待办
+		TaskQuery taskQuery = taskService.createTaskQuery().active();
+		String userId = SecurityContextUtils.getUserId();
+		taskQuery.or().taskCandidateUser(userId).taskAssignee(userId).endOr().orderByTaskCreateTime().desc();
+		statics.setTodo(taskQuery.count());
+		// 获取我的已办
+		statics.setFinished(flowOperationService
+				.count(Wrappers.<FlowOperation>lambdaQuery().eq(FlowOperation::getTaskType, FlowTaskType.userTask)
+						.ne(FlowOperation::getApprovalType, FlowApprovalType.SAVE)));
+		// 获取我能发起的，任务在审批中的
+		statics.setSelfCreated(flowInstanceService.count(
+				Wrappers.<FlowInstance>lambdaQuery().eq(FlowInstance::getCreateBy, SecurityContextUtils.getUserId())
+						.eq(FlowInstance::getStatus, FlowInstanceStatus.APPROVING)));
+		// 获取抄送给我的
+		return statics;
+	}
+
 	private ProcessDefinition getProcessDefinitionByDeployId(String deployId) {
 		return repositoryService.createProcessDefinitionQuery().deploymentId(deployId).latestVersion().singleResult();
 	}

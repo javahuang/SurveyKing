@@ -77,4 +77,9 @@ public class FlowApi {
 		flowService.approvalTask(request);
 	}
 
+	@GetMapping("/statics")
+	public FlowStaticsView statics() {
+		return flowService.statics();
+	}
+
 }

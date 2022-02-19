@@ -14,6 +14,7 @@ import cn.surveyking.server.service.DeptService;
 import cn.surveyking.server.service.UserService;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -62,7 +63,11 @@ public class DeptServiceImpl extends BaseService<DeptMapper, Dept> implements De
 	@Override
 	public void addDept(DeptRequest request) {
 		Dept dept = deptDtoMapper.fromRequest(request);
-		dept.setSortCode((int) count(Wrappers.<Dept>lambdaQuery().eq(Dept::getParentId, request.getParentId())));
+		if (StringUtils.isEmpty(request.getParentId())) {
+			dept.setParentId("0");
+		}
+		dept.setSortCode((int) count(Wrappers.<Dept>lambdaQuery().eq(
+				Dept::getParentId, request.getParentId())));
 		save(dept);
 	}
 

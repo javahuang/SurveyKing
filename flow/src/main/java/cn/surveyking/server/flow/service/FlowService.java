@@ -73,4 +73,9 @@ public interface FlowService {
 	 */
 	List<RevokeView> getRevertNodes(String processInstanceId);
 
+	/**
+	 * @return 当前用户任务统计信息
+	 */
+	FlowStaticsView statics();
+
 }

@@ -80,6 +80,7 @@ public class SystemServiceImpl implements SystemService {
 	@Override
 	public void deleteRole(String id) {
 		roleService.removeById(id);
+		userRoleMapper.delete(Wrappers.<UserRole>lambdaQuery().eq(UserRole::getRoleId, id));
 		evictCache(id);
 	}
 

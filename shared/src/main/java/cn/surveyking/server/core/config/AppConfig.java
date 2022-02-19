@@ -27,7 +27,7 @@ public class AppConfig {
 	 */
 	@EventListener(ApplicationReadyEvent.class)
 	public void initAfterStartup() {
-		userService.init();
+		// userService.init();
 	}
 
 }
