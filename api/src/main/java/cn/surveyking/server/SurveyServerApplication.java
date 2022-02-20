@@ -11,10 +11,10 @@ public class SurveyServerApplication {
 
 	public static void main(String[] args) {
 		// 快速执行数据库初始化操作
-		if (args.length > 0 && "i".equalsIgnoreCase(args[0])) {
-			DatabaseInitHelper.init();
-			return;
+		if (args.length > 0) {
+			DatabaseInitHelper.init(args);
 		}
+
 		SpringApplication.run(SurveyServerApplication.class, args);
 	}
 

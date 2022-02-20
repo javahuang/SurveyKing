@@ -9,8 +9,8 @@ spring:
     #    url: jdbc:h2:tcp://localhost/~/survey
     #    driver-class-name: org.h2.Driver
     username: root
-    password: dota8888
-    url: jdbc:mysql://localhost:3306/workflow
+    password: 123456
+    url: jdbc:mysql://localhost:3306/surveyking
     driver-class-name: com.mysql.cj.jdbc.Driver
 mybatis-plus:
   configuration:

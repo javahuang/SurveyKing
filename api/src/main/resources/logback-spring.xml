@@ -20,7 +20,7 @@
 
     <appender name="INFO_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>./survey/logs/info/info.%d{yyyy-MM-dd}-%i.log.zip</fileNamePattern>
+            <fileNamePattern>./logs/info/info.%d{yyyy-MM-dd}-%i.log.zip</fileNamePattern>
             <maxFileSize>60MB</maxFileSize>
             <totalSizeCap>5GB</totalSizeCap>
             <maxHistory>30</maxHistory>
@@ -37,7 +37,7 @@
 
     <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>./survey/logs/error/error.%d{yyyy-MM-dd}-%i.log.zip
+            <fileNamePattern>./logs/error/error.%d{yyyy-MM-dd}-%i.log.zip
             </fileNamePattern>
             <maxHistory>90</maxHistory>
             <totalSizeCap>10GB</totalSizeCap>

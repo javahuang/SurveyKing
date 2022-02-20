@@ -32,4 +32,7 @@ public class DatabaseInitProperties {
 
 	private String applicationName = "SurveyKing";
 
+	/** 数据库 url */
+	private String dataSourceUrl;
+
 }

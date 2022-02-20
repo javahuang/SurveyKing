@@ -33,30 +33,41 @@ public class DatabaseInitHelper {
 
 	private static String db = "mysql";
 
-	public static void init() {
+	public static void init(String[] args) {
 		try {
 			if (!needCreateProperties()) {
 				return;
 			}
-			colorOutput("请选择您的数据库类型 : ");
-			colorOutput("1) MySql");
-			colorOutput("2) H2");
-			String selection = sc.nextLine();
-			switch (selection) {
-			case "1":
-				db = "mysql";
-				break;
-			case "2":
-				db = "h2";
-				break;
-			default:
-				return;
+			// 初始化启动配置文件，初始化数据库脚本
+			if ("i".equals(args[0])) {
+				initializeDatabase();
 			}
-			initDb();
+			else {
+				// 通过启动命令行参数来创建配置文件
+				createFileFromProperties(setPropertiesFromArguments(args));
+			}
 		}
 		finally {
 			sc.close();
 		}
+	}
+
+	private static void initializeDatabase() {
+		colorOutput("请选择您的数据库类型 : ");
+		colorOutput("1) MySql");
+		colorOutput("2) H2");
+		String selection = sc.nextLine();
+		switch (selection) {
+		case "1":
+			db = "mysql";
+			break;
+		case "2":
+			db = "h2";
+			break;
+		default:
+			return;
+		}
+		initDb();
 	}
 
 	private static void initDb() {
@@ -109,6 +120,27 @@ public class DatabaseInitHelper {
 		properties.setUsername(setProperty("请输入数据库用户名:", "数据库用户名不能为空", ".+", ""));
 		properties.setPassword(setProperty("请输入数据库密码:", "数据库密码不能为空", ".+", ""));
 		properties.setDriverClassName("com.mysql.cj.jdbc.Driver");
+		return properties;
+	}
+
+	private static DatabaseInitProperties setPropertiesFromArguments(String[] args) {
+		DatabaseInitProperties properties = new DatabaseInitProperties();
+		for (String arg : args) {
+			String[] kv = arg.split("=", 2);
+			if (kv[0].toLowerCase().contains("port")) {
+				properties.setServerPort(Integer.parseInt(kv[1]));
+			}
+			else if (kv[0].toLowerCase().contains("url")) {
+				properties.setDataSourceUrl(kv[1]);
+			}
+			else if (kv[0].toLowerCase().contains("username")) {
+				properties.setUsername(kv[1]);
+			}
+			else if (kv[0].toLowerCase().contains("password")) {
+				properties.setPassword(kv[1]);
+			}
+		}
+
 		return properties;
 	}
 
@@ -203,23 +235,26 @@ public class DatabaseInitHelper {
 	@SneakyThrows
 	private static void createFileFromProperties(DatabaseInitProperties properties) {
 		File f = new File(CONFIG_FILE);
-		Files.write(f.toPath(), String.format("spring.application.name=%s\n", properties.getApplicationName())
-				.getBytes(StandardCharsets.UTF_8));
-		Files.write(f.toPath(),
-				String.format("server.port=%d\n", properties.getServerPort()).getBytes(StandardCharsets.UTF_8),
-				StandardOpenOption.APPEND);
-		Files.write(f.toPath(),
-				String.format("spring.datasource.driver-class-name=%s\n", properties.getDriverClassName())
-						.getBytes(StandardCharsets.UTF_8),
-				StandardOpenOption.APPEND);
-		Files.write(f.toPath(),
-				String.format("spring.datasource.url=jdbc:mysql://%s:%d/%s\n", properties.getDbIp(),
-						properties.getDbPort(), properties.getDbName()).getBytes(StandardCharsets.UTF_8),
-				StandardOpenOption.APPEND);
-		Files.write(f.toPath(), String.format("spring.datasource.username=%s\n", properties.getUsername())
-				.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
-		Files.write(f.toPath(), String.format("spring.datasource.password=%s\n", properties.getPassword())
-				.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+		writeLine(f, "spring.application.name=%s\n", properties.getApplicationName());
+		writeLine(f, "server.port=%d\n", properties.getServerPort());
+		writeLine(f, "spring.datasource.driver-class-name=%s\n", properties.getDriverClassName());
+		if (properties.getDataSourceUrl() == null) {
+			writeLine(f, "spring.datasource.url=jdbc:mysql://%s:%d/%s\n", properties.getDbIp(), properties.getDbPort(),
+					properties.getDbName());
+		}
+		else {
+			writeLine(f, "spring.datasource.url=%s\n", properties.getDataSourceUrl());
+		}
+		writeLine(f, "spring.datasource.username=%s\n", properties.getUsername());
+		writeLine(f, "spring.datasource.password=%s\n", properties.getPassword());
+	}
+
+	@SneakyThrows
+	private static void writeLine(File file, String key, Object... value) {
+		if (value.length > 0 && value[0] != null) {
+			Files.write(file.toPath(), String.format(key, value).getBytes(StandardCharsets.UTF_8),
+					StandardOpenOption.APPEND);
+		}
 	}
 
 	private static boolean yesOrNo(String prompt) {
