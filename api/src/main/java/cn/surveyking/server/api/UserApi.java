@@ -57,6 +57,13 @@ public class UserApi {
 				jwtTokenUtil.generateAccessToken(new UserTokenView(user.getUserId()))).build();
 	}
 
+	@PostMapping("/public/logout")
+	public ResponseEntity logout() {
+		HttpCookie cookie = ResponseCookie.from(AppConsts.COOKIE_TOKEN_NAME, "").path("/").httpOnly(true).maxAge(0)
+				.build();
+		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).build();
+	}
+
 	@GetMapping("/currentUser")
 	@PreAuthorize("isAuthenticated()")
 	public UserInfo currentUser() {

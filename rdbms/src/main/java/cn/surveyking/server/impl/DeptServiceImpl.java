@@ -66,8 +66,7 @@ public class DeptServiceImpl extends BaseService<DeptMapper, Dept> implements De
 		if (StringUtils.isEmpty(request.getParentId())) {
 			dept.setParentId("0");
 		}
-		dept.setSortCode((int) count(Wrappers.<Dept>lambdaQuery().eq(
-				Dept::getParentId, request.getParentId())));
+		dept.setSortCode((int) count(Wrappers.<Dept>lambdaQuery().eq(Dept::getParentId, request.getParentId())));
 		save(dept);
 	}
 

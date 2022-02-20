@@ -2,7 +2,7 @@
 
 简体中文 | [English](./README.en-us.md)
 
-<img src="./docs/preview.jpg" width = "650" height = "400" alt="" align=center />
+<img src="./docs/preview.jpg" width = "100%" alt="" align=center />
 
 <details>
   <summary>预览</summary>
