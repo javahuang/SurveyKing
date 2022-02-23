@@ -4,10 +4,7 @@ import cn.surveyking.server.domain.dto.*;
 
 import java.text.Format;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -129,9 +126,21 @@ public class SchemaParser {
 		rowData.add(answerInfo.getMetaInfo().getClientInfo().getRegion());
 		rowData.add(answerInfo.getMetaInfo().getClientInfo().getRemoteIp());
 		rowData.add(answerInfo.getId());
+		avoidFormulaInjection(rowData);
 		return rowData;
 	}
 
+	private static void avoidFormulaInjection(List<Object> rowData) {
+		ListIterator<Object> iterator = rowData.listIterator();
+		while (iterator.hasNext()) {
+			Object next = iterator.next();
+			if (next instanceof String && (((String) next).startsWith("=") || ((String) next).startsWith("+")
+					|| ((String) next).startsWith("-") || ((String) next).startsWith("@"))) {
+				iterator.set("'" + next);
+			}
+		}
+	}
+	
 	private static String parseHumanReadableDuration(AnswerView answerInfo) {
 		long duration = answerInfo.getMetaInfo().getAnswerInfo().getEndTime()
 				- answerInfo.getMetaInfo().getAnswerInfo().getStartTime();
