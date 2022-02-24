@@ -2,6 +2,8 @@ package cn.surveyking.server.core.mvc.advice;
 
 import cn.surveyking.server.core.common.ApiResponse;
 import cn.surveyking.server.core.common.ResponseCode;
+import cn.surveyking.server.core.constant.ErrorCode;
+import cn.surveyking.server.core.exception.ErrorCodeException;
 import cn.surveyking.server.core.exception.InternalServerError;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -72,6 +74,15 @@ public class GlobalExceptionHandler {
 		log.error("handleAccessDeniedException {}\n", request.getRequestURI());
 
 		return ResponseEntity.ok().body(new ApiResponse<>(ResponseCode.FORBIDDEN.code, "Authentication failed"));
+	}
+
+	@ExceptionHandler(ErrorCodeException.class)
+	public ResponseEntity<ApiResponse<String>> handleErrorCodeException(HttpServletRequest request,
+			ErrorCodeException ex) {
+		ErrorCode errorCode = ex.getErrorCode();
+		log.error("handleErrorCodeError {} errorCode={}, errorMessage={}", request.getRequestURI(), errorCode.code,
+				errorCode.message);
+		return ResponseEntity.ok().body(new ApiResponse<>(errorCode.code, errorCode.message));
 	}
 
 	@ExceptionHandler(Exception.class)

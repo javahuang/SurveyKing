@@ -50,6 +50,16 @@ public class ProjectSetting {
 
 		private LinkedHashMap initialValues;
 
+		/**
+		 * 回收答案条数限制,
+		 */
+		private Long maxAnswers;
+
+		/**
+		 * 截止回收时间
+		 */
+		private Long endTime;
+
 	}
 
 	@Data

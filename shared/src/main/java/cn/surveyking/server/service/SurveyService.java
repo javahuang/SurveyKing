@@ -1,6 +1,7 @@
 package cn.surveyking.server.service;
 
 import cn.surveyking.server.domain.dto.ProjectQuery;
+import cn.surveyking.server.domain.dto.ProjectSetting;
 import cn.surveyking.server.domain.dto.PublicProjectView;
 
 /**
@@ -9,8 +10,10 @@ import cn.surveyking.server.domain.dto.PublicProjectView;
  */
 public interface SurveyService {
 
-	PublicProjectView loadProject(ProjectQuery query);
+	PublicProjectView loadProject(String projectId);
 
 	PublicProjectView verifyPassword(ProjectQuery query);
+
+	void validateProject(String projectId, ProjectSetting setting);
 
 }

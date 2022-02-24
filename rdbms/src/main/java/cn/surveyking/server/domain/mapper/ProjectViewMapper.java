@@ -25,14 +25,7 @@ public interface ProjectViewMapper {
 	@Mapping(target = "setting", source = "setting.answerSetting")
 	@Mapping(target = "passwordRequired", expression = "java(project.getSurvey() == null)")
 	@Mapping(target = "setting.answerSetting.password", ignore = true)
+	// @Mapping(target = "setting.answerSetting.maxAnswers", ignore = true)
 	PublicProjectView toPublicProjectView(Project project);
-
-	// @AfterMapping
-	// default void afterCreate(Project project, @MappingTarget ProjectView view) {
-	// QueryWrapper<Answer> answerQueryWrapper = new QueryWrapper<>();
-	// answerQueryWrapper.eq("short_id", project.getShortId());
-	// AnswerMapper answerMapper = SpringContextHolder.getBean(AnswerMapper.class);
-	// view.setTotal(answerMapper.selectCount(answerQueryWrapper));
-	// }
 
 }

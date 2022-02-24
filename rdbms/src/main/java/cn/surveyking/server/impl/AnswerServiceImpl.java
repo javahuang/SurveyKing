@@ -11,10 +11,7 @@ import cn.surveyking.server.domain.model.Answer;
 import cn.surveyking.server.domain.model.Project;
 import cn.surveyking.server.mapper.AnswerMapper;
 import cn.surveyking.server.mapper.ProjectMapper;
-import cn.surveyking.server.service.AnswerService;
-import cn.surveyking.server.service.DeptService;
-import cn.surveyking.server.service.FileService;
-import cn.surveyking.server.service.UserService;
+import cn.surveyking.server.service.*;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -43,6 +40,8 @@ import java.util.zip.ZipOutputStream;
 @Transactional
 @RequiredArgsConstructor
 public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> implements AnswerService {
+
+	private final ProjectService projectService;
 
 	private final ProjectMapper projectMapper;
 
@@ -142,6 +141,11 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		answer.setCreateAt(new Date());
 		save(answer);
 		return answer.getId();
+	}
+
+	@Override
+	public long count(String projectId) {
+		return count(Wrappers.<Answer>lambdaQuery().eq(Answer::getProjectId, projectId));
 	}
 
 	@Override

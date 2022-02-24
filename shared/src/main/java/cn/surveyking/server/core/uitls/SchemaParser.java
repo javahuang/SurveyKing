@@ -140,7 +140,7 @@ public class SchemaParser {
 			}
 		}
 	}
-	
+
 	private static String parseHumanReadableDuration(AnswerView answerInfo) {
 		long duration = answerInfo.getMetaInfo().getAnswerInfo().getEndTime()
 				- answerInfo.getMetaInfo().getAnswerInfo().getStartTime();

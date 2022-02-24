@@ -28,6 +28,8 @@ public interface AnswerService {
 
 	void deleteAnswer(String[] ids);
 
+	long count(String projectId);
+
 	DownloadData downloadAttachment(DownloadQuery query);
 
 	DownloadData downloadSurvey(String shortId);

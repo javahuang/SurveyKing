@@ -39,9 +39,10 @@ public class SurveyApi {
 
 	private final FlowService flowService;
 
-	@GetMapping("/loadProject")
-	public PublicProjectView loadProject(ProjectQuery query) {
-		PublicProjectView projectView = surveyService.loadProject(query);
+	@PostMapping("/loadProject")
+	public PublicProjectView loadProject(@RequestBody ProjectQuery query) {
+		PublicProjectView projectView = surveyService.loadProject(query.getId());
+		surveyService.validateProject(query.getId(), projectView.getSetting());
 		if (Boolean.TRUE.equals(projectView.getSetting().getAnswerSetting().getLoginRequired())
 				&& !SecurityContextUtils.isAuthenticated()) {
 			projectView.setLoginRequired(true);
@@ -50,7 +51,6 @@ public class SurveyApi {
 		else {
 			flowService.beforeLaunchProcess(projectView);
 		}
-
 		return projectView;
 	}
 
@@ -63,11 +63,16 @@ public class SurveyApi {
 
 	@PostMapping("/saveAnswer")
 	public void saveAnswer(@RequestBody AnswerRequest answer, HttpServletRequest request) {
+		String projectId = answer.getProjectId();
+		PublicProjectView projectView = surveyService.loadProject(projectId);
+		surveyService.validateProject(projectId, projectView.getSetting());
+
 		String answerId = answerService.saveAnswer(answer, request);
+
 		ApprovalTaskRequest approvalTaskRequest = new ApprovalTaskRequest();
 		approvalTaskRequest.setType(FlowApprovalType.SAVE);
 		approvalTaskRequest.setAnswerId(answerId);
-		approvalTaskRequest.setProjectId(answer.getProjectId());
+		approvalTaskRequest.setProjectId(projectId);
 		approvalTaskRequest.setActivityId(answer.getProjectId());
 		flowService.approvalTask(approvalTaskRequest);
 	}
