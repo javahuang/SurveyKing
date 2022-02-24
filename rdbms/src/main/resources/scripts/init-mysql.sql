@@ -1308,7 +1308,7 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `FLW_CHANNEL_DEFINITION`;
 CREATE TABLE `FLW_CHANNEL_DEFINITION` (
-  `ID_` varchar(255) COLLATE utf8mb4_bin NOT NULL,
+  `ID_` varchar(64) COLLATE utf8mb4_bin NOT NULL,
   `NAME_` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
   `VERSION_` int(11) DEFAULT NULL,
   `KEY_` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
@@ -1318,9 +1318,7 @@ CREATE TABLE `FLW_CHANNEL_DEFINITION` (
   `TENANT_ID_` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
   `RESOURCE_NAME_` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
   `DESCRIPTION_` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
-  PRIMARY KEY (`ID_`),
-  UNIQUE KEY `ACT_IDX_CHANNEL_DEF_UNIQ` (`KEY_`,`VERSION_`,`TENANT_ID_`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+  PRIMARY KEY (`ID_`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 -- ----------------------------
 -- Records of FLW_CHANNEL_DEFINITION
@@ -1333,7 +1331,7 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `FLW_EVENT_DEFINITION`;
 CREATE TABLE `FLW_EVENT_DEFINITION` (
-  `ID_` varchar(255) COLLATE utf8mb4_bin NOT NULL,
+  `ID_` varchar(64) COLLATE utf8mb4_bin NOT NULL,
   `NAME_` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
   `VERSION_` int(11) DEFAULT NULL,
   `KEY_` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
@@ -1342,9 +1340,7 @@ CREATE TABLE `FLW_EVENT_DEFINITION` (
   `TENANT_ID_` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
   `RESOURCE_NAME_` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
   `DESCRIPTION_` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
-  PRIMARY KEY (`ID_`),
-  UNIQUE KEY `ACT_IDX_EVENT_DEF_UNIQ` (`KEY_`,`VERSION_`,`TENANT_ID_`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+  PRIMARY KEY (`ID_`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 -- ----------------------------
 -- Records of FLW_EVENT_DEFINITION
@@ -1357,7 +1353,7 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `FLW_EVENT_DEPLOYMENT`;
 CREATE TABLE `FLW_EVENT_DEPLOYMENT` (
-  `ID_` varchar(255) COLLATE utf8mb4_bin NOT NULL,
+  `ID_` varchar(64) COLLATE utf8mb4_bin NOT NULL,
   `NAME_` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
   `CATEGORY_` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
   `DEPLOY_TIME_` datetime(3) DEFAULT NULL,
@@ -1377,7 +1373,7 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `FLW_EVENT_RESOURCE`;
 CREATE TABLE `FLW_EVENT_RESOURCE` (
-  `ID_` varchar(255) COLLATE utf8mb4_bin NOT NULL,
+  `ID_` varchar(64) COLLATE utf8mb4_bin NOT NULL,
   `NAME_` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
   `DEPLOYMENT_ID_` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
   `RESOURCE_BYTES_` longblob,
