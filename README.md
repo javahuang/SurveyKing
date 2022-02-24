@@ -8,6 +8,7 @@
   <summary>预览</summary>
 
   ![preview-surveyking](./docs/preview.gif)
+
 </details>
 
 ## 背景
@@ -51,7 +52,7 @@
 
 <!-- 点击[下载 surveyking-h2 版本](https://gitee.com/surveyking/surveyking/attach_files/948414/download/surveyking-h2-v0.2.1.jar)到本地 -->
 
-点击[下载 surveyking-mysql 版本](https://gitee.com/surveyking/surveyking/attach_files/972320/download/surveyking-v0.3.0-beta.3.jar)到本地
+点击[下载 surveyking-mysql 版本](https://gitee.com/surveyking/surveyking/attach_files/976520/download/surveyking-v0.3.0-beta.4.jar)到本地
 
 ### 使用源码编译安装
 
@@ -88,7 +89,7 @@ docker run -p 1991:1991 -v /surveyking:/surveyking surveyking/surveyking
 java -jar surveyking-v0.x.x.jar
 ```
 
-打开浏览器，访问 [http://localhost:1991](http://localhost:1991) 即可，系统首次启动之后会自动创建 admin 用户，账号/密码（*admin/surveyking*），登录系统之后可以通过用户管理界面来修改密码。
+打开浏览器，访问 [http://localhost:1991](http://localhost:1991) 即可，系统首次启动之后会自动创建 admin 用户，账号/密码（*admin/123456*），登录系统之后可以通过用户管理界面来修改密码。
 
 <!-- ### h2 启动方式
 
@@ -98,7 +99,7 @@ java -jar surveyking-v0.x.x.jar
 
 使用参数启动
 
-1. 首先创建 mysql 数据库，然后执行初始化脚本，[下载脚本](https://gitee.com/surveyking/surveyking/blob/master/rdbms/src/main/resources/scripts/init-mysql.sql)。
+1. 首先创建 mysql 数据库，然后执行初始化脚本，[下载脚本](https://gitee.com/surveyking/surveyking/raw/master/rdbms/src/main/resources/scripts/init-mysql.sql)。
 2. 执行 `java -jar surveyking-v0.x.x.jar --server.port=1991 --spring.datasource.url=jdbc:mysql://localhost:3306/surveyking --spring.datasource.username=root --spring.datasource.password=123456`（只有首次启动系统需要添加后面的参数）
 
 参数说明(按照实际需要自行修改)：
