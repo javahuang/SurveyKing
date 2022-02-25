@@ -66,6 +66,9 @@ public class SurveyServiceImpl implements SurveyService {
 
 	@Override
 	public void validateProject(String projectId, ProjectSetting setting) {
+		if (setting.getStatus() == 0) {
+			throw new ErrorCodeException(ErrorCode.SurveySuspend);
+		}
 		Long maxAnswers = setting.getAnswerSetting().getMaxAnswers();
 		// 校验最大答案条数限制
 		if (maxAnswers != null) {

@@ -22,4 +22,8 @@ public class ProjectRequest {
 
 	private String belongGroup;
 
+	private String settingKey;
+
+	private Object settingValue;
+
 }

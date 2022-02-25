@@ -17,9 +17,13 @@ import cn.surveyking.server.service.ProjectService;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Field;
 import java.util.Collections;
 
 import static com.baomidou.mybatisplus.core.toolkit.StringUtils.isNotBlank;
@@ -41,6 +45,8 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 
 	private final ProjectPartnerService projectPartnerService;
 
+	private SpelExpressionParser spelParser = new SpelExpressionParser();
+
 	@Override
 	public PaginationResponse<ProjectView> listProject(ProjectQuery query) {
 		Page<Project> page = pageByQuery(query, Wrappers.<Project>lambdaQuery()
@@ -60,31 +66,6 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 
 	public ProjectView getProject(ProjectQuery query) {
 		return projectViewMapper.toProjectView(getById(query.getId()));
-		// List<Answer> answers = answerMapper
-		// .selectList(Wrappers.<Answer>lambdaQuery().eq(Answer::getProjectId,
-		// query.getId())
-		// .select(Answer::getMetaInfo,
-		// Answer::getCreateAt).orderByDesc(Answer::getCreateAt));
-		// result.setTotal((long) answers.size());
-		// long totalDuration = 0;
-		// int totalOfToday = 0;
-		// for (int i = 0; i < answers.size(); i++) {
-		// Answer current = answers.get(i);
-		// if (i == 0) {
-		// result.setLastUpdate(current.getCreateAt().getTime());
-		// }
-		// if (current.getCreateAt().getTime() >
-		// LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()
-		// .toEpochMilli()) {
-		// totalOfToday++;
-		// }
-		// totalDuration += current.getMetaInfo().getAnswerInfo().getEndTime()
-		// - current.getMetaInfo().getAnswerInfo().getStartTime();
-		// }
-		// if (totalDuration > 0) {
-		// result.setAverageDuration(totalDuration / answers.size());
-		// result.setTotalOfToday(totalOfToday);
-		// }
 	}
 
 	@Override
@@ -114,8 +95,16 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 	}
 
 	@Override
+	@SneakyThrows
 	public void updateProject(ProjectRequest request) {
-		updateById(projectViewMapper.fromRequest(request));
+		Project project = projectViewMapper.fromRequest(request);
+		if (request.getSettingKey() != null) {
+			// 实现单个设置的更新
+			ProjectSetting setting = getById(request.getId()).getSetting();
+			spelParser.parseExpression(request.getSettingKey()).setValue(setting, request.getSettingValue());
+			project.setSetting(setting);
+		}
+		updateById(project);
 	}
 
 	@Override
@@ -126,6 +115,37 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 	@Override
 	public ProjectSetting getSetting(ProjectQuery query) {
 		return null;
+	}
+
+	private <T> T merge(T local, T remote) throws IllegalAccessException, InstantiationException {
+		Class<?> clazz = local.getClass();
+		Object merged = clazz.newInstance();
+		for (Field field : clazz.getDeclaredFields()) {
+			field.setAccessible(true);
+			Object localValue = field.get(local);
+			Object remoteValue = field.get(remote);
+			switch (field.getType().getSimpleName()) {
+			case "Integer":
+			case "String":
+			case "Boolean":
+			case "Long":
+			case "LinkedHashMap":
+				field.set(merged, (remoteValue != null) ? remoteValue : localValue);
+				break;
+			default:
+				field.set(merged, merge(localValue, remoteValue));
+			}
+		}
+		return (T) merged;
+	}
+
+	public static void main(String[] args) {
+		ExpressionParser parser = new SpelExpressionParser();
+
+		ProjectSetting setting = new ProjectSetting();
+		setting.getAnswerSetting().setPassword("123456");
+		parser.parseExpression("answerSetting.password").setValue(setting, null);
+		System.out.println(setting);
 	}
 
 }
