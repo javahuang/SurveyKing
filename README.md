@@ -58,14 +58,29 @@
 
 默认构建的是 h2 版本的安装包。
 
+使用 gradle 构建：
+
+```bash
+# 下载源码
+git clone https://gitee.com/surveyking/surveyking.git
+
+# 设置 profile，修改 api/src/main/resources/application.yml
+# 打开 active: ${activeProfile} # gradle 配置
+
+# 开始构建
+gradle clean :api:build -P pro -x test
+# 生成的 jar 包位于 ./api/build/libs/surveyking-v0.x.x.jar
+```
+
+使用 maven 构建：
+
 ```bash
 # 下载源码
 git clone https://gitee.com/surveyking/surveyking.git
 
 # 开始构建
-gradle clean :api:build -P pro -x test
-
-# 生成的 jar 包位于 ./api/build/libs/surveyking-v0.x.x.jar
+mvn clean package -DskipTests -Ppro
+# 生成的 jar 包位于 ./api/target/surveyking-v0.x.x.jar
 ```
 
 ### 使用 docker 快速启动
