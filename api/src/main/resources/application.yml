@@ -10,6 +10,8 @@ spring:
       request-timeout: -1
     static-path-pattern: /notfound # 覆盖默认的 /**
     throw-exception-if-no-handler-found: true
+    pathmatch:
+      matching-strategy: ant_path_matcher
   servlet:
     multipart:
       max-file-size: 2048MB
