@@ -97,6 +97,11 @@ public class SurveySchema implements Cloneable {
 		 */
 		private String textLimit;
 
+		/**
+		 * 多选答案数量限制 [1, 2] [,3]
+		 */
+		private String answerLimit;
+
 		private Boolean finish;
 
 		private String finishRule;
