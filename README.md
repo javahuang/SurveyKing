@@ -37,7 +37,7 @@
 - 🎨 报表，支持对问题实时统计分析并以图形（条形图、柱形图、扇形图）、表格的形式展示输出
 - 🚀 安装部署简单（**最快 1 分钟部署**），支持 nginx 部署和一键启动的方式
 - 👬 支持多人协作管理问卷
-- 🎁 后端支持多种数据库，可支持所有带有 jdbc 驱动的关系型数据库，未来将支持 mongodb 这种文档数据库
+- 🎁 后端支持多种数据库，可支持所有带有 jdbc 驱动的关系型数据库，未来计划支持 elasticsearch
 - 🐯 安全、可靠、稳定、高性能的后端 API 服务
 - 🙆 支持完善的 RBAC 权限控制
 - 😊 支持**工作流**，工作流代码已全部开源
@@ -52,7 +52,7 @@
 
 <!-- 点击[下载 surveyking-h2 版本](https://gitee.com/surveyking/surveyking/attach_files/948414/download/surveyking-h2-v0.2.1.jar)到本地 -->
 
-点击[下载 surveyking-mysql 版本](https://gitee.com/surveyking/surveyking/attach_files/976520/download/surveyking-v0.3.0-beta.4.jar)到本地
+点击[下载 surveyking-mysql 版本](https://gitee.com/surveyking/surveyking/attach_files/978997/download/surveyking-v0.3.0-beta.5.jar)到本地
 
 ### 使用源码编译安装
 

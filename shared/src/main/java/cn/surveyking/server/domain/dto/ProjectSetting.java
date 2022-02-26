@@ -14,7 +14,7 @@ public class ProjectSetting {
 	/**
 	 * 1开启 0停止
 	 */
-	private Integer status;
+	private Integer status = 0;
 
 	private AnswerSetting answerSetting = new AnswerSetting();
 
@@ -41,7 +41,7 @@ public class ProjectSetting {
 		/**
 		 * 是否显示题号
 		 */
-		private Boolean questionNumber;
+		private Boolean questionNumber = true;
 
 		/**
 		 * 自动保存结果
