@@ -1,7 +1,7 @@
 package cn.surveyking.server.core.security;
 
 import cn.surveyking.server.core.common.ApiResponse;
-import cn.surveyking.server.core.common.ResponseCode;
+import cn.surveyking.server.core.constant.ResponseCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.AuthenticationException;

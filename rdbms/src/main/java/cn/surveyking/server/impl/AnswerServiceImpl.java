@@ -144,8 +144,24 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	}
 
 	@Override
-	public long count(String projectId) {
-		return count(Wrappers.<Answer>lambdaQuery().eq(Answer::getProjectId, projectId));
+	public long count(AnswerQuery query) {
+		return count(Wrappers.<Answer>lambdaQuery().eq(Answer::getProjectId, query.getProjectId())
+				.ge(query.getStartTime() != null, Answer::getCreateAt, query.getStartTime())
+				.lt(query.getEndTime() != null, Answer::getCreateAt, query.getEndTime())
+				.eq(query.getCreateBy() != null, Answer::getCreateBy, query.getCreateBy())
+				.like(query.getIp() != null, Answer::getMetaInfo, query.getIp())
+				.like(query.getCookie() != null, Answer::getMetaInfo, query.getCookie()));
+	}
+
+	@Override
+	public AnswerView getLatestAnswer(AnswerQuery query) {
+		getOne(Wrappers.<Answer>lambdaQuery()
+				.eq(query.getProjectId() != null, Answer::getProjectId, query.getProjectId())
+				.like(query.getIp() != null, Answer::getMetaInfo, query.getIp())
+				.like(query.getCookie() != null, Answer::getMetaInfo, query.getCookie())
+				// TODO: 针对不同的数据库需要特殊处理，如 oracle .le("rownum", 1)
+				.orderByDesc(Answer::getCreateAt).last("LIMIT 1"));
+		return null;
 	}
 
 	@Override

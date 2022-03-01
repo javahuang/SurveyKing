@@ -12,6 +12,11 @@ public class AppConsts {
 	public static final String COOKIE_TOKEN_NAME = "sk-token";
 
 	/**
+	 *
+	 */
+	public static final String COOKIE_LIMIT_NAME = "sk-limit";
+
+	/**
 	 * 支持的图片类型
 	 */
 	public static final String[] SUPPORT_IMAGE_TYPE = { "JPG", "JPEG", "PNG", "GIF", "BMP", "WBMP" };

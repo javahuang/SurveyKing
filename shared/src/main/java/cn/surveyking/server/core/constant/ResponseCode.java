@@ -1,4 +1,4 @@
-package cn.surveyking.server.core.common;
+package cn.surveyking.server.core.constant;
 
 /**
  * @author javahuang

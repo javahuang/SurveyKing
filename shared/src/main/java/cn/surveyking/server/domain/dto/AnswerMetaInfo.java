@@ -42,6 +42,8 @@ public class AnswerMetaInfo {
 
 		private String deviceType;
 
+		private String cookie;
+
 	}
 
 }

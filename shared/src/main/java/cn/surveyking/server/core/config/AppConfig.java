@@ -1,11 +1,13 @@
 package cn.surveyking.server.core.config;
 
+import cn.surveyking.server.core.base.converter.UniqueLimitSettingConverter;
 import cn.surveyking.server.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.convert.support.DefaultConversionService;
 
 /**
  * @author javahuang
@@ -23,11 +25,14 @@ public class AppConfig {
 	}
 
 	/**
-	 * 系统用户初始化
+	 * 一些初始化操作
 	 */
 	@EventListener(ApplicationReadyEvent.class)
 	public void initAfterStartup() {
 		// userService.init();
+		DefaultConversionService defaultConversionService = (DefaultConversionService) DefaultConversionService
+				.getSharedInstance();
+		defaultConversionService.addConverter(new UniqueLimitSettingConverter());
 	}
 
 }

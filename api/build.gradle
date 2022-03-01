@@ -25,6 +25,7 @@ dependencies {
     implementation project(':shared')
     implementation project(':rdbms')
     implementation project(':flow')
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 test {

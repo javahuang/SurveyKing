@@ -1,7 +1,7 @@
 package cn.surveyking.server.core.mvc.advice;
 
 import cn.surveyking.server.core.common.ApiResponse;
-import cn.surveyking.server.core.common.ResponseCode;
+import cn.surveyking.server.core.constant.ResponseCode;
 import cn.surveyking.server.core.constant.ErrorCode;
 import cn.surveyking.server.core.exception.ErrorCodeException;
 import cn.surveyking.server.core.exception.InternalServerError;

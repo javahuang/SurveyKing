@@ -22,7 +22,12 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.ContextLoader;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
@@ -116,6 +121,26 @@ public class ContextHelper implements ApplicationContextAware {
 		List<Object> beanList = new ArrayList<>();
 		beanList.addAll(map.values());
 		return beanList;
+	}
+
+	public static HttpServletRequest getCurrentHttpRequest() {
+		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+		if (requestAttributes instanceof ServletRequestAttributes) {
+			HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
+			return request;
+		}
+		log.debug("Not called in the context of an HTTP request");
+		return null;
+	}
+
+	public static HttpServletResponse getCurrentHttpResponse() {
+		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+		if (requestAttributes instanceof ServletRequestAttributes) {
+			HttpServletResponse response = ((ServletRequestAttributes) requestAttributes).getResponse();
+			return response;
+		}
+		log.debug("Not called in the context of an HTTP request");
+		return null;
 	}
 
 }

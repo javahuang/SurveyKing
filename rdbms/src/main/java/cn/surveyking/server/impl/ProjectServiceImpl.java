@@ -10,7 +10,6 @@ import cn.surveyking.server.domain.model.Answer;
 import cn.surveyking.server.domain.model.Project;
 import cn.surveyking.server.mapper.AnswerMapper;
 import cn.surveyking.server.mapper.ProjectMapper;
-import cn.surveyking.server.mapper.ProjectPartnerMapper;
 import cn.surveyking.server.service.BaseService;
 import cn.surveyking.server.service.ProjectPartnerService;
 import cn.surveyking.server.service.ProjectService;
@@ -18,7 +17,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,11 +39,11 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 
 	private final ProjectViewMapper projectViewMapper;
 
-	private final ProjectPartnerMapper projectPartnerMapper;
-
 	private final ProjectPartnerService projectPartnerService;
 
 	private SpelExpressionParser spelParser = new SpelExpressionParser();
+
+	;
 
 	@Override
 	public PaginationResponse<ProjectView> listProject(ProjectQuery query) {
@@ -137,15 +135,6 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 			}
 		}
 		return (T) merged;
-	}
-
-	public static void main(String[] args) {
-		ExpressionParser parser = new SpelExpressionParser();
-
-		ProjectSetting setting = new ProjectSetting();
-		setting.getAnswerSetting().setPassword("123456");
-		parser.parseExpression("answerSetting.password").setValue(setting, null);
-		System.out.println(setting);
 	}
 
 }

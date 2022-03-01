@@ -1,5 +1,6 @@
 package cn.surveyking.server.domain.dto;
 
+import cn.surveyking.server.core.constant.AnswerFreqEnum;
 import lombok.Data;
 
 import java.util.LinkedHashMap;
@@ -48,11 +49,6 @@ public class ProjectSetting {
 		 */
 		private Boolean autoSave;
 
-		/**
-		 * 允许更新答案
-		 */
-		private Boolean enableUpdate;
-
 		private LinkedHashMap initialValues;
 
 		/**
@@ -65,6 +61,26 @@ public class ProjectSetting {
 		 */
 		private Long endTime;
 
+		/**
+		 * 只能通过微信作答
+		 */
+		private Boolean wechatOnly;
+
+		/**
+		 * ip 答题限制
+		 */
+		private UniqueLimitSetting ipLimit;
+
+		/**
+		 * cookie 答题限制
+		 */
+		private UniqueLimitSetting cookieLimit;
+
+		/**
+		 * 登录之后答题限制
+		 */
+		private UniqueLimitSetting loginLimit;
+
 	}
 
 	@Data
@@ -74,6 +90,34 @@ public class ProjectSetting {
 		 * 提交后展示的网页内容
 		 */
 		private String contentHtml;
+
+		/**
+		 * 允许更新答案
+		 */
+		private Boolean enableUpdate;
+
+	}
+
+	@Data
+	public static class UniqueLimitSetting {
+
+		/**
+		 * 限制数量
+		 */
+		private Integer limitNum;
+
+		/**
+		 * 限制频率
+		 */
+		private AnswerFreqEnum limitFreq;
+
+		public UniqueLimitSetting() {
+		}
+
+		public UniqueLimitSetting(Integer limitNum, AnswerFreqEnum limitFreq) {
+			this.limitNum = limitNum;
+			this.limitFreq = limitFreq;
+		}
 
 	}
 
