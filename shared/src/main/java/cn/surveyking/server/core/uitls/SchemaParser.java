@@ -110,8 +110,25 @@ public class SchemaParser {
 				});
 				rowData.add(String.join(",", result));
 			}
+            else if (questionType.name().startsWith("Matrix")) {
+                List<String> result = new ArrayList<>();
+                ((Map<?, ?>) valueObj).forEach((optionId, valueMap) -> {
+                    String title = trimHtmlTag(schemaType.getRow().stream().filter(x -> x.getId().equals(optionId))
+                            .findFirst().get().getTitle());
+                    List<String> valueList = new ArrayList<>();
+                    ((LinkedHashMap) valueMap).forEach((childOptId, val) -> {
+                        if (val != null && val instanceof Boolean) {
+                            valueList.add(trimHtmlTag(schemaType.getChildren().stream()
+                                    .filter(x -> x.getId().equals(childOptId)).findFirst().get().getTitle()));
+                        } else {
+                            valueList.add(val + "");
+                        }
+                    });
+                    result.add(String.format("%s:(%s)", title, String.join(",", valueList)));
+                });
+                rowData.add(String.join(",", result));
+            }
 			else {
-				// TODO: 矩阵题如何展示答案
 				rowData.add(null);
 			}
 		}
