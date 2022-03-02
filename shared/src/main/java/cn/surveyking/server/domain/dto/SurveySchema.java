@@ -159,6 +159,11 @@ public class SurveySchema implements Cloneable {
 		/** Textarea 高度自适应，[4,6] 最低4行，最高6行 */
 		private String autoSize;
 
+		/**
+		 * 只允许使用拍照上传
+		 */
+		private Boolean cameraOnly;
+
 	}
 
 	@Data
