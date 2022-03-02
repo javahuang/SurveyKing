@@ -9,14 +9,10 @@ import cn.surveyking.server.core.uitls.ContextHelper;
 import cn.surveyking.server.core.uitls.CronHelper;
 import cn.surveyking.server.core.uitls.IPUtils;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
-import cn.surveyking.server.domain.dto.AnswerQuery;
-import cn.surveyking.server.domain.dto.ProjectQuery;
-import cn.surveyking.server.domain.dto.ProjectSetting;
-import cn.surveyking.server.domain.dto.PublicProjectView;
+import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.domain.mapper.ProjectViewMapper;
-import cn.surveyking.server.domain.model.Project;
-import cn.surveyking.server.mapper.ProjectMapper;
 import cn.surveyking.server.service.AnswerService;
+import cn.surveyking.server.service.ProjectService;
 import cn.surveyking.server.service.SurveyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +38,7 @@ import java.util.UUID;
 @Slf4j
 public class SurveyServiceImpl implements SurveyService {
 
-	private final ProjectMapper projectMapper;
+	private final ProjectService projectService;
 
 	private final ProjectViewMapper projectViewMapper;
 
@@ -55,7 +51,7 @@ public class SurveyServiceImpl implements SurveyService {
 	 */
 	@Override
 	public PublicProjectView loadProject(String projectId) {
-		Project project = projectMapper.selectById(projectId);
+		ProjectView project = projectService.getProject(projectId);
 		if (project == null) {
 			throw new ErrorCodeException(ErrorCode.ProjectNotFound);
 		}
@@ -63,12 +59,13 @@ public class SurveyServiceImpl implements SurveyService {
 				&& project.getSetting().getAnswerSetting().getPassword() != null) {
 			project.setSurvey(null);
 		}
+		validateProject(projectId);
 		return projectViewMapper.toPublicProjectView(project);
 	}
 
 	@Override
 	public PublicProjectView verifyPassword(ProjectQuery query) {
-		Project project = projectMapper.selectById(query.getId());
+		ProjectView project = projectService.getProject(query.getId());
 		try {
 			if (project.getSetting().getAnswerSetting().getPassword().equals(query.getPassword())) {
 				return projectViewMapper.toPublicProjectView(project);
@@ -81,7 +78,9 @@ public class SurveyServiceImpl implements SurveyService {
 	}
 
 	@Override
-	public void validateProject(String projectId, ProjectSetting setting) {
+	public void validateProject(String projectId) {
+		ProjectView project = projectService.getProject(projectId);
+		ProjectSetting setting = project.getSetting();
 		if (setting.getStatus() == 0) {
 			throw new ErrorCodeException(ErrorCode.SurveySuspend);
 		}
@@ -174,8 +173,10 @@ public class SurveyServiceImpl implements SurveyService {
 		// 通过 cron 计算时间窗
 		CronHelper helper = new CronHelper(setting.getLimitFreq().getCron());
 		Tuple2<LocalDateTime, LocalDateTime> currentWindow = helper.currentWindow();
-		query.setStartTime(Date.from(currentWindow.getFirst().atZone(ZoneId.systemDefault()).toInstant()));
-		query.setEndTime(Date.from(currentWindow.getSecond().atZone(ZoneId.systemDefault()).toInstant()));
+		if (currentWindow != null) {
+			query.setStartTime(Date.from(currentWindow.getFirst().atZone(ZoneId.systemDefault()).toInstant()));
+			query.setEndTime(Date.from(currentWindow.getSecond().atZone(ZoneId.systemDefault()).toInstant()));
+		}
 		long total = answerService.count(query);
 		if (setting.getLimitNum() != null && total >= setting.getLimitNum()) {
 			throw new ErrorCodeException(ErrorCode.SurveySubmitted);

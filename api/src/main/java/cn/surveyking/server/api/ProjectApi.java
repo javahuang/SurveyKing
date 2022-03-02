@@ -33,9 +33,8 @@ public class ProjectApi {
 	@GetMapping("/{id}")
 	@PreAuthorize("hasAuthority('project:detail')")
 	@EnableDataPerm(key = "#id")
-	public ProjectView getProject(@PathVariable String id, ProjectQuery query) {
-		query.setId(id);
-		return projectService.getProject(query);
+	public ProjectView getProject(@PathVariable String id) {
+		return projectService.getProject(id);
 	}
 
 	@GetMapping("/{id}/settings")

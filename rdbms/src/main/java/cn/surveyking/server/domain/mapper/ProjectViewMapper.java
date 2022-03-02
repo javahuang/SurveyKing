@@ -28,6 +28,6 @@ public interface ProjectViewMapper {
 	@Mapping(target = "setting.answerSetting.ipLimit", ignore = true)
 	@Mapping(target = "setting.answerSetting.cookieLimit", ignore = true)
 	@Mapping(target = "setting.answerSetting.loginLimit", ignore = true)
-	PublicProjectView toPublicProjectView(Project project);
+	PublicProjectView toPublicProjectView(ProjectView project);
 
 }

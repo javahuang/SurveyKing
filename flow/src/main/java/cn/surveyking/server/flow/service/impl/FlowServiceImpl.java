@@ -302,9 +302,7 @@ public class FlowServiceImpl implements FlowService {
 
 	@Override
 	public SurveySchema loadSchemaByPermission(SchemaQuery query) {
-		ProjectQuery projectQuery = new ProjectQuery();
-		projectQuery.setId(query.getProjectId());
-		ProjectView projectView = projectService.getProject(projectQuery);
+		ProjectView projectView = projectService.getProject(query.getProjectId());
 		SurveySchema schema = projectView.getSurvey();
 		FlowEntryNode element = entryNodeService.getById(query.getTaskDefKey());
 		if (element == null) {

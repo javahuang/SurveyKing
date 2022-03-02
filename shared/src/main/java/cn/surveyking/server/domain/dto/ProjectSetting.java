@@ -87,7 +87,7 @@ public class ProjectSetting {
 	public static class SubmittedSetting {
 
 		/**
-		 * 提交后展示的网页内容
+		 * 答题完成后跳转自定义页面
 		 */
 		private String contentHtml;
 
