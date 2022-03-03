@@ -164,6 +164,11 @@ public class SurveySchema implements Cloneable {
 		 */
 		private Boolean cameraOnly;
 
+		/**
+		 * 选项排成几列
+		 */
+		private Integer columns;
+
 	}
 
 	@Data
