@@ -23,7 +23,6 @@ public interface ProjectViewMapper {
 	Project fromRequest(ProjectRequest projectRequest);
 
 	@Mapping(target = "setting", source = "setting.answerSetting")
-	@Mapping(target = "passwordRequired", expression = "java(project.getSurvey() == null)")
 	@Mapping(target = "setting.answerSetting.password", ignore = true)
 	@Mapping(target = "setting.answerSetting.ipLimit", ignore = true)
 	@Mapping(target = "setting.answerSetting.cookieLimit", ignore = true)

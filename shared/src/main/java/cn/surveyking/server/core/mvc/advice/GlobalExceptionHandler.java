@@ -89,7 +89,7 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ApiResponse<String>> handleInternalServerError(HttpServletRequest request, Exception ex) {
 		log.error("handleInternalServerError {}\n", request.getRequestURI(), ex);
 		return ResponseEntity.ok().body(new ApiResponse<>(ResponseCode.INTERNAL_SERVER_ERROR.code,
-				ex instanceof InternalServerError ? ex.getMessage() : "Internal server error"));
+				ex instanceof InternalServerError ? ex.getMessage() : "服务出了点问题"));
 	}
 
 }

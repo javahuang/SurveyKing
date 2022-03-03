@@ -4,7 +4,6 @@ import cn.surveyking.server.core.common.Tuple2;
 import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.constant.ErrorCode;
 import cn.surveyking.server.core.exception.ErrorCodeException;
-import cn.surveyking.server.core.exception.InternalServerError;
 import cn.surveyking.server.core.uitls.ContextHelper;
 import cn.surveyking.server.core.uitls.CronHelper;
 import cn.surveyking.server.core.uitls.IPUtils;
@@ -55,26 +54,23 @@ public class SurveyServiceImpl implements SurveyService {
 		if (project == null) {
 			throw new ErrorCodeException(ErrorCode.ProjectNotFound);
 		}
+		PublicProjectView result = projectViewMapper.toPublicProjectView(project);
 		if (project != null && project.getSetting() != null && project.getSetting().getAnswerSetting() != null
 				&& project.getSetting().getAnswerSetting().getPassword() != null) {
-			project.setSurvey(null);
+			result.setSurvey(null);
+			result.setPasswordRequired(true);
 		}
 		validateProject(projectId);
-		return projectViewMapper.toPublicProjectView(project);
+		return result;
 	}
 
 	@Override
 	public PublicProjectView verifyPassword(ProjectQuery query) {
 		ProjectView project = projectService.getProject(query.getId());
-		try {
-			if (project.getSetting().getAnswerSetting().getPassword().equals(query.getPassword())) {
-				return projectViewMapper.toPublicProjectView(project);
-			}
-			throw new InternalServerError("密码验证失败");
+		if (project.getSetting().getAnswerSetting().getPassword().equals(query.getPassword())) {
+			return projectViewMapper.toPublicProjectView(project);
 		}
-		catch (Exception e) {
-			throw new InternalServerError("密码验证失败");
-		}
+		throw new ErrorCodeException(ErrorCode.ValidationError);
 	}
 
 	@Override

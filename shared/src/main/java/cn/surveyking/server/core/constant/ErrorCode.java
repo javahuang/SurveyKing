@@ -15,7 +15,9 @@ public enum ErrorCode {
 	/** 问卷已提交 */
 	SurveySubmitted(4003, "问卷已提交"),
 	/** 页面不存在 */
-	ProjectNotFound(4004, "对不起，你访问的页面不存在"),;
+	ProjectNotFound(4004, "对不起，你访问的页面不存在"),
+	/** 密码验证失败 */
+	ValidationError(4005, "密码验证失败");
 
 	/**
 	 * 前两位区分模块，后两位区分错误消息
