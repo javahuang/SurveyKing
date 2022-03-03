@@ -8,3 +8,6 @@ files/
 bin/
 .classpath
 .projecttarget/
+target/
+test/
+build.sh
