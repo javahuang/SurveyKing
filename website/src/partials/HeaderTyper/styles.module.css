@@ -1,0 +1,68 @@
+.Container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  height: 5rem;
+}
+
+.Text {
+  color: var(--ifm-navbar-link-color);
+  font-size: var(--ifm-font-size-64);
+  font-weight: bold;
+}
+
+.Cursor {
+  background-color: var(--ifm-navbar-link-active-color);
+  margin-left: 10px;
+  margin-top: 10px;
+
+  width: 0.6rem;
+  height: 4rem;
+}
+
+.Cursor_Blink {
+  -webkit-animation: blink 0.8s infinite;
+  animation: blink 0.8s infinite;
+}
+
+@-webkit-keyframes blink {
+  0% {
+    background: transparent;
+  }
+  50% {
+    background: var(--ifm-navbar-link-active-color);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+@keyframes blink {
+  0% {
+    background: transparent;
+  }
+  50% {
+    background: var(--ifm-navbar-link-active-color);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+@media (max-width: 768px) {
+  .Container {
+    height: 2rem;
+  }
+
+  .Text {
+    font-size: var(--ifm-font-size-40);
+  }
+
+  .Cursor {
+    height: 2rem;
+    width: 0.3rem;
+    margin-left: 5px;
+    margin-top: 5px;
+  }
+}

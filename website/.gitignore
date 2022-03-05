@@ -1,16 +1,3 @@
-.gradle
-build/
-.idea/
-logs/
-*.map
-files/
-.settings
-bin/
-.classpath
-.projecttarget/
-target/
-test/
-build.sh
 # Dependencies
 /node_modules
 

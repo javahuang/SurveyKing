@@ -1,0 +1,63 @@
+{
+    "name": "website",
+    "version": "0.0.0",
+    "private": true,
+    "scripts": {
+        "docusaurus": "docusaurus",
+        "start": "yarn run copyChangelog && TYPEDOC_WATCH=true docusaurus start",
+        "build": "yarn run copyChangelog && TYPEDOC_WATCH=false docusaurus build",
+        "copyChangelog": "echo '---' > ./docs/CHANGELOG.md && echo 'id: changelog' >> ./docs/CHANGELOG.md && echo 'title: Changelog' >> ./docs/CHANGELOG.md && echo '---' >> ./docs/CHANGELOG.md",
+        "swizzle": "docusaurus swizzle --danger",
+        "deploy": "docusaurus deploy",
+        "serve": "docusaurus serve",
+        "clear": "docusaurus clear"
+    },
+    "engines": {
+        "node": ">=14"
+    },
+    "dependencies": {
+        "@docusaurus/core": "^2.0.0-beta.13",
+        "@docusaurus/plugin-google-gtag": "^2.0.0-beta.13",
+        "@docusaurus/plugin-sitemap": "^2.0.0-beta.13",
+        "@docusaurus/preset-classic": "^2.0.0-beta.13",
+        "aos": "^2.3.4",
+        "autoprefixer": "^10.4.0",
+        "clsx": "^1.1.1",
+        "docusaurus-plugin-typedoc": "^0.16.6",
+        "postprocessing": "^6.22.3",
+        "react": "^17.0.2",
+        "react-dom": "^17.0.2",
+        "react-syntax-highlighter": "^15.4.4",
+        "react-transition-group": "^4.4.1",
+        "tailwindcss": "^2.2.15",
+        "three": "^0.137.0",
+        "ts-easing": "^0.2.0"
+    },
+    "browserslist": {
+        "production": [
+            ">0.5%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    },
+    "devDependencies": {
+        "@docusaurus/module-type-aliases": "^2.0.0-beta.13",
+        "@tsconfig/docusaurus": "^1.0.2",
+        "@types/react": "^17.0.2",
+        "@types/react-helmet": "^6.1.0",
+        "@types/react-router-dom": "^5.1.7",
+        "docusaurus-tailwindcss-loader": "file:plugins/docusaurus-tailwindcss-loader",
+        "postcss": "^8.3.6",
+        "postcss-import": "^14.0.2",
+        "postcss-loader": "^6.1.1",
+        "postcss-preset-env": "^3.0.0",
+        "typedoc": "^0.22.10",
+        "typedoc-plugin-markdown": "^3.11.7",
+        "typescript": "^4.5.2"
+    }
+}

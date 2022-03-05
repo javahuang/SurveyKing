@@ -1,0 +1,22 @@
+{
+    "allReflectionsHaveOwnDocument": true,
+    "readme": "docs/api_index.md",
+    "name": "API",
+    "categorizeByGroup": true,
+    "categoryOrder": [
+        "Core",
+        "Collections",
+        "Entity properties",
+        "Entities",
+        "Form fields",
+        "Builder",
+        "Core components",
+        "Form custom fields",
+        "Preview components",
+        "Collection components",
+        "Authentication",
+        "Locales",
+        "Navigation",
+        "*"
+    ]
+}

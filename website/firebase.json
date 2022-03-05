@@ -1,0 +1,17 @@
+{
+    "hosting": {
+        "public": "build",
+        "site": "firecms-landing",
+        "ignore": [
+            "firebase.json",
+            "**/.*",
+            "**/node_modules/**"
+        ],
+        "rewrites": [
+            {
+                "source": "**",
+                "destination": "/index.html"
+            }
+        ]
+    }
+}
