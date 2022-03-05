@@ -52,7 +52,7 @@
 
 <!-- 点击[下载 surveyking-h2 版本](https://gitee.com/surveyking/surveyking/attach_files/948414/download/surveyking-h2-v0.2.1.jar)到本地 -->
 
-点击[下载 surveyking-mysql 版本](https://gitee.com/surveyking/surveyking/attach_files/984045/download/surveyking-v0.3.0-beta.6.jar)到本地
+点击[下载 surveyking-mysql 版本](https://gitee.com/surveyking/surveyking/attach_files/986958/download/surveyking-v0.3.0-beta.7.jar)到本地
 
 ### 使用源码编译安装
 
