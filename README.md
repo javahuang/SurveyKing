@@ -114,7 +114,7 @@ java -jar surveyking-v0.x.x.jar
 
 使用参数启动
 
-1. 首先创建 mysql 数据库，然后执行初始化脚本，[下载脚本](https://gitee.com/surveyking/surveyking/raw/master/rdbms/src/main/resources/scripts/init-mysql.sql)。
+1. 首先创建 mysql 数据库，然后执行初始化脚本，[下载脚本](https://gitee.com/surveyking/surveyking/raw/master/server/rdbms/src/main/resources/scripts/init-mysql.sql)。
 2. 执行 `java -jar surveyking-v0.x.x.jar --server.port=1991 --spring.datasource.url=jdbc:mysql://localhost:3306/surveyking --spring.datasource.username=root --spring.datasource.password=123456`（只有首次启动系统需要添加后面的参数）
 
 参数说明(按照实际需要自行修改)：
@@ -135,7 +135,7 @@ java -jar surveyking-v0.x.x.jar
 
 ### 使用 nginx 部署前端
 
-下载 [该目录下面的静态资源文件](https://gitee.com/surveyking/surveyking/tree/master/api/src/main/resources/static)，直接部署到 nginx 即可。
+下载 [该目录下面的静态资源文件](https://gitee.com/surveyking/surveyking/tree/master/server/api/src/main/resources/static)，直接部署到 nginx 即可。
 
 然后配置 proxy 代理到后端 api 服务。
 
