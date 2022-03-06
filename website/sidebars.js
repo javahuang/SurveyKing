@@ -6,6 +6,42 @@ module.exports = {
       id: "intro",
     },
     "quickstart",
+    {
+      type: "category",
+      label: "指南",
+      link: {
+        type: "generated-index",
+        // title: "Docusaurus Guides",
+        // description:
+        //   "Let's learn about the most important Docusaurus concepts!",
+        // keywords: ["guides"],
+        // image: "/img/docusaurus.png",
+      },
+      collapsed: false,
+      items: [
+        "guides/introduction",
+        {
+          type: "category",
+          label: "题型",
+          link: {
+            // type: "generated-index",
+            type: "doc",
+            id: "guides/questions/index",
+          },
+          items: ["guides/questions/radio"],
+        },
+        {
+          type: "category",
+          label: "自定义逻辑",
+          link: {
+            type: "doc",
+            id: "guides/logic/introduction",
+          },
+          items: ["guides/logic/grammar"],
+        },
+      ],
+    },
+    "faq",
     "changelog",
   ],
 
