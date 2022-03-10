@@ -13,6 +13,8 @@ import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -35,9 +37,7 @@ public class DatabaseInitHelper {
 
 	public static void init(String[] args) {
 		try {
-			if (!needCreateProperties()) {
-				return;
-			}
+			needCreateProperties();
 			// 初始化启动配置文件，初始化数据库脚本
 			if ("i".equals(args[0])) {
 				initializeDatabase();
@@ -98,15 +98,10 @@ public class DatabaseInitHelper {
 	@SneakyThrows
 	private static boolean needCreateProperties() {
 		File f = new File(CONFIG_FILE);
-		if (f.exists()) {
-			if (yesOrNo("文件已存在,是否覆盖？")) {
-				return true;
-			}
-			return false;
-		}
-		else {
+		if (!f.exists()) {
 			f.createNewFile();
 		}
+		// 总是覆盖之前的配置
 		return true;
 	}
 
@@ -235,25 +230,36 @@ public class DatabaseInitHelper {
 	@SneakyThrows
 	private static void createFileFromProperties(DatabaseInitProperties properties) {
 		File f = new File(CONFIG_FILE);
-		writeLine(f, "spring.application.name=%s\n", properties.getApplicationName());
-		writeLine(f, "server.port=%d\n", properties.getServerPort());
-		writeLine(f, "spring.datasource.driver-class-name=%s\n", properties.getDriverClassName());
-		if (properties.getDataSourceUrl() == null) {
-			writeLine(f, "spring.datasource.url=jdbc:mysql://%s:%d/%s\n", properties.getDbIp(), properties.getDbPort(),
-					properties.getDbName());
+		List<String> fileContent = new ArrayList<>(Files.readAllLines(f.toPath(), StandardCharsets.UTF_8));
+
+		writeLine(fileContent, "spring.application.name=%s", properties.getApplicationName());
+		writeLine(fileContent, "server.port=%d", properties.getServerPort());
+		writeLine(fileContent, "spring.datasource.driver-class-name=%s", properties.getDriverClassName());
+		if (properties.getDataSourceUrl() == null && properties.getDbName() != null) {
+			writeLine(fileContent, "spring.datasource.url=jdbc:mysql://%s:%d/%s", properties.getDbIp(),
+					properties.getDbPort(), properties.getDbName());
 		}
-		else {
-			writeLine(f, "spring.datasource.url=%s\n", properties.getDataSourceUrl());
+		else if (properties.getDataSourceUrl() != null) {
+			writeLine(fileContent, "spring.datasource.url=%s", properties.getDataSourceUrl());
 		}
-		writeLine(f, "spring.datasource.username=%s\n", properties.getUsername());
-		writeLine(f, "spring.datasource.password=%s\n", properties.getPassword());
+		writeLine(fileContent, "spring.datasource.username=%s", properties.getUsername());
+		writeLine(fileContent, "spring.datasource.password=%s", properties.getPassword());
+
+		Files.write(f.toPath(), fileContent, StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING);
 	}
 
 	@SneakyThrows
-	private static void writeLine(File file, String key, Object... value) {
+	private static void writeLine(List<String> fileContent, String key, Object... value) {
 		if (value.length > 0 && value[0] != null) {
-			Files.write(file.toPath(), String.format(key, value).getBytes(StandardCharsets.UTF_8),
-					StandardOpenOption.APPEND);
+			String newLine = String.format(key, value);
+			String propertyKey = newLine.split("=", 2)[0];
+			for (int i = 0; i < fileContent.size(); i++) {
+				if (fileContent.get(i).startsWith(propertyKey)) {
+					fileContent.set(i, newLine);
+					return;
+				}
+			}
+			fileContent.add(newLine);
 		}
 	}
 
