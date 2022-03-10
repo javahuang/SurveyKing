@@ -56,6 +56,7 @@ public class SchemaParser {
 		List<Object> rowData = new ArrayList<>();
 		rowData.add(index);
 		// 转换答案
+		// TODO: 中途修改 schema 可能会出错、提取公共解析方法
 		for (SurveySchema schemaType : dataTypes) {
 			String questionId = schemaType.getId();
 			SurveySchema.QuestionType questionType = schemaType.getType();
@@ -107,6 +108,31 @@ public class SchemaParser {
 					else {
 						result.add(v + "");
 					}
+				});
+				rowData.add(String.join(",", result));
+			}
+			else if (questionType == SurveySchema.QuestionType.MatrixAuto) {
+				List<String> result = new ArrayList<>();
+				((List<Map<?, ?>>) valueObj).forEach((rowValue) -> {
+					List<String> matrixRowData = new ArrayList<>();
+					rowValue.forEach((optionId, v) -> {
+						SurveySchema optionSchema = schemaType.getChildren().stream()
+								.filter(option -> option.getId().equals(optionId)).findFirst().orElse(null);
+						if (optionSchema != null && optionSchema.getDataSource() != null) {
+							matrixRowData.add(
+									optionSchema.getDataSource().stream().filter(x -> x.getValue().equals(v))
+											.findFirst().orElse(new SurveySchema.DataSource()).getLabel());
+						}
+						else if (v != null && v instanceof Boolean) {
+							// 单选、多选题，选中的话，答案会是 true，需要转换成标题
+							matrixRowData.add(trimHtmlTag(schemaType.getChildren().stream()
+									.filter(x -> x.getId().equals(optionId)).findFirst().get().getTitle()));
+						}
+						else {
+							matrixRowData.add(v + "");
+						}
+					});
+					result.add(String.format("(%s)", String.join(",", matrixRowData)));
 				});
 				rowData.add(String.join(",", result));
 			}
