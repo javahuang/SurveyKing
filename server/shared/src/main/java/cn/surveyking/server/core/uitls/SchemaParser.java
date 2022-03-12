@@ -119,9 +119,8 @@ public class SchemaParser {
 						SurveySchema optionSchema = schemaType.getChildren().stream()
 								.filter(option -> option.getId().equals(optionId)).findFirst().orElse(null);
 						if (optionSchema != null && optionSchema.getDataSource() != null) {
-							matrixRowData.add(
-									optionSchema.getDataSource().stream().filter(x -> x.getValue().equals(v))
-											.findFirst().orElse(new SurveySchema.DataSource()).getLabel());
+							matrixRowData.add(optionSchema.getDataSource().stream().filter(x -> x.getValue().equals(v))
+									.findFirst().orElse(new SurveySchema.DataSource()).getLabel());
 						}
 						else if (v != null && v instanceof Boolean) {
 							// 单选、多选题，选中的话，答案会是 true，需要转换成标题
