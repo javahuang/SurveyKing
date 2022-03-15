@@ -1,8 +1,9 @@
 ---
 slug: docker-deploy
-title: 使用 docker 一健部署卷王
+title: 使用 docker 构建部署卷王
 author: 米粥
 ---
+# 通过 Docker 部署
 
 ## 准备工作
 
@@ -10,7 +11,7 @@ author: 米粥
 
 在根目录新建配置文件 application.properties，内容如下。其中我们将数据库的连接配置采用从环境变量中获取。
 
-```json
+```ini
 spring.application.name=SurveyKing
 server.port=1991
 spring.datasource.url=jdbc:mysql://${MYSQL_ADDRESS}/${MYSQL_DATABASE}
@@ -35,12 +36,12 @@ WORKDIR $WEB_PATH
 
 RUN mvn clean package -DskipTests -Ppro
 
+FROM alpine
 
-FROM ccr.ccs.tencentyun.com/w7team/swoole:fpm-php7.4
+RUN apk add --update --no-cache openjdk8 \
+    && rm -f /var/cache/apk/*
 
 ENV WEB_PATH /home/surveyking
-RUN apk add --update --no-cache openjdk8 \
-    && rm -f /var/cache/apk/* \
 WORKDIR $WEB_PATH
 COPY . $WEB_PATH
 
@@ -62,8 +63,6 @@ CMD ["sh", "start.sh"]
 sudo docker build -t surveyking/server .
 ```
 
-镜像构建好后，你可以推送到 docker hub 上，方便在其它地方使用。
-
 ## 导入数据
 
 创建 mysql 数据库，然后执行初始化脚本，[下载脚本](https://gitee.com/surveyking/surveyking/raw/master/server/rdbms/src/main/resources/scripts/init-mysql.sql)。
@@ -74,9 +73,10 @@ sudo docker build -t surveyking/server .
 
 MYSQL_ADDRESS、MYSQL_DATABASE、MYSQL_USERNAME、MYSQL_PASSWORD 为刚才导入数据时数据的一些权限，这里采用通过环境变量的形式注入。
 
+> 其中数据库 surveyking_app_table 数据库要提前创建好，并把上面的sql数据导入
 
 ```shell
-sudo docker run -it -d --name surveyking-app -p 80:1991 -e MYSQL_PASSWORD=123456 -e MYSQL_USERNAME=root -e MYSQL_DATABASE=surveyking_app_table -e MYSQL_ADDRESS=172.16.1.13:3306 surveyking/server
+sudo docker run -it -d --name surveyking-app -p 8877:1991 -e MYSQL_PASSWORD=123456 -e MYSQL_USERNAME=root -e MYSQL_DATABASE=surveyking_app_table -e MYSQL_ADDRESS=172.16.1.13:3306 surveyking/server
 ```
 
-执行命令后，通过 127.0.0.1 访问。
+执行命令后，通过 http://127.0.0.1:8877 访问。
