@@ -30,12 +30,12 @@ public class SurveySchema implements Cloneable {
 
 	public enum QuestionType {
 
-		FillBlank, Textarea, MultipleBlank, Signature, Score, Radio, Checkbox, Select, Cascader, Upload, MatrixAuto, MatrixRadio, MatrixCheckbox, MatrixFillBlank, MatrixScore, Survey, QuestionSet, Pagination, Remark, SplitLine, Option, User, Dept, Nps;
+		FillBlank, Textarea, MultipleBlank, Signature, Score, Radio, Checkbox, Select, Cascader, Upload, MatrixAuto, MatrixRadio, MatrixCheckbox, MatrixFillBlank, MatrixScore, Survey, QuestionSet, Pagination, Remark, SplitLine, Option, User, Dept, Nps, HorzBlank;
 
 		// 分为数据类型和空类型
 		public static EnumSet<QuestionType> dataType() {
 			return EnumSet.of(FillBlank, Textarea, MultipleBlank, Signature, Score, Radio, Checkbox, Select, Cascader,
-					Upload, MatrixAuto, MatrixRadio, MatrixCheckbox, MatrixFillBlank, MatrixScore, User, Dept, Nps);
+					Upload, MatrixAuto, MatrixRadio, MatrixCheckbox, MatrixFillBlank, MatrixScore, User, Dept, Nps, HorzBlank);
 		}
 
 		public static EnumSet<QuestionType> voidType() {
@@ -174,6 +174,11 @@ public class SurveySchema implements Cloneable {
 		 * 选项排成几列
 		 */
 		private Integer columns;
+
+		/**
+		 * 填空题的题干
+		 */
+		private String content;
 
 	}
 
