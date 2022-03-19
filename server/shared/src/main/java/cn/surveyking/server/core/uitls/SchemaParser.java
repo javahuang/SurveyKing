@@ -78,6 +78,21 @@ public class SchemaParser {
 							.collect(Collectors.joining(","));
 				}).collect(Collectors.joining(",")));
 			}
+			else if (questionType == SurveySchema.QuestionType.Cascader) {
+				Map mapValue = (Map) valueObj;
+				List<String> result = new ArrayList<>();
+				List<SurveySchema.DataSource> dataSources = schemaType.getDataSource();
+				for (SurveySchema child : schemaType.getChildren()) {
+					String optionId = child.getId();
+					String optionValue = (String) mapValue.get(optionId);
+					SurveySchema.DataSource dataSource = dataSources.stream()
+							.filter(x -> x.getValue().equals(optionValue)).findFirst()
+							.orElse(new SurveySchema.DataSource("", "", new ArrayList<>()));
+					result.add(dataSource.getLabel());
+					dataSources = dataSource.getChildren();
+				}
+				rowData.add(String.join(",", result));
+			}
 			else if (questionType == SurveySchema.QuestionType.User) {
 				Map mapValue = (Map) valueObj;
 				rowData.add(mapValue.values().stream().map((x) -> {
