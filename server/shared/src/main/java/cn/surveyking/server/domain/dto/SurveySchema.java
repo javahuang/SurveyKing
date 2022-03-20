@@ -30,12 +30,13 @@ public class SurveySchema implements Cloneable {
 
 	public enum QuestionType {
 
-		FillBlank, Textarea, MultipleBlank, Signature, Score, Radio, Checkbox, Select, Cascader, Upload, MatrixAuto, MatrixRadio, MatrixCheckbox, MatrixFillBlank, MatrixScore, Survey, QuestionSet, Pagination, Remark, SplitLine, Option, User, Dept, Nps, HorzBlank;
+		FillBlank, Textarea, MultipleBlank, Signature, Score, Radio, Checkbox, Select, Cascader, Upload, MatrixAuto, MatrixRadio, MatrixCheckbox, MatrixFillBlank, MatrixScore, Survey, QuestionSet, Pagination, Remark, SplitLine, Option, User, Dept, Nps, HorzBlank, Address;
 
 		// 分为数据类型和空类型
 		public static EnumSet<QuestionType> dataType() {
 			return EnumSet.of(FillBlank, Textarea, MultipleBlank, Signature, Score, Radio, Checkbox, Select, Cascader,
-					Upload, MatrixAuto, MatrixRadio, MatrixCheckbox, MatrixFillBlank, MatrixScore, User, Dept, Nps, HorzBlank);
+					Upload, MatrixAuto, MatrixRadio, MatrixCheckbox, MatrixFillBlank, MatrixScore, User, Dept, Nps,
+					HorzBlank, Address);
 		}
 
 		public static EnumSet<QuestionType> voidType() {
@@ -180,6 +181,11 @@ public class SurveySchema implements Cloneable {
 		 */
 		private String content;
 
+		/**
+		 * 是否允许移动地图修改位置
+		 */
+		private Boolean mapMove;
+
 	}
 
 	@Data
@@ -190,6 +196,15 @@ public class SurveySchema implements Cloneable {
 		private String value;
 
 		private List<DataSource> children;
+
+		public DataSource() {
+		}
+
+		public DataSource(String label, String value, List<DataSource> children) {
+			this.label = label;
+			this.value = value;
+			this.children = children;
+		}
 
 	}
 
