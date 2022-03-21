@@ -17,19 +17,19 @@
 
 卷王是已知开源调查问卷系统中**功能最强大**、**安装最简单**、**综合体验最好**的一个，一些功能特性及体验可以对标甚至超过问卷网、问卷星、腾讯问卷这些国内主流的在线表单系统。
 
-**稳定**、**易用**、**专业**，是卷王的持续开发理念。大中小企业甚至个人都可以使用卷王快速搭建一个属于自己的在线问卷系统。
+**稳定**、**易用**、**专业**，是卷王的持续开发理念。企业甚至个人都可以使用卷王快速搭建一个属于自己的在线问卷系统。
 
 ## 🚀 1 分钟快速体验调查问卷系统(无需安装数据库)
 
 1. 安装 [Java 运行环境](https://www.java.com/zh-CN/download/manual.jsp)（如果本机已有 Java 环境可以忽略）
-2. 下载 [卷王安装包](https://gitee.com/surveyking/surveyking/attach_files/864427/download/surveyking-h2-v0.2.0.jar)
-3. 双击运行
-4. 打开浏览器访问 [http://localhost:1991](http://localhost:1991)，输入账号密码： *admin*/*surveyking*
+2. 下载 [卷王安装包](https://gitee.com/surveyking/surveyking/attach_files/1002654/download/surveyking-v0.3.0-beta.10-h2.zip)
+3. 解压，双击运行 surveyking-v0.3.0-beta.10.jar
+4. 打开浏览器访问 [http://localhost:1991](http://localhost:1991)，输入账号密码： *admin*/*123456*
 
 ## 特性
 
 - 🥇 支持多种题型，如填空、选择、下拉、级联、矩阵、分页、签名、题组等
-- 🎉 可计算，分为**逻辑计算**、**值计算**、**文本替换计算**、**必填计算**，[点击体验](https://surveyking.cn/s/logic8)
+- 🎉 可计算，分为**逻辑计算**、**值计算**、**文本替换计算**、**必填计算**，[点击体验](https://s.surveyking.cn/s/logic8)
 - 🦋 问题、选项支持快速富文本编辑
 - 🥊 响应式布局，所有页面在 PC 和手机端都有良好的操作体验
 - 🥂 多种问卷设置，如支持**问卷默认值**、**暂存**、**问卷修改**、**设置密码**、背景图、页眉图、**提交后图文展示**等
@@ -41,7 +41,6 @@
 - 🐯 安全、可靠、稳定、高性能的后端 API 服务
 - 🙆 支持完善的 RBAC 权限控制
 - 😊 支持**工作流**，工作流代码已全部开源
-- 🌈 支持国际化（正在完善）
 - ...
 
 ## 安装
@@ -52,7 +51,7 @@
 
 <!-- 点击[下载 surveyking-h2 版本](https://gitee.com/surveyking/surveyking/attach_files/948414/download/surveyking-h2-v0.2.1.jar)到本地 -->
 
-点击[下载 surveyking-mysql 版本](https://gitee.com/surveyking/surveyking/attach_files/986958/download/surveyking-v0.3.0-beta.7.jar)到本地
+点击[下载 surveyking-mysql 版本](https://gitee.com/surveyking/surveyking/attach_files/1002651/download/surveyking-v0.3.0-beta.10.jar)到本地
 
 ### 使用源码编译安装
 
