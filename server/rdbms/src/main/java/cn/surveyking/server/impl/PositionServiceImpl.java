@@ -52,7 +52,7 @@ public class PositionServiceImpl extends BaseService<PositionMapper, Position> i
 
 	@Override
 	public void deletePosition(String id) {
-		deletePosition(id);
+		removeById(id);
 	}
 
 	@Override
