@@ -14,10 +14,44 @@
     />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
     <title>SurveyKing</title>
     <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+
+    <script>
+      (function () {
+        if (
+          typeof WeixinJSBridge == "object" &&
+          typeof WeixinJSBridge.invoke == "function"
+        ) {
+          handleFontSize();
+        } else {
+          if (document.addEventListener) {
+            document.addEventListener(
+              "WeixinJSBridgeReady",
+              handleFontSize,
+              false
+            );
+          } else if (document.attachEvent) {
+            document.attachEvent("WeixinJSBridgeReady", handleFontSize);
+            document.attachEvent("onWeixinJSBridgeReady", handleFontSize);
+          }
+        }
+        function handleFontSize() {
+          // 设置网页字体为默认大小
+          WeixinJSBridge.invoke("setFontSizeCallback", {
+            fontSize: 0,
+          });
+          // 重写设置网页字体大小的事件
+          WeixinJSBridge.on("menu:setfont", function () {
+            WeixinJSBridge.invoke("setFontSizeCallback", {
+              fontSize: 0,
+            });
+          });
+        }
+      })();
+    </script>
     <link rel="stylesheet" href="/umi.a4fcd338.css" />
     <script>
       window.routerBase = "/";
@@ -171,6 +205,6 @@
       </div>
     </div>
 
-    <script src="/umi.081da8d0.js"></script>
+    <script src="/umi.729cd86f.js"></script>
   </body>
 </html>
