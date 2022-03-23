@@ -22,6 +22,11 @@ public class DownloadQuery {
 	 */
 	private String answerId;
 
+	/**
+	 * 导出附件命名表达式
+	 */
+	private String nameExp;
+
 	@NotNull
 	private DownloadType type;
 

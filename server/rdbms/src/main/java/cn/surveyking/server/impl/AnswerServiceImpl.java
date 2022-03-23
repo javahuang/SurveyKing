@@ -18,9 +18,13 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -28,6 +32,8 @@ import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -40,8 +46,6 @@ import java.util.zip.ZipOutputStream;
 @Transactional
 @RequiredArgsConstructor
 public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> implements AnswerService {
-
-	private final ProjectService projectService;
 
 	private final ProjectMapper projectMapper;
 
@@ -240,7 +244,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		}
 		else {
 			// 下载所有问卷答案的附件
-			downloadData.setResource(new InputStreamResource(answerAttachToZip(listAnswer(answerQuery).getList())));
+			downloadData.setResource(
+					new InputStreamResource(answerAttachToZip(listAnswer(answerQuery).getList(), query.getNameExp())));
 			downloadData.setFileName(project.getName() + ".zip");
 			downloadData.setMediaType(MediaType.parseMediaType("application/zip"));
 		}
@@ -258,7 +263,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		}
 		else {
 			// 多个附件，压缩包
-			downloadData.setResource(new InputStreamResource(answerAttachToZip(Collections.singletonList(answer))));
+			downloadData.setResource(new InputStreamResource(answerAttachToZip(Collections.singletonList(answer), "")));
 			downloadData.setFileName(answer.getId() + ".zip");
 			downloadData.setMediaType(MediaType.parseMediaType("application/zip"));
 		}
@@ -270,7 +275,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	 * @param answers
 	 * @return
 	 */
-	private InputStream answerAttachToZip(List<AnswerView> answers) {
+	private InputStream answerAttachToZip(List<AnswerView> answers, String nameExp) {
 		try {
 			PipedOutputStream outputStream = new PipedOutputStream();
 			PipedInputStream inputStream = new PipedInputStream(outputStream);
@@ -280,7 +285,9 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 						answer.getAttachment().forEach(attachment -> {
 							ByteArrayResource resource = (ByteArrayResource) fileService
 									.loadFile(new FileQuery(attachment.getId())).getBody();
-							ZipEntry entry = new ZipEntry(answer.getId() + "_" + attachment.getOriginalName());
+							String parsedFileName = parseAttachmentNameByExp(answer, nameExp,
+									attachment.getOriginalName());
+							ZipEntry entry = new ZipEntry(parsedFileName);
 							try {
 								zout.putNextEntry(entry);
 								zout.write(resource.getByteArray());
@@ -302,6 +309,74 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		catch (Exception e) {
 			throw new InternalServerError("生成压缩文件失败", e);
 		}
+	}
+
+	/**
+	 * @param answerView 当前答案
+	 * @param nameExp 附件名称表达式
+	 * @param nameExp 附件名称表达式
+	 * @return 新的附件名称
+	 */
+	private String parseAttachmentNameByExp(AnswerView answerView, String nameExp, String originalFileName) {
+		if (StringUtils.hasText(nameExp)) {
+			String fileName = nameExp;
+			LinkedHashMap<String, Object> answerMap = answerView.getAnswer();
+
+			Pattern pattern = Pattern.compile("#\\{([a-z0-9]+)\\.?([a-z0-9]*)\\}");
+			Matcher matcher = pattern.matcher(nameExp);
+			String exp, questionId, optionId = null;
+			while (matcher.find()) {
+				int count = matcher.groupCount();
+				exp = matcher.group(0);
+				questionId = matcher.group(1);
+				if (count > 1) {
+					optionId = matcher.group(2);
+				}
+
+				String expValue = "";
+				Map<String, Object> questionValue = (Map<String, Object>) answerMap.get(questionId);
+				if (questionValue != null) {
+					// 单行文本表达式只有问题id #{xxxx}
+					if (StringUtils.hasText(optionId)) {
+						expValue = questionValue.get(optionId).toString();
+					}
+					else {
+						// 多行文本会有选项id #{ancd.a3dx}
+						expValue = questionValue.values().toArray()[0].toString();
+					}
+				}
+				fileName = StringUtils.replace(fileName, exp, expValue);
+			}
+			String suffix = getFileExtension(originalFileName);
+			// 返回解析之后的文件名字
+			if (suffix != null) {
+				return fileName + "." + suffix;
+			}
+			return fileName;
+		}
+		else {
+			// 返回原始文件名字
+			return originalFileName;
+		}
+	}
+
+	/**
+	 * 获取文件后缀
+	 * @param fileName 文件名称
+	 * @return 文件后缀
+	 */
+	private String getFileExtension(String fileName) {
+		String extension = null;
+		int i = fileName.lastIndexOf('.');
+		if (i > 0) {
+			extension = fileName.substring(i + 1);
+		}
+		return extension;
+	}
+
+	public static void main(String[] args) {
+		String a = "aaa #{ufbf} sss #{aaa.xxx}";
+		System.out.println(StringUtils.replace(a, "aaa", "bbb"));
 	}
 
 }

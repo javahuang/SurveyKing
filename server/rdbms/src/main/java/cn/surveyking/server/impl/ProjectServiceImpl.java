@@ -45,8 +45,6 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 
 	private SpelExpressionParser spelParser = new SpelExpressionParser();
 
-	;
-
 	@Override
 	public PaginationResponse<ProjectView> listProject(ProjectQuery query) {
 		Page<Project> page = pageByQuery(query, Wrappers.<Project>lambdaQuery()
