@@ -62,6 +62,11 @@ public class SurveyApi {
 		return projectView;
 	}
 
+	@PostMapping("/statistics")
+	public PublicStatisticsView statProject(@RequestBody ProjectQuery query) {
+		return surveyService.statProject(query);
+	}
+
 	@PostMapping("/saveAnswer")
 	public void saveAnswer(@RequestBody AnswerRequest answer, HttpServletRequest request) {
 		String projectId = answer.getProjectId();

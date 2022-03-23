@@ -186,6 +186,11 @@ public class SurveySchema implements Cloneable {
 		 */
 		private Boolean mapMove;
 
+		/**
+		 * 显示投票结果
+		 */
+		private Boolean statEnabled;
+
 	}
 
 	@Data

@@ -158,17 +158,6 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	}
 
 	@Override
-	public AnswerView getLatestAnswer(AnswerQuery query) {
-		getOne(Wrappers.<Answer>lambdaQuery()
-				.eq(query.getProjectId() != null, Answer::getProjectId, query.getProjectId())
-				.like(query.getIp() != null, Answer::getMetaInfo, query.getIp())
-				.like(query.getCookie() != null, Answer::getMetaInfo, query.getCookie())
-				// TODO: 针对不同的数据库需要特殊处理，如 oracle .le("rownum", 1)
-				.orderByDesc(Answer::getCreateAt).last("LIMIT 1"));
-		return null;
-	}
-
-	@Override
 	public void updateAnswer(AnswerRequest answer) {
 		super.updateById(answerViewMapper.fromRequest(answer));
 	}
@@ -372,11 +361,6 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 			extension = fileName.substring(i + 1);
 		}
 		return extension;
-	}
-
-	public static void main(String[] args) {
-		String a = "aaa #{ufbf} sss #{aaa.xxx}";
-		System.out.println(StringUtils.replace(a, "aaa", "bbb"));
 	}
 
 }

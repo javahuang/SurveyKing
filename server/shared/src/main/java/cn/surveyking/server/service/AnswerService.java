@@ -27,8 +27,6 @@ public interface AnswerService {
 
 	long count(AnswerQuery query);
 
-	AnswerView getLatestAnswer(AnswerQuery query);
-
 	String saveAnswer(AnswerRequest answer, HttpServletRequest request);
 
 	void updateAnswer(AnswerRequest answer);

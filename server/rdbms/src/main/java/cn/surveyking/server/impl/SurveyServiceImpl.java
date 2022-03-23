@@ -4,10 +4,7 @@ import cn.surveyking.server.core.common.Tuple2;
 import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.constant.ErrorCode;
 import cn.surveyking.server.core.exception.ErrorCodeException;
-import cn.surveyking.server.core.uitls.ContextHelper;
-import cn.surveyking.server.core.uitls.CronHelper;
-import cn.surveyking.server.core.uitls.IPUtils;
-import cn.surveyking.server.core.uitls.SecurityContextUtils;
+import cn.surveyking.server.core.uitls.*;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.domain.mapper.ProjectViewMapper;
 import cn.surveyking.server.service.AnswerService;
@@ -25,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -44,7 +42,7 @@ public class SurveyServiceImpl implements SurveyService {
 	private final AnswerService answerService;
 
 	/**
-	 * 如果需要验证密码，则只有密码输入正确之后才开始加载 schema
+	 * answerService 如果需要验证密码，则只有密码输入正确之后才开始加载 schema
 	 * @param projectId
 	 * @return
 	 */
@@ -113,6 +111,16 @@ public class SurveyServiceImpl implements SurveyService {
 		if (setting.getAnswerSetting().getIpLimit() != null) {
 			validateIpLimit(projectId, setting);
 		}
+	}
+
+	@Override
+	public PublicStatisticsView statProject(ProjectQuery query) {
+		AnswerQuery answerQuery = new AnswerQuery();
+		answerQuery.setProjectId(query.getId());
+		answerQuery.setPageSize(-1);
+		List<AnswerView> answers = answerService.listAnswer(answerQuery).getList();
+		ProjectView project = projectService.getProject(query.getId());
+		return new ProjectStatHelper(project.getSurvey(), answers).stat();
 	}
 
 	private void validateLoginLimit(String projectId, ProjectSetting setting) {
