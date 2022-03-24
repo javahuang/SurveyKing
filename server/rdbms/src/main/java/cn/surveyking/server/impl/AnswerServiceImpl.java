@@ -105,7 +105,13 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 			String questionId = question.getId();
 			Object option2value = answers.get(questionId);
 			if (option2value != null && option2value instanceof Map) {
-				((Map<String, List<String>>) option2value).values().forEach(ids -> {
+				// 签名题前端存的是 {qId: {oId: fileId}} 需要转换成数组
+				((Map<String, Object>) option2value).values().stream().map(x -> {
+					if (x instanceof List) {
+						return (List<String>) x;
+					}
+					return Collections.singletonList(x.toString());
+				}).collect(Collectors.toList()).forEach(ids -> {
 					if (questionType == SurveySchema.QuestionType.User) {
 						view.setUsers(ids.stream().map(userId -> userService.loadUserById(userId).simpleMode())
 								.collect(Collectors.toList()));
