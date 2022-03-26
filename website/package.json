@@ -8,7 +8,7 @@
         "build": "yarn run copyChangelog && TYPEDOC_WATCH=false docusaurus build",
         "copyChangelog": "echo '---' > ./docs/CHANGELOG.md && echo 'id: changelog' >> ./docs/CHANGELOG.md && echo 'title: Changelog' >> ./docs/CHANGELOG.md && echo '---' >> ./docs/CHANGELOG.md",
         "swizzle": "docusaurus swizzle --danger",
-        "deploy": "docusaurus deploy",
+        "deploy": "npm run build && scp -r build/* root@124.223.64.137:~/website",
         "serve": "docusaurus serve",
         "clear": "docusaurus clear"
     },
@@ -16,10 +16,11 @@
         "node": ">=14"
     },
     "dependencies": {
-        "@docusaurus/core": "^2.0.0-beta.13",
-        "@docusaurus/plugin-google-gtag": "^2.0.0-beta.13",
-        "@docusaurus/plugin-sitemap": "^2.0.0-beta.13",
-        "@docusaurus/preset-classic": "^2.0.0-beta.13",
+        "@docusaurus/core": "2.0.0-beta.13",
+        "@docusaurus/plugin-google-gtag": "2.0.0-beta.13",
+        "@docusaurus/plugin-ideal-image": "2.0.0-beta.13",
+        "@docusaurus/plugin-sitemap": "2.0.0-beta.13",
+        "@docusaurus/preset-classic": "2.0.0-beta.13",
         "aos": "^2.3.4",
         "autoprefixer": "^10.4.0",
         "clsx": "^1.1.1",

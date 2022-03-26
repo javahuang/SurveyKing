@@ -13,9 +13,7 @@ author: 大黄
 
 :::
 
-
 ### 如何部署
-
 
 ```bash
 # 1. 启动后端服务
@@ -29,8 +27,6 @@ nohup java -jar surveyking-v0.3.0.jar --server.port=1991 &
 nginx -s reload
 
 ```
-
-
 
 ### nginx 配置
 
