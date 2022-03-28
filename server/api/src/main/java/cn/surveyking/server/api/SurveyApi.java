@@ -1,6 +1,8 @@
 package cn.surveyking.server.api;
 
 import cn.surveyking.server.core.constant.AppConsts;
+import cn.surveyking.server.core.constant.ErrorCode;
+import cn.surveyking.server.core.exception.ErrorCodeException;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.flow.constant.FlowApprovalType;
@@ -14,6 +16,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -55,6 +58,24 @@ public class SurveyApi {
 		return projectView;
 	}
 
+	@PostMapping("/loadAnswer")
+	public AnswerView loadAnswer(@RequestBody AnswerQuery query) {
+		ProjectSetting setting = null;
+		try {
+			setting = surveyService.validateProject(query.getProjectId());
+		}
+		catch (ErrorCodeException e) {
+			// 401 开头的是校验问卷限制，修改答案的时候无需校验
+			if (!(e.getErrorCode().code + "").startsWith("401")) {
+				throw e;
+			}
+		}
+		if (!Boolean.TRUE.equals(setting.getSubmittedSetting().getEnableUpdate())) {
+			throw new ErrorCodeException(ErrorCode.AnswerChangeDisabled);
+		}
+		return answerService.getAnswer(query);
+	}
+
 	@PostMapping("/verifyPassword")
 	public PublicProjectView verifyPassword(@RequestBody ProjectQuery query) {
 		PublicProjectView projectView = surveyService.verifyPassword(query);
@@ -68,17 +89,24 @@ public class SurveyApi {
 	}
 
 	@PostMapping("/saveAnswer")
-	public void saveAnswer(@RequestBody AnswerRequest answer, HttpServletRequest request) {
+	public String saveAnswer(@RequestBody AnswerRequest answer, HttpServletRequest request) {
 		String projectId = answer.getProjectId();
-		surveyService.validateProject(projectId);
+		ProjectSetting setting = surveyService.validateProject(projectId);
 		String answerId = answerService.saveAnswer(answer, request);
 
-		ApprovalTaskRequest approvalTaskRequest = new ApprovalTaskRequest();
-		approvalTaskRequest.setType(FlowApprovalType.SAVE);
-		approvalTaskRequest.setAnswerId(answerId);
-		approvalTaskRequest.setProjectId(projectId);
-		approvalTaskRequest.setActivityId(answer.getProjectId());
-		flowService.approvalTask(approvalTaskRequest);
+		if (!StringUtils.hasText(answer.getId())) {
+			ApprovalTaskRequest approvalTaskRequest = new ApprovalTaskRequest();
+			approvalTaskRequest.setType(FlowApprovalType.SAVE);
+			approvalTaskRequest.setAnswerId(answerId);
+			approvalTaskRequest.setProjectId(projectId);
+			approvalTaskRequest.setActivityId(answer.getProjectId());
+			flowService.approvalTask(approvalTaskRequest);
+		}
+
+		if (Boolean.TRUE.equals(setting.getSubmittedSetting().getEnableUpdate())) {
+			return answerId;
+		}
+		return null;
 	}
 
 	@PostMapping("/upload")

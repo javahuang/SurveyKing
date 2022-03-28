@@ -147,10 +147,16 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	@Override
 	public String saveAnswer(AnswerRequest request, HttpServletRequest httpRequest) {
 		request.getMetaInfo().setClientInfo(parseClientInfo(httpRequest));
-		Answer answer = answerViewMapper.fromRequest(request);
-		answer.setCreateAt(new Date());
-		save(answer);
-		return answer.getId();
+		if (StringUtils.hasText(request.getId())) {
+			updateAnswer(request);
+			return request.getId();
+		}
+		else {
+			Answer answer = answerViewMapper.fromRequest(request);
+			answer.setCreateAt(new Date());
+			save(answer);
+			return answer.getId();
+		}
 	}
 
 	@Override

@@ -72,7 +72,7 @@ public class SurveyServiceImpl implements SurveyService {
 	}
 
 	@Override
-	public void validateProject(String projectId) {
+	public ProjectSetting validateProject(String projectId) {
 		ProjectView project = projectService.getProject(projectId);
 		ProjectSetting setting = project.getSetting();
 		if (setting.getStatus() == 0) {
@@ -111,6 +111,7 @@ public class SurveyServiceImpl implements SurveyService {
 		if (setting.getAnswerSetting().getIpLimit() != null) {
 			validateIpLimit(projectId, setting);
 		}
+		return setting;
 	}
 
 	@Override
