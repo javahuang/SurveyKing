@@ -54,6 +54,16 @@ public class SurveyApi {
 		else {
 			flowService.beforeLaunchProcess(projectView);
 		}
+		if (Boolean.TRUE.equals(projectView.getSetting().getSubmittedSetting().getEnableUpdate())
+				&& SecurityContextUtils.isAuthenticated()) {
+			AnswerQuery answerQuery = new AnswerQuery();
+			answerQuery.setProjectId(query.getId());
+			answerQuery.setLatest(true);
+			AnswerView latestAnswer = answerService.getAnswer(answerQuery);
+			if (latestAnswer != null) {
+				projectView.setAnswerId(latestAnswer.getId());
+			}
+		}
 
 		return projectView;
 	}
@@ -91,7 +101,37 @@ public class SurveyApi {
 	@PostMapping("/saveAnswer")
 	public String saveAnswer(@RequestBody AnswerRequest answer, HttpServletRequest request) {
 		String projectId = answer.getProjectId();
-		ProjectSetting setting = surveyService.validateProject(projectId);
+		ProjectSetting setting = null;
+		boolean needGetLatest = false;
+		try {
+			setting = surveyService.validateProject(projectId);
+
+			// 未设时间限制&需要登录&可以修改，永远修改的是同一份
+			if (SecurityContextUtils.isAuthenticated() && setting != null
+					&& Boolean.TRUE.equals(setting.getSubmittedSetting().getEnableUpdate())) {
+				needGetLatest = true;
+			}
+		}
+		catch (ErrorCodeException e) {
+			// 如果设置了时间限制，只能修改某个时间区间内的问卷
+			// 登录&问卷已提交&允许修改，则可以继续修改
+			if (ErrorCode.SurveySubmitted.equals(e.getErrorCode()) && SecurityContextUtils.isAuthenticated()
+					&& setting != null && Boolean.TRUE.equals(setting.getSubmittedSetting().getEnableUpdate())) {
+				needGetLatest = true;
+			}
+		}
+
+		if (needGetLatest) {
+			// 获取最近一份的问卷
+			AnswerQuery answerQuery = new AnswerQuery();
+			answerQuery.setProjectId(projectId);
+			answerQuery.setLatest(true);
+			AnswerView latestAnswer = answerService.getAnswer(answerQuery);
+			if (latestAnswer != null) {
+				answer.setId(latestAnswer.getId());
+			}
+		}
+
 		String answerId = answerService.saveAnswer(answer, request);
 
 		if (!StringUtils.hasText(answer.getId())) {
@@ -102,8 +142,9 @@ public class SurveyApi {
 			approvalTaskRequest.setActivityId(answer.getProjectId());
 			flowService.approvalTask(approvalTaskRequest);
 		}
-
-		if (Boolean.TRUE.equals(setting.getSubmittedSetting().getEnableUpdate())) {
+		// 登录用户无需显示二维码
+		if (Boolean.TRUE.equals(setting.getSubmittedSetting().getEnableUpdate())
+				&& !SecurityContextUtils.isAuthenticated()) {
 			return answerId;
 		}
 		return null;

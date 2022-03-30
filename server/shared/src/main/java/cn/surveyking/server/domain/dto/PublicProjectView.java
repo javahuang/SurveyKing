@@ -29,4 +29,6 @@ public class PublicProjectView {
 
 	private String submittedHtml;
 
+	private String answerId;
+
 }

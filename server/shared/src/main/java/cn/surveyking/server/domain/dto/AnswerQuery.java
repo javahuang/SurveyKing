@@ -30,4 +30,7 @@ public class AnswerQuery extends PageQuery {
 
 	private String createBy;
 
+	/** 获取最近一份答案 */
+	private Boolean latest;
+
 }

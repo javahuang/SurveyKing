@@ -5,6 +5,7 @@ import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.exception.InternalServerError;
 import cn.surveyking.server.core.uitls.ExcelExporter;
 import cn.surveyking.server.core.uitls.SchemaParser;
+import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.domain.mapper.AnswerViewMapper;
 import cn.surveyking.server.domain.model.Answer;
@@ -137,7 +138,20 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
 	@Override
 	public AnswerView getAnswer(AnswerQuery query) {
-		AnswerView answerView = answerViewMapper.toAnswerView(getById(query.getId()));
+		AnswerView answerView = null;
+		if (query.getId() != null) {
+			answerView = answerViewMapper.toAnswerView(getById(query.getId()));
+		}
+		else if (query.getProjectId() != null && Boolean.TRUE.equals(query.getLatest())) {
+			answerView = answerViewMapper
+					.toAnswerView(list(Wrappers.<Answer>lambdaQuery().eq(Answer::getProjectId, query.getProjectId())
+							.eq(SecurityContextUtils.isAuthenticated(), Answer::getCreateBy,
+									SecurityContextUtils.getUserId())
+							.orderByDesc(Answer::getCreateAt)).stream().findFirst().orElse(null));
+		}
+		if (answerView == null) {
+			return null;
+		}
 		String projectId = answerView.getProjectId();
 		FlatSurveySchemaByType schemaByType = parseSurveySchemaByType(projectMapper.selectById(projectId).getSurvey());
 		setAnswerExtraInfo(answerView, schemaByType);
