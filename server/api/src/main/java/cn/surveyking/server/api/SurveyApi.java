@@ -119,6 +119,9 @@ public class SurveyApi {
 					&& setting != null && Boolean.TRUE.equals(setting.getSubmittedSetting().getEnableUpdate())) {
 				needGetLatest = true;
 			}
+			else {
+				throw e;
+			}
 		}
 
 		if (needGetLatest) {

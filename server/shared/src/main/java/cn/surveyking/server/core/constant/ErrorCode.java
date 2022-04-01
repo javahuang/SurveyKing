@@ -6,6 +6,8 @@ package cn.surveyking.server.core.constant;
  */
 public enum ErrorCode {
 
+	/** 账号或者密码错误 */
+	UsernameOrPasswordError(1024, "账号或者密码错误"),
 	/** 暂停回收 */
 	SurveySuspend(4000, "问卷已暂停回收"),
 	/** 页面不存在 */

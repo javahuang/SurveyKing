@@ -207,6 +207,9 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 					throw new InternalServerError("密码验证失败");
 				}
 			}
+			if (request.getUsername() != null) {
+				account.setAuthAccount(request.getUsername());
+			}
 			if (request.getStatus() != null) {
 				account.setStatus(request.getStatus());
 			}

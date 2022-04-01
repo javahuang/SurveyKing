@@ -1,6 +1,8 @@
 package cn.surveyking.server.api;
 
 import cn.surveyking.server.core.constant.AppConsts;
+import cn.surveyking.server.core.constant.ErrorCode;
+import cn.surveyking.server.core.exception.ErrorCodeException;
 import cn.surveyking.server.core.security.JwtTokenUtil;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.AuthRequest;
@@ -47,14 +49,21 @@ public class UserApi {
 			throw new AccessDeniedException("不支持的认证方式");
 		}
 		// 将 token 提交给 spring security 的 DaoAuthenticationProvider 进行认证
-		Authentication authenticate = authenticationManager.authenticate(authentication);
-		UserInfo user = (UserInfo) authenticate.getPrincipal();
-		HttpCookie cookie = ResponseCookie
-				.from(AppConsts.COOKIE_TOKEN_NAME,
-						jwtTokenUtil.generateAccessToken(new UserTokenView(user.getUserId())))
-				.path("/").httpOnly(true).build();
-		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).header(HttpHeaders.AUTHORIZATION,
-				jwtTokenUtil.generateAccessToken(new UserTokenView(user.getUserId()))).build();
+		try {
+			Authentication authenticate = authenticationManager.authenticate(authentication);
+			UserInfo user = (UserInfo) authenticate.getPrincipal();
+			HttpCookie cookie = ResponseCookie
+					.from(AppConsts.COOKIE_TOKEN_NAME,
+							jwtTokenUtil.generateAccessToken(new UserTokenView(user.getUserId())))
+					.path("/").httpOnly(true).build();
+			return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
+					.header(HttpHeaders.AUTHORIZATION,
+							jwtTokenUtil.generateAccessToken(new UserTokenView(user.getUserId())))
+					.build();
+		}
+		catch (Exception e) {
+			throw new ErrorCodeException(ErrorCode.UsernameOrPasswordError);
+		}
 	}
 
 	@PostMapping("/public/logout")
