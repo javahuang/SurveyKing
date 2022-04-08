@@ -24,4 +24,6 @@ public class AnswerRequest {
 	 */
 	private Integer tempSave;
 
+	private AnswerExamInfo examInfo;
+
 }

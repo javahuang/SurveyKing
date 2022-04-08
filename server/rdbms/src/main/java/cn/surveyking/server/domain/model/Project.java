@@ -1,5 +1,6 @@
 package cn.surveyking.server.domain.model;
 
+import cn.surveyking.server.core.constant.ProjectModeEnum;
 import cn.surveyking.server.core.model.BaseModel;
 import cn.surveyking.server.domain.dto.ProjectSetting;
 import cn.surveyking.server.domain.dto.SurveySchema;
@@ -23,6 +24,11 @@ import java.util.Date;
 public class Project extends BaseModel {
 
 	private String name;
+
+	/**
+	 * 问卷模式 survey问卷 exam考试
+	 */
+	private ProjectModeEnum mode;
 
 	@TableField(typeHandler = JacksonTypeHandler.class, jdbcType = JdbcType.LONGVARCHAR)
 	private SurveySchema survey;

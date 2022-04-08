@@ -1,9 +1,6 @@
 package cn.surveyking.server.api;
 
 import cn.surveyking.server.core.constant.AppConsts;
-import cn.surveyking.server.core.constant.ErrorCode;
-import cn.surveyking.server.core.exception.ErrorCodeException;
-import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.flow.constant.FlowApprovalType;
 import cn.surveyking.server.flow.domain.dto.ApprovalTaskRequest;
@@ -44,46 +41,16 @@ public class SurveyApi {
 
 	@PostMapping("/loadProject")
 	public PublicProjectView loadProject(@RequestBody ProjectQuery query) {
-		surveyService.validateProject(query.getId());
 		PublicProjectView projectView = surveyService.loadProject(query.getId());
-		if (Boolean.TRUE.equals(projectView.getSetting().getAnswerSetting().getLoginRequired())
-				&& !SecurityContextUtils.isAuthenticated()) {
-			projectView.setLoginRequired(true);
-			projectView.setSurvey(null);
-		}
-		else {
+		if (projectView.getSurvey() != null) {
 			flowService.beforeLaunchProcess(projectView);
 		}
-		if (Boolean.TRUE.equals(projectView.getSetting().getSubmittedSetting().getEnableUpdate())
-				&& SecurityContextUtils.isAuthenticated()) {
-			AnswerQuery answerQuery = new AnswerQuery();
-			answerQuery.setProjectId(query.getId());
-			answerQuery.setLatest(true);
-			AnswerView latestAnswer = answerService.getAnswer(answerQuery);
-			if (latestAnswer != null) {
-				projectView.setAnswerId(latestAnswer.getId());
-			}
-		}
-
 		return projectView;
 	}
 
 	@PostMapping("/loadAnswer")
-	public AnswerView loadAnswer(@RequestBody AnswerQuery query) {
-		ProjectSetting setting = null;
-		try {
-			setting = surveyService.validateProject(query.getProjectId());
-		}
-		catch (ErrorCodeException e) {
-			// 401 开头的是校验问卷限制，修改答案的时候无需校验
-			if (!(e.getErrorCode().code + "").startsWith("401")) {
-				throw e;
-			}
-		}
-		if (!Boolean.TRUE.equals(setting.getSubmittedSetting().getEnableUpdate())) {
-			throw new ErrorCodeException(ErrorCode.AnswerChangeDisabled);
-		}
-		return answerService.getAnswer(query);
+	public PublicAnswerView loadAnswer(@RequestBody AnswerQuery query) {
+		return surveyService.loadAnswer(query);
 	}
 
 	@PostMapping("/verifyPassword")
@@ -99,58 +66,18 @@ public class SurveyApi {
 	}
 
 	@PostMapping("/saveAnswer")
-	public String saveAnswer(@RequestBody AnswerRequest answer, HttpServletRequest request) {
-		String projectId = answer.getProjectId();
-		ProjectSetting setting = null;
-		boolean needGetLatest = false;
-		try {
-			setting = surveyService.validateProject(projectId);
-
-			// 未设时间限制&需要登录&可以修改，永远修改的是同一份
-			if (SecurityContextUtils.isAuthenticated() && setting != null
-					&& Boolean.TRUE.equals(setting.getSubmittedSetting().getEnableUpdate())) {
-				needGetLatest = true;
-			}
-		}
-		catch (ErrorCodeException e) {
-			// 如果设置了时间限制，只能修改某个时间区间内的问卷
-			// 登录&问卷已提交&允许修改，则可以继续修改
-			if (ErrorCode.SurveySubmitted.equals(e.getErrorCode()) && SecurityContextUtils.isAuthenticated()
-					&& setting != null && Boolean.TRUE.equals(setting.getSubmittedSetting().getEnableUpdate())) {
-				needGetLatest = true;
-			}
-			else {
-				throw e;
-			}
-		}
-
-		if (needGetLatest) {
-			// 获取最近一份的问卷
-			AnswerQuery answerQuery = new AnswerQuery();
-			answerQuery.setProjectId(projectId);
-			answerQuery.setLatest(true);
-			AnswerView latestAnswer = answerService.getAnswer(answerQuery);
-			if (latestAnswer != null) {
-				answer.setId(latestAnswer.getId());
-			}
-		}
-
-		String answerId = answerService.saveAnswer(answer, request);
-
+	public PublicAnswerView saveAnswer(@RequestBody AnswerRequest answer, HttpServletRequest request) {
+		PublicAnswerView publicAnswerView = surveyService.saveAnswer(answer, request);
+		// 发起审批流程
 		if (!StringUtils.hasText(answer.getId())) {
 			ApprovalTaskRequest approvalTaskRequest = new ApprovalTaskRequest();
 			approvalTaskRequest.setType(FlowApprovalType.SAVE);
-			approvalTaskRequest.setAnswerId(answerId);
-			approvalTaskRequest.setProjectId(projectId);
+			approvalTaskRequest.setAnswerId(publicAnswerView.getAnswerId());
+			approvalTaskRequest.setProjectId(answer.getProjectId());
 			approvalTaskRequest.setActivityId(answer.getProjectId());
 			flowService.approvalTask(approvalTaskRequest);
 		}
-		// 登录用户无需显示二维码
-		if (Boolean.TRUE.equals(setting.getSubmittedSetting().getEnableUpdate())
-				&& !SecurityContextUtils.isAuthenticated()) {
-			return answerId;
-		}
-		return null;
+		return publicAnswerView;
 	}
 
 	@PostMapping("/upload")

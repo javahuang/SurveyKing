@@ -1,6 +1,7 @@
 package cn.surveyking.server.domain.model;
 
 import cn.surveyking.server.core.model.BaseModel;
+import cn.surveyking.server.domain.dto.AnswerExamInfo;
 import cn.surveyking.server.domain.dto.AnswerMetaInfo;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -29,6 +30,17 @@ public class Answer extends BaseModel {
 
 	@TableField(typeHandler = JacksonTypeHandler.class, jdbcType = JdbcType.LONGVARCHAR)
 	private AnswerMetaInfo metaInfo;
+
+	/**
+	 * 考试分数
+	 */
+	private Double examScore;
+
+	/**
+	 * 考试信息
+	 */
+	@TableField(typeHandler = JacksonTypeHandler.class, jdbcType = JdbcType.LONGVARCHAR)
+	private AnswerExamInfo examInfo;
 
 	/**
 	 * 0 暂存 1 已完成

@@ -1,9 +1,8 @@
 package cn.surveyking.server.service;
 
-import cn.surveyking.server.domain.dto.ProjectQuery;
-import cn.surveyking.server.domain.dto.ProjectSetting;
-import cn.surveyking.server.domain.dto.PublicProjectView;
-import cn.surveyking.server.domain.dto.PublicStatisticsView;
+import cn.surveyking.server.domain.dto.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author javahuang
@@ -15,8 +14,10 @@ public interface SurveyService {
 
 	PublicProjectView verifyPassword(ProjectQuery query);
 
-	ProjectSetting validateProject(String projectId);
-
 	PublicStatisticsView statProject(ProjectQuery query);
+
+	PublicAnswerView saveAnswer(AnswerRequest answer, HttpServletRequest request);
+
+	PublicAnswerView loadAnswer(AnswerQuery query);
 
 }

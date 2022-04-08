@@ -3,6 +3,7 @@ package cn.surveyking.server.impl;
 import cn.surveyking.server.core.common.Tuple2;
 import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.constant.ErrorCode;
+import cn.surveyking.server.core.constant.ProjectModeEnum;
 import cn.surveyking.server.core.exception.ErrorCodeException;
 import cn.surveyking.server.core.uitls.*;
 import cn.surveyking.server.domain.dto.*;
@@ -12,6 +13,7 @@ import cn.surveyking.server.service.ProjectService;
 import cn.surveyking.server.service.SurveyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.WebUtils;
@@ -52,14 +54,36 @@ public class SurveyServiceImpl implements SurveyService {
 		if (project == null) {
 			throw new ErrorCodeException(ErrorCode.ProjectNotFound);
 		}
-		PublicProjectView result = projectViewMapper.toPublicProjectView(project);
+		PublicProjectView projectView = projectViewMapper.toPublicProjectView(project);
+
+		// 需要密码答卷
 		if (project != null && project.getSetting() != null && project.getSetting().getAnswerSetting() != null
 				&& project.getSetting().getAnswerSetting().getPassword() != null) {
-			result.setSurvey(null);
-			result.setPasswordRequired(true);
+			projectView.setSurvey(null);
+			projectView.setPasswordRequired(true);
 		}
-		validateProject(projectId);
-		return result;
+
+		// 需要登录答卷
+		if (Boolean.TRUE.equals(projectView.getSetting().getAnswerSetting().getLoginRequired())
+				&& !SecurityContextUtils.isAuthenticated()) {
+			projectView.setLoginRequired(true);
+			projectView.setSurvey(null);
+		}
+
+		// 允许修改答案
+		if (Boolean.TRUE.equals(projectView.getSetting().getSubmittedSetting().getEnableUpdate())
+				&& SecurityContextUtils.isAuthenticated()) {
+			AnswerQuery answerQuery = new AnswerQuery();
+			answerQuery.setProjectId(projectId);
+			answerQuery.setLatest(true);
+			AnswerView latestAnswer = answerService.getAnswer(answerQuery);
+			if (latestAnswer != null) {
+				projectView.setAnswerId(latestAnswer.getId());
+			}
+		}
+		// 校验问卷
+		validateProject(project);
+		return projectView;
 	}
 
 	@Override
@@ -71,10 +95,14 @@ public class SurveyServiceImpl implements SurveyService {
 		throw new ErrorCodeException(ErrorCode.ValidationError);
 	}
 
-	@Override
-	public ProjectSetting validateProject(String projectId) {
-		ProjectView project = projectService.getProject(projectId);
+	/**
+	 * 根据问卷设置校验问卷
+	 * @param project
+	 * @return
+	 */
+	private ProjectSetting validateProject(ProjectView project) {
 		ProjectSetting setting = project.getSetting();
+		String projectId = project.getId();
 		if (setting.getStatus() == 0) {
 			throw new ErrorCodeException(ErrorCode.SurveySuspend);
 		}
@@ -83,7 +111,7 @@ public class SurveyServiceImpl implements SurveyService {
 		// 校验最大答案条数限制
 		if (maxAnswers != null) {
 			AnswerQuery answerQuery = new AnswerQuery();
-			answerQuery.setProjectId(projectId);
+			answerQuery.setProjectId(project.getId());
 			long totalAnswers = answerService.count(answerQuery);
 			if (totalAnswers >= maxAnswers) {
 				throw new ErrorCodeException(ErrorCode.ExceededMaxAnswers);
@@ -122,6 +150,92 @@ public class SurveyServiceImpl implements SurveyService {
 		List<AnswerView> answers = answerService.listAnswer(answerQuery).getList();
 		ProjectView project = projectService.getProject(query.getId());
 		return new ProjectStatHelper(project.getSurvey(), answers).stat();
+	}
+
+	@Override
+	public PublicAnswerView saveAnswer(AnswerRequest answer, HttpServletRequest request) {
+		String projectId = answer.getProjectId();
+
+		PublicAnswerView result = new PublicAnswerView();
+		ProjectView project = projectService.getProject(projectId);
+		ProjectSetting setting = project.getSetting();
+
+		String answerId = validateAndGetLatestAnswer(project);
+		answer.setId(answerId);
+		AnswerView answerView = answerService.saveAnswer(answer, request);
+
+		// 登录用户无需显示修改答案的二维码
+		if (Boolean.TRUE.equals(setting.getSubmittedSetting().getEnableUpdate())
+				&& !SecurityContextUtils.isAuthenticated()) {
+			result.setAnswerId(answerView.getId());
+		}
+		if (ProjectModeEnum.exam.equals(project.getMode())) {
+			result.setExamScore(answerView.getExamScore());
+			result.setQuestionScore(answerView.getExamInfo().getQuestionScore());
+		}
+
+		return result;
+	}
+
+	@Override
+	public PublicAnswerView loadAnswer(AnswerQuery query) {
+		ProjectSetting setting = null;
+		try {
+			ProjectView project = projectService.getProject(query.getProjectId());
+			setting = validateProject(project);
+		}
+		catch (ErrorCodeException e) {
+			// 401 开头的是校验问卷限制，修改答案的时候无需校验
+			if (!(e.getErrorCode().code + "").startsWith("401")) {
+				throw e;
+			}
+		}
+		if (!Boolean.TRUE.equals(setting.getSubmittedSetting().getEnableUpdate())) {
+			throw new ErrorCodeException(ErrorCode.AnswerChangeDisabled);
+		}
+		PublicAnswerView answerView = new PublicAnswerView();
+		BeanUtils.copyProperties(answerService.getAnswer(query), answerView);
+		return answerView;
+	}
+
+	/**
+	 * 校验问卷并且判断是否要更新最近一次的答案
+	 * @param project
+	 * @return
+	 */
+	private String validateAndGetLatestAnswer(ProjectView project) {
+		ProjectSetting setting = project.getSetting();
+		boolean needGetLatest = false;
+		try {
+			validateProject(project);
+			// 未设时间限制&需要登录&可以修改，永远修改的是同一份
+			if (SecurityContextUtils.isAuthenticated() && setting != null
+					&& Boolean.TRUE.equals(setting.getSubmittedSetting().getEnableUpdate())) {
+				needGetLatest = true;
+			}
+		}
+		catch (ErrorCodeException e) {
+			// 如果设置了时间限制，只能修改某个时间区间内的问卷
+			// 登录&问卷已提交&允许修改，则可以继续修改
+			if (ErrorCode.SurveySubmitted.equals(e.getErrorCode()) && SecurityContextUtils.isAuthenticated()
+					&& setting != null && Boolean.TRUE.equals(setting.getSubmittedSetting().getEnableUpdate())) {
+				needGetLatest = true;
+			}
+			else {
+				throw e;
+			}
+		}
+		// 获取最近一份的问卷执行答案更新操作
+		if (needGetLatest) {
+			AnswerQuery answerQuery = new AnswerQuery();
+			answerQuery.setProjectId(project.getId());
+			answerQuery.setLatest(true);
+			AnswerView latestAnswer = answerService.getAnswer(answerQuery);
+			if (latestAnswer != null) {
+				return answerQuery.getId();
+			}
+		}
+		return null;
 	}
 
 	private void validateLoginLimit(String projectId, ProjectSetting setting) {

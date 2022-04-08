@@ -2,7 +2,9 @@ package cn.surveyking.server.impl;
 
 import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.constant.AppConsts;
+import cn.surveyking.server.core.constant.ProjectModeEnum;
 import cn.surveyking.server.core.exception.InternalServerError;
+import cn.surveyking.server.core.uitls.AnswerScoreEvaluator;
 import cn.surveyking.server.core.uitls.ExcelExporter;
 import cn.surveyking.server.core.uitls.SchemaParser;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
@@ -12,16 +14,16 @@ import cn.surveyking.server.domain.model.Answer;
 import cn.surveyking.server.domain.model.Project;
 import cn.surveyking.server.mapper.AnswerMapper;
 import cn.surveyking.server.mapper.ProjectMapper;
-import cn.surveyking.server.service.*;
+import cn.surveyking.server.service.AnswerService;
+import cn.surveyking.server.service.DeptService;
+import cn.surveyking.server.service.FileService;
+import cn.surveyking.server.service.UserService;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.expression.Expression;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -94,6 +96,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		setAnswerTypeInfo(schemaByType.getDeptQuestions(), view);
 		setAnswerTypeInfo(schemaByType.getFileQuestions(), view);
 		setAnswerTypeInfo(schemaByType.getUserQuestions(), view);
+		setUserName(view);
 	}
 
 	private void setAnswerTypeInfo(List<SurveySchema> flatQuestionSchema, AnswerView view) {
@@ -136,6 +139,15 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		});
 	}
 
+	private void setUserName(AnswerView answerView) {
+		if (answerView.getCreateBy() != null) {
+			UserInfo userInfo = userService.loadUserById(answerView.getCreateBy());
+			if (userInfo != null) {
+				answerView.setCreateByName(userInfo.getName());
+			}
+		}
+	}
+
 	@Override
 	public AnswerView getAnswer(AnswerQuery query) {
 		AnswerView answerView = null;
@@ -159,17 +171,16 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	}
 
 	@Override
-	public String saveAnswer(AnswerRequest request, HttpServletRequest httpRequest) {
+	public AnswerView saveAnswer(AnswerRequest request, HttpServletRequest httpRequest) {
 		request.getMetaInfo().setClientInfo(parseClientInfo(httpRequest));
 		if (StringUtils.hasText(request.getId())) {
-			updateAnswer(request);
-			return request.getId();
+			return updateAnswer(request);
 		}
 		else {
 			Answer answer = answerViewMapper.fromRequest(request);
 			answer.setCreateAt(new Date());
-			save(answer);
-			return answer.getId();
+			save(beforeSaveAnswer(answer));
+			return answerViewMapper.toAnswerView(answer);
 		}
 	}
 
@@ -184,8 +195,10 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	}
 
 	@Override
-	public void updateAnswer(AnswerRequest answer) {
-		super.updateById(answerViewMapper.fromRequest(answer));
+	public AnswerView updateAnswer(AnswerRequest request) {
+		Answer answer = beforeSaveAnswer(answerViewMapper.fromRequest(request));
+		updateById(answer);
+		return answerViewMapper.toAnswerView(answer);
 	}
 
 	@Override
@@ -212,10 +225,11 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 			new Thread(() -> {
 				try {
 					new ExcelExporter.Builder().setSheetName(project.getName()).setOutputStream(outputStream)
-							.setColumns(SchemaParser.parseColumns(schemaDataTypes))
+							.setColumns(SchemaParser.parseColumns(schemaDataTypes, project.getMode()))
 							.setRows(answerViews.stream().map(answer -> {
 								indexArr[0] = indexArr[0] += 1;
-								return SchemaParser.parseRowData(answer, schemaDataTypes, indexArr[0]);
+								return SchemaParser.parseRowData(answer, schemaDataTypes, indexArr[0],
+										project.getMode());
 							}).collect(Collectors.toList())).build().exportToStream();
 				}
 				catch (Exception e) {
@@ -387,6 +401,18 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 			extension = fileName.substring(i + 1);
 		}
 		return extension;
+	}
+
+	private Answer beforeSaveAnswer(Answer answer) {
+		Project project = projectMapper.selectById(answer.getProjectId());
+		if (ProjectModeEnum.exam.equals(project.getMode())) {
+			AnswerScoreEvaluator evaluator = new AnswerScoreEvaluator(project.getSurvey(), answer.getAnswer());
+			answer.setExamScore(evaluator.eval());
+			AnswerExamInfo examInfo = new AnswerExamInfo();
+			examInfo.setQuestionScore(evaluator.getQuestionScore());
+			answer.setExamInfo(examInfo);
+		}
+		return answer;
 	}
 
 }

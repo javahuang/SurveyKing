@@ -3,7 +3,14 @@ spring:
     console:
       enabled: true
   datasource:
+    #    username: sa
+    #    password: sa
+    #    url: jdbc:h2:./survey; #INIT=runscript from 'classpath:scripts/init-h2.sql'
+    #    driver-class-name: org.h2.Driver
     driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      continue-on-error: true
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

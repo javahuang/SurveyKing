@@ -1,6 +1,7 @@
 package cn.surveyking.server.domain.dto;
 
 import cn.surveyking.server.core.constant.AnswerFreqEnum;
+import cn.surveyking.server.core.constant.ProjectModeEnum;
 import lombok.Data;
 
 import java.util.LinkedHashMap;
@@ -17,9 +18,13 @@ public class ProjectSetting {
 	 */
 	private Integer status = 0;
 
+	private ProjectModeEnum mode;
+
 	private AnswerSetting answerSetting = new AnswerSetting();
 
 	private SubmittedSetting submittedSetting = new SubmittedSetting();
+
+	private ExamSetting examSetting = new ExamSetting();
 
 	@Data
 	public static class AnswerSetting {
@@ -118,6 +123,51 @@ public class ProjectSetting {
 			this.limitNum = limitNum;
 			this.limitFreq = limitFreq;
 		}
+
+	}
+
+	/**
+	 * 通过链接获取初始值，调用不同的链接可以获取不同的初始值
+	 */
+	@Data
+	public static class LinkWithInitialValuesSetting {
+
+		/**
+		 *
+		 */
+		private String id;
+
+		private LinkedHashMap initialValues;
+
+	}
+
+	@Data
+	public static class ExamSetting {
+
+		/**
+		 * 考试开始时间
+		 */
+		private Long startTime;
+
+		/**
+		 * 考试结束时间
+		 */
+		private Long endTime;
+
+		/**
+		 * 最短交卷时间
+		 */
+		private Integer minSubmitMinutes;
+
+		/**
+		 * 最长交卷时间
+		 */
+		private Integer maxSubmitMinutes;
+
+		/**
+		 * 显示排名
+		 */
+		private Boolean rankingEnabled;
 
 	}
 

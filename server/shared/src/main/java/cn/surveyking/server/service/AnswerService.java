@@ -27,9 +27,9 @@ public interface AnswerService {
 
 	long count(AnswerQuery query);
 
-	String saveAnswer(AnswerRequest answer, HttpServletRequest request);
+	AnswerView saveAnswer(AnswerRequest answer, HttpServletRequest request);
 
-	void updateAnswer(AnswerRequest answer);
+	AnswerView updateAnswer(AnswerRequest answer);
 
 	void deleteAnswer(String[] ids);
 

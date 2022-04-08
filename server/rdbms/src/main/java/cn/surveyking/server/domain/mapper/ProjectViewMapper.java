@@ -1,11 +1,12 @@
 package cn.surveyking.server.domain.mapper;
 
+import cn.surveyking.server.core.constant.ProjectModeEnum;
 import cn.surveyking.server.domain.dto.ProjectRequest;
 import cn.surveyking.server.domain.dto.ProjectView;
 import cn.surveyking.server.domain.dto.PublicProjectView;
+import cn.surveyking.server.domain.dto.SurveySchema;
 import cn.surveyking.server.domain.model.Project;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 
 import java.util.List;
 
@@ -28,5 +29,23 @@ public interface ProjectViewMapper {
 	@Mapping(target = "setting.answerSetting.cookieLimit", ignore = true)
 	@Mapping(target = "setting.answerSetting.loginLimit", ignore = true)
 	PublicProjectView toPublicProjectView(ProjectView project);
+
+	@AfterMapping
+	default void calledWithSourceAndTargetType(ProjectView source, @MappingTarget PublicProjectView view) {
+		// 去掉 schema 里面的答案信息
+		if (ProjectModeEnum.exam.name().equals(source.getMode())) {
+			trimExamAnswerInfo(view.getSurvey());
+		}
+	}
+
+	default void trimExamAnswerInfo(SurveySchema schema) {
+		schema.getAttribute().setExamAnswerMode(null);
+		schema.getAttribute().setExamCorrectAnswer(null);
+		schema.getAttribute().setExamScore(null);
+		schema.getAttribute().setExamMatchRule(null);
+		if (schema.getChildren() != null) {
+			schema.getChildren().forEach(sub -> trimExamAnswerInfo(sub));
+		}
+	}
 
 }

@@ -1,5 +1,6 @@
 package cn.surveyking.server.domain.dto;
 
+import cn.surveyking.server.core.constant.ProjectModeEnum;
 import lombok.Data;
 
 import java.util.Date;
@@ -14,6 +15,8 @@ public class ProjectView {
 	private String id;
 
 	private String name;
+
+	private ProjectModeEnum mode;
 
 	private Integer status;
 

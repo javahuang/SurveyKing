@@ -24,6 +24,7 @@ dependencies {
         exclude group: 'org.flowable', module: 'flowable-idm-spring-configurator'
     }
     implementation 'mysql:mysql-connector-java:8.0.26'
+//    implementation 'com.h2database:h2:1.4.200'
     implementation project(':shared')
     implementation project(':rdbms')
 }

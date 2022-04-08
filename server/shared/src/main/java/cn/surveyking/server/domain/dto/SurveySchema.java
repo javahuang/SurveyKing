@@ -30,17 +30,22 @@ public class SurveySchema implements Cloneable {
 
 	public enum QuestionType {
 
-		FillBlank, Textarea, MultipleBlank, Signature, Score, Radio, Checkbox, Select, Cascader, Upload, MatrixAuto, MatrixRadio, MatrixCheckbox, MatrixFillBlank, MatrixScore, Survey, QuestionSet, Pagination, Remark, SplitLine, Option, User, Dept, Nps, HorzBlank, Address;
+		FillBlank, Textarea, MultipleBlank, Signature, Score, Radio, Checkbox, Select, Cascader, Upload, MatrixAuto, MatrixRadio, MatrixCheckbox, MatrixFillBlank, MatrixScore, MatrixNps, Survey, QuestionSet, Pagination, Remark, SplitLine, Option, User, Dept, Nps, HorzBlank, Address;
 
 		// 分为数据类型和空类型
 		public static EnumSet<QuestionType> dataType() {
 			return EnumSet.of(FillBlank, Textarea, MultipleBlank, Signature, Score, Radio, Checkbox, Select, Cascader,
-					Upload, MatrixAuto, MatrixRadio, MatrixCheckbox, MatrixFillBlank, MatrixScore, User, Dept, Nps,
-					HorzBlank, Address);
+					Upload, MatrixAuto, MatrixRadio, MatrixCheckbox, MatrixFillBlank, MatrixScore, MatrixNps, User,
+					Dept, Nps, HorzBlank, Address);
 		}
 
 		public static EnumSet<QuestionType> voidType() {
 			return EnumSet.of(Survey, QuestionSet, Pagination, Remark, SplitLine, Option);
+		}
+
+		// 考试自动计分支持题型
+		public static EnumSet<QuestionType> examType() {
+			return EnumSet.of(FillBlank, Textarea, MultipleBlank, Radio, Checkbox, Select, HorzBlank);
 		}
 
 	}
@@ -107,24 +112,13 @@ public class SurveySchema implements Cloneable {
 
 		private Boolean finish;
 
-		private String finishRule;
-
-		private String calculate;
-
 		private Integer currentPage;
 
 		private Integer totalPage;
 
 		private String submitButton;
 
-		private String visibleRule;
-
 		private Integer numericScale;
-
-		/**
-		 * 必填校验规则
-		 */
-		private String requiredRule;
 
 		/**
 		 * 背景图
@@ -157,11 +151,6 @@ public class SurveySchema implements Cloneable {
 		private String scoreStyle;
 
 		/**
-		 * 文本替换规则
-		 */
-		private String replaceTextRule;
-
-		/**
 		 * Textarea 高度自适应，[4,6] 最低4行，最高6行
 		 */
 		private String autoSize;
@@ -190,6 +179,105 @@ public class SurveySchema implements Cloneable {
 		 * 显示投票结果
 		 */
 		private Boolean statEnabled;
+
+		/**
+		 * nps 起始文案
+		 */
+		private String npsStart;
+
+		/**
+		 * nps 结束文案
+		 */
+		private String npsEnd;
+
+		/**
+		 * nps 起始数值
+		 */
+		private Integer npsStartNum;
+
+		/**
+		 * nps 总计数值
+		 */
+		private Integer npsTotalNum;
+
+		/**
+		 * 排序方式，默认正序
+		 */
+		private Boolean npsInvertSort;
+
+		/**
+		 * 结束规则
+		 */
+		private String finishRule;
+
+		/**
+		 * 显示隐藏规则
+		 */
+		private String visibleRule;
+
+		/**
+		 * 必填校验规则
+		 */
+		private String requiredRule;
+
+		/**
+		 * 文本替换规则
+		 */
+		private String replaceTextRule;
+
+		/**
+		 * 校验规则
+		 */
+		private String validateRule;
+
+		/**
+		 * 计算规则
+		 */
+		private String calculate;
+
+		/**
+		 * 分值
+		 */
+		private Double examScore;
+
+		/**
+		 * 计分方式
+		 */
+		private ExamScoreMode examAnswerMode;
+
+		/**
+		 * 答案匹配规则
+		 */
+		private ExamMatchRule examMatchRule;
+
+		/**
+		 * 考试正确答案，当前选项 id 或者文本
+		 */
+		private String examCorrectAnswer;
+
+	}
+
+	public enum ExamMatchRule {
+
+		/** 与答案完全相同才得分 */
+		completeSame,
+		/** 包含答案，多个答案分号间隔 */
+		contain
+
+	}
+
+	public enum ExamScoreMode {
+
+		/** 只有一个选项 */
+		onlyOne,
+		/** 精确匹配，全部选对得分 */
+		selectAll,
+		/** 答对几项得几分，打错不得分(单选、多选、下拉) 答对几项得几分(填空) */
+		selectCorrect,
+		/** 部分选中，按选中分值算分/按选中计分 */
+		select,
+		/** 人工打分 */
+		manual
 
 	}
 

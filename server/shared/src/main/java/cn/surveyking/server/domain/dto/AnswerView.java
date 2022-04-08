@@ -28,12 +28,21 @@ public class AnswerView {
 
 	private AnswerMetaInfo metaInfo;
 
+	private Double examScore;
+
+	/**
+	 * 考试信息
+	 */
+	private AnswerExamInfo examInfo;
+
 	/**
 	 * 0 暂存 1 已完成
 	 */
 	private Integer tempSave;
 
 	private Date createAt;
+
+	private String createByName;
 
 	private String createBy;
 

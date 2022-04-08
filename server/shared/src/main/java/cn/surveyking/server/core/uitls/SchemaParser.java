@@ -1,5 +1,6 @@
 package cn.surveyking.server.core.uitls;
 
+import cn.surveyking.server.core.constant.ProjectModeEnum;
 import cn.surveyking.server.domain.dto.*;
 
 import java.text.Format;
@@ -13,12 +14,15 @@ import java.util.stream.Collectors;
  */
 public class SchemaParser {
 
-	public static List<String> parseColumns(List<SurveySchema> schemaDataTypes) {
+	public static List<String> parseColumns(List<SurveySchema> schemaDataTypes, ProjectModeEnum mode) {
 		List<String> result = new ArrayList<>();
 		result.add("序号");
 		schemaDataTypes.forEach(schemaType -> {
 			result.add(schemaType.getTitle());
 		});
+		if (ProjectModeEnum.exam.equals(mode)) {
+			result.add("分数");
+		}
 		result.add("提交人");
 		result.add("提交时间");
 		result.add("填写时长");
@@ -51,7 +55,8 @@ public class SchemaParser {
 		return dataTypes;
 	}
 
-	public static List<Object> parseRowData(AnswerView answerInfo, List<SurveySchema> dataTypes, int index) {
+	public static List<Object> parseRowData(AnswerView answerInfo, List<SurveySchema> dataTypes, int index,
+			ProjectModeEnum mode) {
 		LinkedHashMap<String, Object> answer = answerInfo.getAnswer();
 		List<Object> rowData = new ArrayList<>();
 		rowData.add(index);
@@ -173,8 +178,11 @@ public class SchemaParser {
 				rowData.add(null);
 			}
 		}
+		if (ProjectModeEnum.exam.equals(mode)) {
+			rowData.add(answerInfo.getExamScore());
+		}
 		// 转换答卷元数据
-		rowData.add(answerInfo.getCreateBy());
+		rowData.add(answerInfo.getCreateByName());
 		Format formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		rowData.add(formatter.format(answerInfo.getCreateAt()));
 		rowData.add(parseHumanReadableDuration(answerInfo));
