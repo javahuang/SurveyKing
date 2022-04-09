@@ -2,7 +2,14 @@
 
 简体中文 | [English](./README.en-us.md)
 
+问卷编辑
+
 <img src="./docs/preview.jpg" width = "100%" alt="" align=center />
+
+考试编辑
+
+<img src="./docs/exam.jpg" width = "100%" alt="" align=center />
+
 
 <details>
   <summary>预览</summary>
@@ -11,13 +18,25 @@
 
 </details>
 
-## 背景
+## 问卷产品对比
 
-基于阿里大佬 [Janry](https://github.com/janryWang) 开源的 [formily](https://github.com/alibaba/formily) 表单解决方案自研问卷编辑器，使用最新的前后端技术（React+SpringBoot+AntDesignUI），构建出一套完整的调查问卷系统。
+|            | [问卷网](https://www.wenjuan.com/) | [腾讯问卷](https://wj.qq.com) | [问卷星](https://www.wjx.cn/) | [金数据](https://jinshuju.net/) | [填鸭企业版](https://www.tduckcloud.com/) | [调问企业版](https://www.diaowen.net/) | [卷王](https://surveyking.cn/) | 演示 |
+| ---------- | ------------------------------- | -------------------------- | -------------------------- | ---------------------------- | --------------------------------------- | ----------------------------------- | --------------------------- | ---- |
+| 问卷调查   | √                              | √                         | √                         | √                           | √                                      | √                                  | √                          | [Go](https://wj.surveyking.cn/s/j02tex)   |
+| 在线考试   | √                              | ×                         | √                         | √                           | ×                                      | ×                                  | √                          | [Go](https://wj.surveyking.cn/s/QYHDWT)   |
+| 投票       | √                              | √                         | √                         | √                           | ×                                      | ×                                  | √                          | [Go](https://wj.surveyking.cn/s/ELt5zm)   |
+| 支持题型   | 强                              | 弱                         | 强                         | 中                           | 中                                      | 弱                                  | 中                          | [Go](https://wj.surveyking.cn/s/VK6vc4)   |
+| 题型设置   | 强                              | 弱                         | 强                         | 强                           | 弱                                      | 弱                                  | 强                          |      |
+| 工作流     | ×                              | ×                         | ×                         | ×                           | √                                      | √                                  | √                          |      |
+| 自动计算   | ×                              | ×                         | 弱                         | 中                           | ×                                      | ×                                  | 强                          | [Go](https://wj.surveyking.cn/s/v16HuM)   |
+| 逻辑设置   | 中                              | 中                         | 中                         | 中                           | 弱                                      | 弱                                  | 强                          | [Go](https://wj.surveyking.cn/s/ke6vOv)   |
+| 自定义校验 | ×                              | ×                         | ×                         | ×                           | ×                                      | ×                                  | √                          | [Go](https://wj.surveyking.cn/s/E1qiBC)   |
+| 自定义导出 | 中                              | ×                         | ×                         | 弱                           | ×                                      | ×                                  | 强                          |      |
+| 手机端编辑 | √                              | √                         | √                         | √                           | ×                                      | ×                                  | √                          |      |
+| 私有部署   | 收费                            | 收费                       | 收费                       | 收费                         | 收费                                    | 收费                                | 免费                        |      |
+|            |                                 |                            |                            |                              |                                         |                                     |                             |      |
 
-卷王是已知开源调查问卷系统中**功能最强大**、**安装最简单**、**综合体验最好**的一个，一些功能特性及体验可以对标甚至超过问卷网、问卷星、腾讯问卷这些国内主流的在线表单系统。
-
-**稳定**、**易用**、**专业**，是卷王的持续开发理念。企业甚至个人都可以使用卷王快速搭建一个属于自己的在线问卷系统。
+注: 上表中与卷王对比的全部是商业问卷产品，他们有很多地方值得卷王学习，仅列出部分主要功能供大家参考，如果对结果有疑问，可以点击对应产品的链接自行对比体验。
 
 ## 🚀 1 分钟快速体验调查问卷系统(无需安装数据库)
 
@@ -153,6 +172,10 @@ java -jar surveyking-v0.x.x.jar
 <div>
  QQ群：338461197
 </div>
+
+## 致谢
+
+[formily](https://github.com/alibaba/formily)
 
 ## 开源协议
 
