@@ -31,11 +31,10 @@ public interface UserService extends UserDetailsService {
 
 	Set<String> getUsersByGroup(String groupId, String currentUser);
 
-	/**
-	 * 系统用户初始化
-	 */
-	void init();
-
 	List<UserInfo> selectUsers(SelectUserRequest request);
+
+	void register(RegisterRequest request);
+
+	List<RegisterRoleView> getRegisterRoles();
 
 }

@@ -33,6 +33,6 @@ public class Account extends BaseModel {
 	private String secretSalt;
 
 	/** 0失活 1激活 */
-	private int status;
+	private Integer status;
 
 }

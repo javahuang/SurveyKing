@@ -5,10 +5,7 @@ import cn.surveyking.server.core.constant.ErrorCode;
 import cn.surveyking.server.core.exception.ErrorCodeException;
 import cn.surveyking.server.core.security.JwtTokenUtil;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
-import cn.surveyking.server.domain.dto.AuthRequest;
-import cn.surveyking.server.domain.dto.UserInfo;
-import cn.surveyking.server.domain.dto.UserRequest;
-import cn.surveyking.server.domain.dto.UserTokenView;
+import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpCookie;
@@ -23,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 /**
  * @author javahuang
@@ -73,6 +71,11 @@ public class UserApi {
 		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).build();
 	}
 
+	@PostMapping("/public/register")
+	public void register(@RequestBody RegisterRequest request) {
+		userService.register(request);
+	}
+
 	@GetMapping("/currentUser")
 	@PreAuthorize("isAuthenticated()")
 	public UserInfo currentUser() {
@@ -80,11 +83,17 @@ public class UserApi {
 	}
 
 	@PostMapping("/user")
+	@PreAuthorize("hasAuthority('user:update')")
 	public UserInfo updateUser(@RequestBody UserRequest request) {
 		// 只有本人才能通过调用这个接口修改个人信息
 		request.setId(SecurityContextUtils.getUserId());
 		userService.updateUser(request);
 		return userService.loadUserById(SecurityContextUtils.getUserId());
+	}
+
+	@GetMapping("/public/getRegisterRoles")
+	public List<RegisterRoleView> getRegisterRoles() {
+		return userService.getRegisterRoles();
 	}
 
 }

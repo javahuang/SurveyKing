@@ -34,4 +34,9 @@ public class SystemInfoRequest {
 	 */
 	private String locale;
 
+	/**
+	 * 注册信息
+	 */
+	private SystemInfo.RegisterInfo registerInfo;
+
 }

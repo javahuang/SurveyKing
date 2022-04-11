@@ -2,9 +2,10 @@ package cn.surveyking.server.impl;
 
 import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.constant.AppConsts;
+import cn.surveyking.server.core.constant.ErrorCode;
+import cn.surveyking.server.core.exception.ErrorCodeException;
 import cn.surveyking.server.core.exception.InternalServerError;
 import cn.surveyking.server.core.security.PasswordEncoder;
-import cn.surveyking.server.core.security.PreAuthorizeAnnotationExtractor;
 import cn.surveyking.server.core.uitls.ContextHelper;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.domain.mapper.RoleViewMapper;
@@ -13,6 +14,7 @@ import cn.surveyking.server.domain.mapper.UserViewMapper;
 import cn.surveyking.server.domain.model.*;
 import cn.surveyking.server.mapper.*;
 import cn.surveyking.server.service.BaseService;
+import cn.surveyking.server.service.SystemService;
 import cn.surveyking.server.service.UserService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -63,6 +65,8 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 	private final UserPositionDtoMapper userPositionDtoMapper;
 
 	private final DeptMapper deptMapper;
+
+	private final SystemService systemService;
 
 	/**
 	 * @param username 账号密码登录认证使用
@@ -116,8 +120,10 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 								Arrays.asList(query.getIds() != null ? query.getIds() : new String[0])));
 		return new PaginationResponse<>(userPage.getTotal(), userPage.getRecords().stream().map(x -> {
 			UserView userView = userViewMapper.toUserView(x);
-			userView.setUsername(accountMapper
-					.selectOne(Wrappers.<Account>lambdaQuery().eq(Account::getUserId, x.getId())).getAuthAccount());
+			Account account = accountMapper
+					.selectOne(Wrappers.<Account>lambdaQuery().eq(Account::getUserId, x.getId()));
+			userView.setUsername(account.getAuthAccount());
+			userView.setStatus(account.getStatus());
 			// 设置用户部门
 			Dept dept = deptMapper.selectById(x.getDeptId());
 			if (dept != null) {
@@ -158,6 +164,7 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 		account.setUserType(AppConsts.USER_TYPE.SysUser.toString());
 		account.setAuthSecret(passwordEncoder.encode(request.getPassword()));
 		account.setUserId(user.getId());
+		account.setStatus(request.getStatus());
 		accountMapper.insert(account);
 
 		// 添加用户角色
@@ -322,42 +329,36 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 	}
 
 	@Override
-	public void init() {
-		if (count() > 0) {
-			return;
+	public void register(RegisterRequest request) {
+		long total = accountMapper
+				.selectCount(Wrappers.<Account>lambdaQuery().eq(Account::getAuthAccount, request.getUsername()));
+		if (total > 0) {
+			throw new ErrorCodeException(ErrorCode.UsernameExists);
 		}
-		log.info("开始初始化系统用户");
-		// 创建角色
-		Role role = new Role();
-		role.setName("Admin");
-		role.setCode("admin");
-		role.setRemark("系统初始化角色");
-		role.setAuthority(String.join(",", PreAuthorizeAnnotationExtractor.extractAllApiPermissions()));
-		roleService.save(role);
+		UserRequest createUserRequest = new UserRequest();
+		createUserRequest.setUsername(request.getUsername());
+		createUserRequest.setPassword(request.getPassword());
+		createUserRequest.setName(request.getName());
+		createUserRequest.setStatus(AppConsts.USER_STATUS.VALID);
+		if (request.getRole() != null) {
+			createUserRequest.setRoles(Collections.singletonList(request.getRole()));
+		}
+		createUser(createUserRequest);
+	}
 
-		// 创建用户
-		User user = new User();
-		user.setName("Admin");
-		user.setGender("M");
-		user.setStatus(AppConsts.USER_STATUS.VALID);
-		save(user);
-
-		// 绑定用户角色
-		UserRole userRole = new UserRole();
-		userRole.setUserId(user.getId());
-		userRole.setRoleId(role.getId());
-		userRole.setUserType(AppConsts.USER_TYPE.SysUser.name());
-		userRoleMapper.insert(userRole);
-
-		// 创建账号
-		Account account = new Account();
-		account.setAuthAccount("admin");
-		account.setAuthSecret(passwordEncoder.encode("surveyking"));
-		account.setUserId(user.getId());
-		account.setUserType(AppConsts.USER_TYPE.SysUser.name());
-		account.setStatus(AppConsts.USER_STATUS.VALID);
-		accountMapper.insert(account);
-		log.info("系统用户初始化完成(admin/surveyking)");
+	@Override
+	public List<RegisterRoleView> getRegisterRoles() {
+		List<String> defaultRegisterRoleCodes = systemService.getSystemInfo().getRegisterInfo().getRoles();
+		if (defaultRegisterRoleCodes.size() > 0) {
+			return roleService.list(Wrappers.<Role>lambdaQuery().in(Role::getCode,
+					systemService.getSystemInfo().getRegisterInfo().getRoles())).stream().map(role -> {
+						RegisterRoleView roleView = new RegisterRoleView();
+						roleView.setId(role.getId());
+						roleView.setName(role.getName());
+						return roleView;
+					}).collect(Collectors.toList());
+		}
+		return new ArrayList<>();
 	}
 
 }

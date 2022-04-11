@@ -46,8 +46,8 @@ public class SystemServiceImpl implements SystemService {
 	@Override
 	public SystemInfo getSystemInfo() {
 		SystemInfo systemInfo = new SystemInfo();
-		BeanUtils.copyProperties(
-				sysInfoMapper.selectOne(Wrappers.<SysInfo>lambdaQuery().eq(SysInfo::getIsDefault, true)), systemInfo);
+		SysInfo info = sysInfoMapper.selectOne(Wrappers.<SysInfo>lambdaQuery().eq(SysInfo::getIsDefault, true));
+		BeanUtils.copyProperties(info, systemInfo);
 		return systemInfo;
 	}
 

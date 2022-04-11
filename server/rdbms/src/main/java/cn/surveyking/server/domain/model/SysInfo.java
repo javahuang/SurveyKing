@@ -1,9 +1,12 @@
 package cn.surveyking.server.domain.model;
 
+import cn.surveyking.server.domain.dto.SystemInfo;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.Data;
+import org.apache.ibatis.type.JdbcType;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -13,7 +16,7 @@ import java.util.Date;
  *
  * @TableName t_sys_info
  */
-@TableName(value = "t_sys_info")
+@TableName(value = "t_sys_info", autoResultMap = true)
 @Data
 public class SysInfo implements Serializable {
 
@@ -48,7 +51,7 @@ public class SysInfo implements Serializable {
 	private String locale;
 
 	/**
-	 * 默认语言
+	 * 系统版本
 	 */
 	@TableField(value = "version")
 	private String version;
@@ -58,6 +61,12 @@ public class SysInfo implements Serializable {
 	 */
 	@TableField(value = "is_default")
 	private Boolean isDefault;
+
+	/**
+	 * 注册信息
+	 */
+	@TableField(typeHandler = JacksonTypeHandler.class, jdbcType = JdbcType.VARCHAR)
+	private SystemInfo.RegisterInfo registerInfo;
 
 	/**
 	 * 创建时间

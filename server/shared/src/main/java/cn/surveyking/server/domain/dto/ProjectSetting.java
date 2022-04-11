@@ -85,7 +85,7 @@ public class ProjectSetting {
 		 * 登录之后答题限制
 		 */
 		private UniqueLimitSetting loginLimit;
-
+		
 	}
 
 	@Data

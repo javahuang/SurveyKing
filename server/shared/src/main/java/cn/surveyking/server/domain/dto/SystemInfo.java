@@ -2,6 +2,8 @@ package cn.surveyking.server.domain.dto;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @author javahuang
  * @date 2022/2/11
@@ -38,5 +40,27 @@ public class SystemInfo {
 	 * 默认语言
 	 */
 	private String version;
+
+	private RegisterInfo registerInfo;
+
+	@Data
+	public static class RegisterInfo {
+
+		/**
+		 * 是否开启注册
+		 */
+		private Boolean registerEnabled;
+
+		/**
+		 * 注册用户可选角色列表
+		 */
+		private List<String> roles;
+
+		/**
+		 * 开启强密码验证
+		 */
+		private Boolean strongPasswordEnabled;
+
+	}
 
 }

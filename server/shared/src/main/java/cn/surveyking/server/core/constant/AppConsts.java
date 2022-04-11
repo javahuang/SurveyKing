@@ -101,6 +101,9 @@ public class AppConsts {
 		/** 正常用户 */
 		int VALID = 1;
 
+		/** 失活用户 */
+		int INVALID = 0;
+
 	}
 
 	/**

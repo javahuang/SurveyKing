@@ -26,7 +26,7 @@ public class UserView {
 
 	private String gender;
 
-	private int status;
+	private Integer status;
 
 	private Date createAt;
 
