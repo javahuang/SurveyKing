@@ -33,9 +33,9 @@ public class DownloadQuery {
 	public enum DownloadType {
 
 		/**
-		 * 问卷答案、问卷附件
+		 * 问卷答案、问卷答案+附件、问卷附件
 		 */
-		SURVEY_ANSWER, ANSWER_ATTACHMENT
+		answer, answerAttachment, attachment
 
 	}
 

@@ -51,11 +51,12 @@ public interface AnswerService {
 	default ResponseEntity<Resource> download(DownloadQuery query) {
 		DownloadData download;
 		// 下载问卷答案
-		if (query.getType() == DownloadQuery.DownloadType.SURVEY_ANSWER) {
+		if (query.getType() == DownloadQuery.DownloadType.answer) {
 			download = downloadSurvey(query.getProjectId());
 		}
 		// 下载附件
-		else if (query.getType() == DownloadQuery.DownloadType.ANSWER_ATTACHMENT) {
+		else if (query.getType() == DownloadQuery.DownloadType.answerAttachment
+				|| query.getType() == DownloadQuery.DownloadType.attachment) {
 			download = downloadAttachment(query);
 		}
 		else {

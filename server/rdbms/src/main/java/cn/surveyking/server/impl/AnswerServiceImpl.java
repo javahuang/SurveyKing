@@ -31,10 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -220,19 +217,12 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
 		DownloadData download = new DownloadData();
 		download.setFileName(project.getName() + ".xlsx");
-		int[] indexArr = { 0 };
 		try {
 			PipedOutputStream outputStream = new PipedOutputStream();
 			PipedInputStream inputStream = new PipedInputStream(outputStream);
 			new Thread(() -> {
 				try {
-					new ExcelExporter.Builder().setSheetName(project.getName()).setOutputStream(outputStream)
-							.setColumns(SchemaParser.parseColumns(schemaDataTypes, project.getMode()))
-							.setRows(answerViews.stream().map(answer -> {
-								indexArr[0] = indexArr[0] += 1;
-								return SchemaParser.parseRowData(answer, schemaDataTypes, indexArr[0],
-										project.getMode());
-							}).collect(Collectors.toList())).build().exportToStream();
+					export(project, answerViews, outputStream);
 				}
 				catch (Exception e) {
 					e.printStackTrace();
@@ -271,19 +261,19 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		// 下载某个问卷答案的附件
 		if (query.getAnswerId() != null) {
 			answerQuery.setId(query.getAnswerId());
-			return generateSurveyAttachment(listAnswer(answerQuery).getList().get(0));
+			return generateSurveyAttachment(project, listAnswer(answerQuery).getList().get(0));
 		}
 		else {
 			// 下载所有问卷答案的附件
 			downloadData.setResource(
-					new InputStreamResource(answerAttachToZip(listAnswer(answerQuery).getList(), query.getNameExp())));
+					new InputStreamResource(answerAttachToZip(project, listAnswer(answerQuery).getList(), query)));
 			downloadData.setFileName(project.getName() + ".zip");
 			downloadData.setMediaType(MediaType.parseMediaType("application/zip"));
 		}
 		return downloadData;
 	}
 
-	private DownloadData generateSurveyAttachment(AnswerView answer) {
+	private DownloadData generateSurveyAttachment(Project project, AnswerView answer) {
 		DownloadData downloadData = new DownloadData();
 		List<FileView> files = answer.getAttachment();
 		// 如果只有一个附件，则直接返回附件的结果
@@ -294,7 +284,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		}
 		else {
 			// 多个附件，压缩包
-			downloadData.setResource(new InputStreamResource(answerAttachToZip(Collections.singletonList(answer), "")));
+			downloadData.setResource(new InputStreamResource(
+					answerAttachToZip(project, Collections.singletonList(answer), new DownloadQuery())));
 			downloadData.setFileName(answer.getId() + ".zip");
 			downloadData.setMediaType(MediaType.parseMediaType("application/zip"));
 		}
@@ -306,12 +297,11 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	 * @param answers
 	 * @return
 	 */
-	private InputStream answerAttachToZip(List<AnswerView> answers, String nameExp) {
+	private InputStream answerAttachToZip(Project project, List<AnswerView> answers, DownloadQuery query) {
 		try {
 			PipedOutputStream outputStream = new PipedOutputStream();
 			PipedInputStream inputStream = new PipedInputStream(outputStream);
 			new Thread(() -> {
-
 				try (ZipOutputStream zout = new ZipOutputStream(outputStream);) {
 					int[] serialNum = { 0, 0 };
 					answers.forEach(answer -> {
@@ -321,7 +311,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 							serialNum[1] += 1;
 							ByteArrayResource resource = (ByteArrayResource) fileService
 									.loadFile(new FileQuery(attachment.getId())).getBody();
-							String parsedFileName = parseAttachmentNameByExp(answer, nameExp,
+							String parsedFileName = parseAttachmentNameByExp(answer, query.getNameExp(),
 									attachment.getOriginalName(), serialNum);
 							ZipEntry entry = new ZipEntry(parsedFileName);
 							try {
@@ -334,7 +324,14 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
 						});
 					});
-
+					// 生成表格
+					if (DownloadQuery.DownloadType.answerAttachment.equals(query.getType())) {
+						ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+						export(project, answers, byteArrayOutputStream);
+						ZipEntry entry = new ZipEntry(project.getName() + ".xlsx");
+						zout.putNextEntry(entry);
+						zout.write(byteArrayOutputStream.toByteArray());
+					}
 				}
 				catch (Exception e) {
 					throw new InternalServerError("生成压缩文件失败", e);
@@ -345,6 +342,17 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		catch (Exception e) {
 			throw new InternalServerError("生成压缩文件失败", e);
 		}
+	}
+
+	private void export(Project project, List<AnswerView> answerViews, OutputStream outputStream) {
+		List<SurveySchema> schemaDataTypes = SchemaParser.flatSurveySchema(project.getSurvey());
+		int[] indexArr = { 0 };
+		new ExcelExporter.Builder().setSheetName(project.getName()).setOutputStream(outputStream)
+				.setColumns(SchemaParser.parseColumns(schemaDataTypes, project.getMode()))
+				.setRows(answerViews.stream().map(answer -> {
+					indexArr[0] = indexArr[0] += 1;
+					return SchemaParser.parseRowData(answer, schemaDataTypes, indexArr[0], project.getMode());
+				}).collect(Collectors.toList())).build().exportToStream();
 	}
 
 	/**
