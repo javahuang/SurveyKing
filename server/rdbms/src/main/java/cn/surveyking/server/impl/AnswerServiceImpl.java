@@ -2,6 +2,7 @@ package cn.surveyking.server.impl;
 
 import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.constant.AppConsts;
+import cn.surveyking.server.core.constant.AttachmentNameVariableEnum;
 import cn.surveyking.server.core.constant.ProjectModeEnum;
 import cn.surveyking.server.core.exception.InternalServerError;
 import cn.surveyking.server.core.uitls.AnswerScoreEvaluator;
@@ -34,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -309,13 +311,18 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 			PipedOutputStream outputStream = new PipedOutputStream();
 			PipedInputStream inputStream = new PipedInputStream(outputStream);
 			new Thread(() -> {
+
 				try (ZipOutputStream zout = new ZipOutputStream(outputStream);) {
+					int[] serialNum = { 0, 0 };
 					answers.forEach(answer -> {
+						serialNum[1] = 0;
 						answer.getAttachment().forEach(attachment -> {
+							serialNum[0] += 1;
+							serialNum[1] += 1;
 							ByteArrayResource resource = (ByteArrayResource) fileService
 									.loadFile(new FileQuery(attachment.getId())).getBody();
 							String parsedFileName = parseAttachmentNameByExp(answer, nameExp,
-									attachment.getOriginalName());
+									attachment.getOriginalName(), serialNum);
 							ZipEntry entry = new ZipEntry(parsedFileName);
 							try {
 								zout.putNextEntry(entry);
@@ -344,14 +351,15 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	 * @param answerView 当前答案
 	 * @param nameExp 附件名称表达式
 	 * @param nameExp 附件名称表达式
+	 * @param serialNum 序号
 	 * @return 新的附件名称
 	 */
-	private String parseAttachmentNameByExp(AnswerView answerView, String nameExp, String originalFileName) {
+	private String parseAttachmentNameByExp(AnswerView answerView, String nameExp, String originalFileName,
+			int[] serialNum) {
 		if (StringUtils.hasText(nameExp)) {
 			String fileName = nameExp;
 			LinkedHashMap<String, Object> answerMap = answerView.getAnswer();
-
-			Pattern pattern = Pattern.compile("#\\{([a-z0-9]+)\\.?([a-z0-9]*)\\}");
+			Pattern pattern = Pattern.compile("#\\{([a-zA-Z0-9]+)\\.?([a-zA-Z0-9]*)\\}");
 			Matcher matcher = pattern.matcher(nameExp);
 			String exp, questionId, optionId = null;
 			while (matcher.find()) {
@@ -361,19 +369,43 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 				if (count > 1) {
 					optionId = matcher.group(2);
 				}
-
 				String expValue = "";
-				Map<String, Object> questionValue = (Map<String, Object>) answerMap.get(questionId);
-				if (questionValue != null) {
-					// 单行文本表达式只有问题id #{xxxx}
-					if (StringUtils.hasText(optionId)) {
-						expValue = questionValue.get(optionId).toString();
-					}
-					else {
-						// 多行文本会有选项id #{ancd.a3dx}
-						expValue = questionValue.values().toArray()[0].toString();
+				if (AttachmentNameVariableEnum.projectId.name().equals(questionId)) {
+					expValue = answerView.getProjectId();
+				}
+				else if (AttachmentNameVariableEnum.serialNum.name().equals(questionId)) {
+					expValue = serialNum[0] + "";
+				}
+				else if (AttachmentNameVariableEnum.serialNumInAnswer.name().equals(questionId)) {
+					expValue = serialNum[1] + "";
+				}
+				else if (AttachmentNameVariableEnum.uploadDate.name().equals(questionId)) {
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+					expValue = sdf.format(answerView.getCreateAt());
+				}
+				else if (AttachmentNameVariableEnum.uploadDateTime.name().equals(questionId)) {
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+					expValue = sdf.format(answerView.getCreateAt());
+				}
+				else if (AttachmentNameVariableEnum.sourceName.name().equals(questionId)) {
+					expValue = getFileNameWithoutSuffix(originalFileName);
+				}
+				else {
+					// 问题变量
+					Map<String, Object> questionValue = (Map<String, Object>) answerMap.get(questionId);
+
+					if (questionValue != null) {
+						// 单行文本表达式只有问题id #{xxxx}
+						if (StringUtils.hasText(optionId)) {
+							expValue = questionValue.get(optionId).toString();
+						}
+						else {
+							// 多行文本会有选项id #{ancd.a3dx}
+							expValue = questionValue.values().toArray()[0].toString();
+						}
 					}
 				}
+
 				fileName = StringUtils.replace(fileName, exp, expValue);
 			}
 			String suffix = getFileExtension(originalFileName);
@@ -389,6 +421,10 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		}
 	}
 
+	private void replaceWithVariable(String variableName) {
+
+	}
+
 	/**
 	 * 获取文件后缀
 	 * @param fileName 文件名称
@@ -401,6 +437,15 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 			extension = fileName.substring(i + 1);
 		}
 		return extension;
+	}
+
+	private String getFileNameWithoutSuffix(String fileName) {
+		String fileNameWithoutSuffix = null;
+		int i = fileName.lastIndexOf('.');
+		if (i > 0) {
+			fileNameWithoutSuffix = fileName.substring(0, i);
+		}
+		return fileNameWithoutSuffix;
 	}
 
 	private Answer beforeSaveAnswer(Answer answer) {
