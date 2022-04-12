@@ -17,7 +17,7 @@ public interface ProjectService {
 
 	PaginationResponse<ProjectView> listProject(ProjectQuery filter);
 
-	@Cacheable(value = CacheConsts.projectCache, key = "#id")
+	@Cacheable(value = CacheConsts.projectCache, key = "#id", condition = "#p0!=null", unless = "#result == null")
 	ProjectView getProject(String id);
 
 	ProjectView addProject(ProjectRequest request);

@@ -273,6 +273,25 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		return downloadData;
 	}
 
+	@Override
+	public List<AnswerView> listAnswerDeleted(AnswerQuery query) {
+		List<AnswerView> list = answerViewMapper.toAnswerView(getBaseMapper().selectLogicDeleted(query.getProjectId()));
+		Project project = projectMapper.selectById(query.getProjectId());
+		FlatSurveySchemaByType schemaByType = parseSurveySchemaByType(project.getSurvey());
+		list.forEach(view -> setAnswerExtraInfo(view, schemaByType));
+		return list;
+	}
+
+	@Override
+	public void batchPhysicalDeleteAnswer(String[] ids) {
+		this.getBaseMapper().batchPhysicalDelete(Arrays.asList(ids));
+	}
+
+	@Override
+	public void restoreAnswer(AnswerRequest request) {
+		this.getBaseMapper().restoreAnswer(request.getIds());
+	}
+
 	private DownloadData generateSurveyAttachment(Project project, AnswerView answer) {
 		DownloadData downloadData = new DownloadData();
 		List<FileView> files = answer.getAttachment();

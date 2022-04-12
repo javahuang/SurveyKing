@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @author javahuang
@@ -29,6 +30,12 @@ public class AnswerApi {
 	@GetMapping
 	public PaginationResponse<AnswerView> listAnswer(AnswerQuery query) {
 		return answerService.listAnswer(query);
+	}
+
+	@PreAuthorize("hasAuthority('answer:list')")
+	@GetMapping("/getDeleted")
+	public List<AnswerView> listAnswerDeleted(AnswerQuery query) {
+		return answerService.listAnswerDeleted(query);
 	}
 
 	@GetMapping("/{id}")
@@ -54,6 +61,18 @@ public class AnswerApi {
 	@PreAuthorize("hasAuthority('answer:delete')")
 	public void deleteAnswer(String[] ids) {
 		answerService.deleteAnswer(ids);
+	}
+
+	@PreAuthorize("hasAuthority('answer:delete')")
+	@DeleteMapping("/delete")
+	public void batchPhysicalDeleteAnswer(String[] ids) {
+		answerService.batchPhysicalDeleteAnswer(ids);
+	}
+
+	@PreAuthorize("hasAuthority('answer:update')")
+	@PostMapping("/restore")
+	public void restoreAnswer(@RequestBody AnswerRequest request) {
+		answerService.restoreAnswer(request);
 	}
 
 	@GetMapping("/download")

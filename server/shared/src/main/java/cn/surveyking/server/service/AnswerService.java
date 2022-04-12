@@ -14,6 +14,7 @@ import org.springframework.web.util.WebUtils;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @author javahuang
@@ -66,5 +67,11 @@ public interface AnswerService {
 				.header(HttpHeaders.CONTENT_DISPOSITION, HTTPUtils.getContentDispositionValue(download.getFileName()))
 				.contentType(download.getMediaType()).body(download.getResource());
 	}
+
+	List<AnswerView> listAnswerDeleted(AnswerQuery query);
+
+	void batchPhysicalDeleteAnswer(String[] ids);
+
+	void restoreAnswer(AnswerRequest request);
 
 }
