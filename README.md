@@ -1,21 +1,6 @@
 # 卷王
 
-简体🥈文 | [English](./README.en-us.md)
-
-问卷编辑
-
-<img src="./docs/preview.jpg" width = "100%" alt="" align=center />
-
-考试编辑
-
-<img src="./docs/exam.jpg" width = "100%" alt="" align=center />
-
-<details>
-  <summary>预览</summary>
-
-  ![preview-surveyking](./docs/preview.gif)
-
-</details>
+简体中文 | [English](./README.en-us.md)
 
 ## 问卷产品对比
 
@@ -36,7 +21,24 @@
 
 注: 上表与卷王对比的全部是商业问卷产品，他们有很多地方值得卷王学习，仅列出部分主要功能供大家参考，如果对结果有疑问，可以点击对应产品的链接自行对比体验。 
 
-🥇强  🥈中 🥉弱 )
+🥇强  🥈中 🥉弱
+
+## 预览
+
+问卷编辑
+
+<img src="./docs/preview.jpg" width = "100%" alt="" align=center />
+
+考试编辑
+
+<img src="./docs/exam.jpg" width = "100%" alt="" align=center />
+
+<details>
+  <summary>预览</summary>
+
+  ![preview-surveyking](./docs/preview.gif)
+
+</details>
 
 ## 🚀 1 分钟快速体验调查问卷系统(无需安装数据库)
 
