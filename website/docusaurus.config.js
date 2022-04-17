@@ -43,13 +43,13 @@ module.exports = {
     announcementBar: {
       id: "new_version_rc.2",
       content:
-        '版本 0.3.0-beta.6 已发布! 🎉 点击 <a target="_blank" rel="noopener noreferrer" href="/docs/quickstart">quickstart</a> 开始吧!',
+        '版本 0.3.0-beta.13 已发布! 🎉 点击 <a target="_blank" rel="noopener noreferrer" href="/docs/quickstart">quickstart</a> 开始吧!',
       backgroundColor: "#FF5B79",
       textColor: "black",
       isCloseable: true,
     },
     colorMode: {
-      defaultMode: "dark",
+      defaultMode: "light",
       respectPrefersColorScheme: false,
     },
     navbar: {
@@ -148,5 +148,11 @@ module.exports = {
         },
       },
     ],
+  ],
+  scripts: [
+    {
+      src: "https://hm.baidu.com/hm.js?43e89c38a9e9332e702161a0c19bba11",
+      async: true,
+    },
   ],
 };

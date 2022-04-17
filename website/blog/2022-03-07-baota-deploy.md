@@ -47,14 +47,14 @@ date: 2022-03-07T12:00
 开始创建 java 项目，选择项目 jar 路径，在项目执行命令里面输入如下命令，注意项目用户选择 root，点击确定。
 
 ```bash
-/usr/bin/java -jar --Xmx1024M --Xms256M --server.port=1991 --spring.datasource.url=jdbc:mysql://localhost:3306/surveyking --spring.datasource.username=surveyking --spring.datasource.password=123456
+/usr/bin/java -jar -Xmx512 -Xms256M /www/wwwroot/survey/surveyking-v0.x.x.jar --server.port=1991 --spring.datasource.url=jdbc:mysql://localhost:3306/surveyking --spring.datasource.username=surveyking --spring.datasource.password=123456
 ```
 
 参数说明：
 
-- `--Xmx1024M` (可选) 设置运行最大使用内存
-- `--Xms256M` (可选)  设置运行最小使用内存
-- `--server.port=1991` (可选) 默认端口是 1991，你可以任意指定
+- `-Xmx1024M` (可选) 设置运行最大使用内存，*注意这两个参数前面只有一个* **-**
+- `-Xms256M` (可选)  设置运行最小使用内存
+- `--server.port=1991` (可选) 默认端口是 1991，你可以任意指定，*注意这两个参数前面有一个* **--**
 - `--spring.datasource.url=jdbc:mysql://localhost:3306/surveyking` (必须) 数据库名，选择第二步创建数据库时设置的数据库名、用户名、密码
 - `--spring.datasource.username=root` (必须) 数据库用户名
 - `--spring.datasource.password=123456` (必须) 数据库密码

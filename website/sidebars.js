@@ -37,7 +37,12 @@ module.exports = {
             type: "doc",
             id: "guides/logic/introduction",
           },
-          items: ["guides/logic/grammar"],
+          items: [
+            "guides/logic/show",
+            "guides/logic/validate",
+            "guides/logic/calculate",
+            "guides/logic/replaceText",
+          ],
         },
       ],
     },
