@@ -22,7 +22,7 @@ public interface AnswerMapper extends BaseMapper<Answer> {
 	@Delete({ "<script>", "delete", "FROM t_answer", "WHERE id IN",
 			"<foreach item='item' index='index' collection='ids'", "open='(' separator=',' close=')'>", "#{item}",
 			"</foreach>", "</script>" })
-	int batchPhysicalDelete(List<String> ids);
+	void batchDestroy(List<String> ids);
 
 	@Update({ "<script>", "update", "t_answer set is_deleted = 0", "WHERE id IN",
 			"<foreach item='item' index='index' collection='ids'", "open='(' separator=',' close=')'>", "#{item}",

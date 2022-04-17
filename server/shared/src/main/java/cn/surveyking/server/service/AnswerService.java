@@ -70,7 +70,7 @@ public interface AnswerService {
 
 	List<AnswerView> listAnswerDeleted(AnswerQuery query);
 
-	void batchPhysicalDeleteAnswer(String[] ids);
+	void batchDestroyAnswer(String[] ids);
 
 	void restoreAnswer(AnswerRequest request);
 

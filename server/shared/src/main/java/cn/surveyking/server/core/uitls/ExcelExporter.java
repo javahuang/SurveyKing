@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static cn.surveyking.server.core.uitls.SchemaParser.openidColumnName;
+
 /**
  * 轻量级 excel 导出工具，换成 poi 打的包会多出十几 M，不能接受，-_-||
  *
@@ -29,7 +31,9 @@ public class ExcelExporter {
 
 	private ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-	ThreadLocal<Worksheet> threadLocal = new ThreadLocal<>();
+	ThreadLocal<Worksheet> localSheet = new ThreadLocal<>();
+
+	protected static ThreadLocal<Integer> localOpenid = new ThreadLocal<>();
 
 	public ExcelExporter() {
 		this.workbook = new Workbook(os, "survey", "1.0");
@@ -43,20 +47,20 @@ public class ExcelExporter {
 		Worksheet worksheet = workbook.newWorksheet(sheetName);
 		worksheet.fitToWidth((short) 10);
 		worksheet.setFitToPage(true);
-		threadLocal.set(worksheet);
+		localSheet.set(worksheet);
 		rowIndexBySheet.put(sheetName, 1);
 		return worksheet;
 	}
 
 	public void createHeader(List<String> columns) {
-		Worksheet sheet = threadLocal.get();
+		Worksheet sheet = localSheet.get();
 		for (int i = 0; i < columns.size(); i++) {
 			sheet.value(0, i, columns.get(i));
 		}
 	}
 
 	public void createRow(List<List<Object>> rows) {
-		Worksheet sheet = threadLocal.get();
+		Worksheet sheet = localSheet.get();
 		String sheetName = sheet.getName();
 		int rowNum = rowIndexBySheet.get(sheetName);
 		for (int r = 1; r <= rows.size(); r++) {
@@ -118,9 +122,19 @@ public class ExcelExporter {
 			else {
 				excelExporter = new ExcelExporter();
 			}
+			// 如果答案中不存在 openid，则删除该列
+			if (!Boolean.TRUE.equals(SchemaParser.localOpenId.get())) {
+				int openidColumnIndex = this.columns.indexOf(openidColumnName);
+				this.columns.remove(openidColumnIndex);
+				this.rows.forEach(row -> {
+					row.remove(openidColumnIndex);
+				});
+				SchemaParser.localOpenId.remove();
+			}
 			excelExporter.createSheet(this.sheetName);
 			excelExporter.createRow(this.rows);
 			excelExporter.createHeader(this.columns);
+
 			return excelExporter;
 		}
 

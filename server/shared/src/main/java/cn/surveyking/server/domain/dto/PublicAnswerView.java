@@ -28,4 +28,6 @@ public class PublicAnswerView {
 
 	private LinkedHashMap questionScore;
 
+	private LinkedHashMap<String, Object> answer;
+
 }

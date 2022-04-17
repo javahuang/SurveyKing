@@ -208,7 +208,6 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	@Override
 	public DownloadData downloadSurvey(String id) {
 		Project project = projectMapper.selectById(id);
-		List<SurveySchema> schemaDataTypes = SchemaParser.flatSurveySchema(project.getSurvey());
 
 		AnswerQuery query = new AnswerQuery();
 		query.setProjectId(id);
@@ -283,8 +282,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	}
 
 	@Override
-	public void batchPhysicalDeleteAnswer(String[] ids) {
-		this.getBaseMapper().batchPhysicalDelete(Arrays.asList(ids));
+	public void batchDestroyAnswer(String[] ids) {
+		this.getBaseMapper().batchDestroy(Arrays.asList(ids));
 	}
 
 	@Override
@@ -367,11 +366,11 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		List<SurveySchema> schemaDataTypes = SchemaParser.flatSurveySchema(project.getSurvey());
 		int[] indexArr = { 0 };
 		new ExcelExporter.Builder().setSheetName(project.getName()).setOutputStream(outputStream)
-				.setColumns(SchemaParser.parseColumns(schemaDataTypes, project.getMode()))
 				.setRows(answerViews.stream().map(answer -> {
 					indexArr[0] = indexArr[0] += 1;
 					return SchemaParser.parseRowData(answer, schemaDataTypes, indexArr[0], project.getMode());
-				}).collect(Collectors.toList())).build().exportToStream();
+				}).collect(Collectors.toList()))
+				.setColumns(SchemaParser.parseColumns(schemaDataTypes, project.getMode())).build().exportToStream();
 	}
 
 	/**

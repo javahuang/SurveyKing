@@ -14,6 +14,10 @@ import java.util.stream.Collectors;
  */
 public class SchemaParser {
 
+	protected static ThreadLocal<Boolean> localOpenId = new ThreadLocal<>();
+
+	public static final String openidColumnName = "自定义字段";
+
 	public static List<String> parseColumns(List<SurveySchema> schemaDataTypes, ProjectModeEnum mode) {
 		List<String> result = new ArrayList<>();
 		result.add("序号");
@@ -23,6 +27,7 @@ public class SchemaParser {
 		if (ProjectModeEnum.exam.equals(mode)) {
 			result.add("分数");
 		}
+		result.add(openidColumnName);
 		result.add("提交人");
 		result.add("提交时间");
 		result.add("填写时长");
@@ -181,6 +186,13 @@ public class SchemaParser {
 		if (ProjectModeEnum.exam.equals(mode)) {
 			rowData.add(answerInfo.getExamScore());
 		}
+		if (answer.containsKey("openid")) {
+			rowData.add(answer.get("openid"));
+			localOpenId.set(true);
+		}
+		else {
+			rowData.add("");
+		}
 		// 转换答卷元数据
 		rowData.add(answerInfo.getCreateByName());
 		Format formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -192,6 +204,7 @@ public class SchemaParser {
 		rowData.add(answerInfo.getMetaInfo().getClientInfo().getRegion());
 		rowData.add(answerInfo.getMetaInfo().getClientInfo().getRemoteIp());
 		rowData.add(answerInfo.getId());
+
 		avoidFormulaInjection(rowData);
 		return rowData;
 	}

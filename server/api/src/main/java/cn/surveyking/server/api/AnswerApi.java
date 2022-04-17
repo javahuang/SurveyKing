@@ -64,9 +64,9 @@ public class AnswerApi {
 	}
 
 	@PreAuthorize("hasAuthority('answer:delete')")
-	@DeleteMapping("/delete")
-	public void batchPhysicalDeleteAnswer(String[] ids) {
-		answerService.batchPhysicalDeleteAnswer(ids);
+	@DeleteMapping("/destroy")
+	public void batchDestroyAnswer(String[] ids) {
+		answerService.batchDestroyAnswer(ids);
 	}
 
 	@PreAuthorize("hasAuthority('answer:update')")
