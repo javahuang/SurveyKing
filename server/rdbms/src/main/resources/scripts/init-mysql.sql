@@ -20,7 +20,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 -- Table structure for ACT_EVT_LOG
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_EVT_LOG`;
+
 CREATE TABLE `ACT_EVT_LOG` (
   `LOG_NR_` bigint(20) NOT NULL AUTO_INCREMENT,
   `TYPE_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
@@ -46,7 +46,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_GE_BYTEARRAY
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_GE_BYTEARRAY`;
+
 CREATE TABLE `ACT_GE_BYTEARRAY` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT NULL,
@@ -68,7 +68,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_GE_PROPERTY
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_GE_PROPERTY`;
+
 CREATE TABLE `ACT_GE_PROPERTY` (
   `NAME_` varchar(64) COLLATE utf8_bin NOT NULL,
   `VALUE_` varchar(300) COLLATE utf8_bin DEFAULT NULL,
@@ -98,7 +98,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_HI_ACTINST
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_HI_ACTINST`;
+
 CREATE TABLE `ACT_HI_ACTINST` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT '1',
@@ -133,7 +133,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_HI_ATTACHMENT
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_HI_ATTACHMENT`;
+
 CREATE TABLE `ACT_HI_ATTACHMENT` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT NULL,
@@ -158,7 +158,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_HI_COMMENT
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_HI_COMMENT`;
+
 CREATE TABLE `ACT_HI_COMMENT` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
@@ -181,7 +181,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_HI_DETAIL
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_HI_DETAIL`;
+
 CREATE TABLE `ACT_HI_DETAIL` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `TYPE_` varchar(255) COLLATE utf8_bin NOT NULL,
@@ -215,7 +215,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_HI_ENTITYLINK
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_HI_ENTITYLINK`;
+
 CREATE TABLE `ACT_HI_ENTITYLINK` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `LINK_TYPE_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
@@ -247,7 +247,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_HI_IDENTITYLINK
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_HI_IDENTITYLINK`;
+
 CREATE TABLE `ACT_HI_IDENTITYLINK` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `GROUP_ID_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
@@ -278,7 +278,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_HI_PROCINST
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_HI_PROCINST`;
+
 CREATE TABLE `ACT_HI_PROCINST` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT '1',
@@ -315,7 +315,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_HI_TASKINST
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_HI_TASKINST`;
+
 CREATE TABLE `ACT_HI_TASKINST` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT '1',
@@ -361,7 +361,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_HI_TSK_LOG
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_HI_TSK_LOG`;
+
 CREATE TABLE `ACT_HI_TSK_LOG` (
   `ID_` bigint(20) NOT NULL AUTO_INCREMENT,
   `TYPE_` varchar(64) COLLATE utf8_bin DEFAULT NULL,
@@ -389,7 +389,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_HI_VARINST
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_HI_VARINST`;
+
 CREATE TABLE `ACT_HI_VARINST` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT '1',
@@ -426,7 +426,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_ID_BYTEARRAY
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_ID_BYTEARRAY`;
+
 CREATE TABLE `ACT_ID_BYTEARRAY` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT NULL,
@@ -444,7 +444,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_ID_GROUP
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_ID_GROUP`;
+
 CREATE TABLE `ACT_ID_GROUP` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT NULL,
@@ -462,7 +462,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_ID_INFO
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_ID_INFO`;
+
 CREATE TABLE `ACT_ID_INFO` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT NULL,
@@ -484,7 +484,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_ID_MEMBERSHIP
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_ID_MEMBERSHIP`;
+
 CREATE TABLE `ACT_ID_MEMBERSHIP` (
   `USER_ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `GROUP_ID_` varchar(64) COLLATE utf8_bin NOT NULL,
@@ -503,7 +503,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_ID_PRIV
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_ID_PRIV`;
+
 CREATE TABLE `ACT_ID_PRIV` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `NAME_` varchar(255) COLLATE utf8_bin NOT NULL,
@@ -520,7 +520,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_ID_PRIV_MAPPING
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_ID_PRIV_MAPPING`;
+
 CREATE TABLE `ACT_ID_PRIV_MAPPING` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `PRIV_ID_` varchar(64) COLLATE utf8_bin NOT NULL,
@@ -542,7 +542,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_ID_PROPERTY
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_ID_PROPERTY`;
+
 CREATE TABLE `ACT_ID_PROPERTY` (
   `NAME_` varchar(64) COLLATE utf8_bin NOT NULL,
   `VALUE_` varchar(300) COLLATE utf8_bin DEFAULT NULL,
@@ -560,7 +560,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_ID_TOKEN
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_ID_TOKEN`;
+
 CREATE TABLE `ACT_ID_TOKEN` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT NULL,
@@ -582,7 +582,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_ID_USER
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_ID_USER`;
+
 CREATE TABLE `ACT_ID_USER` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT NULL,
@@ -605,7 +605,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_PROCDEF_INFO
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_PROCDEF_INFO`;
+
 CREATE TABLE `ACT_PROCDEF_INFO` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `PROC_DEF_ID_` varchar(64) COLLATE utf8_bin NOT NULL,
@@ -628,7 +628,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_RE_DEPLOYMENT
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_RE_DEPLOYMENT`;
+
 CREATE TABLE `ACT_RE_DEPLOYMENT` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `NAME_` varchar(255) COLLATE utf8_bin DEFAULT NULL,
@@ -652,7 +652,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_RE_MODEL
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_RE_MODEL`;
+
 CREATE TABLE `ACT_RE_MODEL` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT NULL,
@@ -685,7 +685,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_RE_PROCDEF
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_RE_PROCDEF`;
+
 CREATE TABLE `ACT_RE_PROCDEF` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT NULL,
@@ -718,7 +718,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_RU_ACTINST
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_RU_ACTINST`;
+
 CREATE TABLE `ACT_RU_ACTINST` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT '1',
@@ -756,7 +756,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_RU_DEADLETTER_JOB
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_RU_DEADLETTER_JOB`;
+
 CREATE TABLE `ACT_RU_DEADLETTER_JOB` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT NULL,
@@ -808,7 +808,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_RU_ENTITYLINK
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_RU_ENTITYLINK`;
+
 CREATE TABLE `ACT_RU_ENTITYLINK` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT NULL,
@@ -841,7 +841,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_RU_EVENT_SUBSCR
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_RU_EVENT_SUBSCR`;
+
 CREATE TABLE `ACT_RU_EVENT_SUBSCR` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT NULL,
@@ -873,7 +873,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_RU_EXECUTION
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_RU_EXECUTION`;
+
 CREATE TABLE `ACT_RU_EXECUTION` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT NULL,
@@ -936,7 +936,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_RU_EXTERNAL_JOB
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_RU_EXTERNAL_JOB`;
+
 CREATE TABLE `ACT_RU_EXTERNAL_JOB` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT NULL,
@@ -985,7 +985,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_RU_HISTORY_JOB
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_RU_HISTORY_JOB`;
+
 CREATE TABLE `ACT_RU_HISTORY_JOB` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT NULL,
@@ -1013,7 +1013,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_RU_IDENTITYLINK
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_RU_IDENTITYLINK`;
+
 CREATE TABLE `ACT_RU_IDENTITYLINK` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT NULL,
@@ -1050,7 +1050,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_RU_JOB
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_RU_JOB`;
+
 CREATE TABLE `ACT_RU_JOB` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT NULL,
@@ -1105,7 +1105,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_RU_SUSPENDED_JOB
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_RU_SUSPENDED_JOB`;
+
 CREATE TABLE `ACT_RU_SUSPENDED_JOB` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT NULL,
@@ -1158,7 +1158,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_RU_TASK
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_RU_TASK`;
+
 CREATE TABLE `ACT_RU_TASK` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT NULL,
@@ -1212,7 +1212,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_RU_TIMER_JOB
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_RU_TIMER_JOB`;
+
 CREATE TABLE `ACT_RU_TIMER_JOB` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT NULL,
@@ -1268,7 +1268,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for ACT_RU_VARIABLE
 -- ----------------------------
-DROP TABLE IF EXISTS `ACT_RU_VARIABLE`;
+
 CREATE TABLE `ACT_RU_VARIABLE` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT NULL,
@@ -1306,7 +1306,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for FLW_CHANNEL_DEFINITION
 -- ----------------------------
-DROP TABLE IF EXISTS `FLW_CHANNEL_DEFINITION`;
+
 CREATE TABLE `FLW_CHANNEL_DEFINITION` (
   `ID_` varchar(64) COLLATE utf8mb4_bin NOT NULL,
   `NAME_` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
@@ -1329,7 +1329,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for FLW_EVENT_DEFINITION
 -- ----------------------------
-DROP TABLE IF EXISTS `FLW_EVENT_DEFINITION`;
+
 CREATE TABLE `FLW_EVENT_DEFINITION` (
   `ID_` varchar(64) COLLATE utf8mb4_bin NOT NULL,
   `NAME_` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
@@ -1351,7 +1351,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for FLW_EVENT_DEPLOYMENT
 -- ----------------------------
-DROP TABLE IF EXISTS `FLW_EVENT_DEPLOYMENT`;
+
 CREATE TABLE `FLW_EVENT_DEPLOYMENT` (
   `ID_` varchar(64) COLLATE utf8mb4_bin NOT NULL,
   `NAME_` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
@@ -1371,7 +1371,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for FLW_EVENT_RESOURCE
 -- ----------------------------
-DROP TABLE IF EXISTS `FLW_EVENT_RESOURCE`;
+
 CREATE TABLE `FLW_EVENT_RESOURCE` (
   `ID_` varchar(64) COLLATE utf8mb4_bin NOT NULL,
   `NAME_` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
@@ -1389,7 +1389,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for FLW_EV_DATABASECHANGELOG
 -- ----------------------------
-DROP TABLE IF EXISTS `FLW_EV_DATABASECHANGELOG`;
+
 CREATE TABLE `FLW_EV_DATABASECHANGELOG` (
   `ID` varchar(255) COLLATE utf8mb4_bin NOT NULL,
   `AUTHOR` varchar(255) COLLATE utf8mb4_bin NOT NULL,
@@ -1417,7 +1417,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for FLW_EV_DATABASECHANGELOGLOCK
 -- ----------------------------
-DROP TABLE IF EXISTS `FLW_EV_DATABASECHANGELOGLOCK`;
+
 CREATE TABLE `FLW_EV_DATABASECHANGELOGLOCK` (
   `ID` int(11) NOT NULL,
   `LOCKED` bit(1) NOT NULL,
@@ -1436,7 +1436,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for FLW_RU_BATCH
 -- ----------------------------
-DROP TABLE IF EXISTS `FLW_RU_BATCH`;
+
 CREATE TABLE `FLW_RU_BATCH` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT NULL,
@@ -1460,7 +1460,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for FLW_RU_BATCH_PART
 -- ----------------------------
-DROP TABLE IF EXISTS `FLW_RU_BATCH_PART`;
+
 CREATE TABLE `FLW_RU_BATCH_PART` (
   `ID_` varchar(64) COLLATE utf8_bin NOT NULL,
   `REV_` int(11) DEFAULT NULL,
@@ -1490,7 +1490,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for t_account
 -- ----------------------------
-DROP TABLE IF EXISTS `t_account`;
+
 CREATE TABLE `t_account` (
   `id` varchar(64) NOT NULL COMMENT 'ID',
   `user_type` varchar(100) NOT NULL DEFAULT 'SysUser' COMMENT '用户类型',
@@ -1518,7 +1518,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for t_answer
 -- ----------------------------
-DROP TABLE IF EXISTS `t_answer`;
+
 CREATE TABLE `t_answer` (
   `id` varchar(64) COLLATE utf8mb4_bin NOT NULL,
   `project_id` varchar(64) COLLATE utf8mb4_bin DEFAULT NULL,
@@ -1543,7 +1543,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for t_dashboard
 -- ----------------------------
-DROP TABLE IF EXISTS `t_dashboard`;
+
 CREATE TABLE `t_dashboard` (
   `id` varchar(64) NOT NULL COMMENT 'ID',
   `key` varchar(256) NOT NULL COMMENT '仪表盘组件key',
@@ -1566,7 +1566,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for t_dept
 -- ----------------------------
-DROP TABLE IF EXISTS `t_dept`;
+
 CREATE TABLE `t_dept` (
   `id` varchar(64) NOT NULL COMMENT 'ID',
   `parent_id` varchar(64) NOT NULL,
@@ -1596,7 +1596,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for t_file
 -- ----------------------------
-DROP TABLE IF EXISTS `t_file`;
+
 CREATE TABLE `t_file` (
   `id` varchar(64) COLLATE utf8mb4_bin NOT NULL,
   `original_name` varchar(256) COLLATE utf8mb4_bin DEFAULT NULL,
@@ -1622,7 +1622,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for t_flow_entry
 -- ----------------------------
-DROP TABLE IF EXISTS `t_flow_entry`;
+
 CREATE TABLE `t_flow_entry` (
   `id` varchar(64) COLLATE utf8mb4_bin NOT NULL COMMENT '主键',
   `project_id` varchar(64) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '流程定义key',
@@ -1648,7 +1648,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for t_flow_entry_node
 -- ----------------------------
-DROP TABLE IF EXISTS `t_flow_entry_node`;
+
 CREATE TABLE `t_flow_entry_node` (
   `id` varchar(64) COLLATE utf8mb4_bin NOT NULL COMMENT '节点id',
   `name` varchar(256) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '节点名称',
@@ -1674,7 +1674,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for t_flow_entry_publish
 -- ----------------------------
-DROP TABLE IF EXISTS `t_flow_entry_publish`;
+
 CREATE TABLE `t_flow_entry_publish` (
   `id` varchar(64) COLLATE utf8mb4_bin NOT NULL COMMENT '流程部署Id',
   `entry_id` bigint(20) NOT NULL COMMENT '流程Id',
@@ -1699,7 +1699,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for t_flow_instance
 -- ----------------------------
-DROP TABLE IF EXISTS `t_flow_instance`;
+
 CREATE TABLE `t_flow_instance` (
   `id` varchar(64) COLLATE utf8mb4_bin NOT NULL COMMENT '流程实例ID',
   `project_id` varchar(64) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '项目id',
@@ -1722,7 +1722,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for t_flow_operation
 -- ----------------------------
-DROP TABLE IF EXISTS `t_flow_operation`;
+
 CREATE TABLE `t_flow_operation` (
   `id` varchar(64) COLLATE utf8mb4_bin NOT NULL COMMENT '主键id',
   `instance_id` varchar(64) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '流程实例id',
@@ -1754,7 +1754,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for t_flow_operation_user
 -- ----------------------------
-DROP TABLE IF EXISTS `t_flow_operation_user`;
+
 CREATE TABLE `t_flow_operation_user` (
   `id` varchar(64) COLLATE utf8mb4_bin NOT NULL COMMENT '节点id',
   `operation_id` varchar(64) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '操作id',
@@ -1778,7 +1778,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for t_position
 -- ----------------------------
-DROP TABLE IF EXISTS `t_position`;
+
 CREATE TABLE `t_position` (
   `id` varchar(64) NOT NULL COMMENT 'ID',
   `name` varchar(50) NOT NULL,
@@ -1803,7 +1803,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for t_project
 -- ----------------------------
-DROP TABLE IF EXISTS `t_project`;
+
 CREATE TABLE `t_project` (
   `id` varchar(64) COLLATE utf8mb4_bin NOT NULL,
   `short_id` varchar(32) COLLATE utf8mb4_bin DEFAULT NULL,
@@ -1830,7 +1830,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for t_project_partner
 -- ----------------------------
-DROP TABLE IF EXISTS `t_project_partner`;
+
 CREATE TABLE `t_project_partner` (
   `id` varchar(64) COLLATE utf8mb4_bin NOT NULL,
   `project_id` varchar(64) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '项目id',
@@ -1854,7 +1854,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for t_role
 -- ----------------------------
-DROP TABLE IF EXISTS `t_role`;
+
 CREATE TABLE `t_role` (
   `id` varchar(64) NOT NULL COMMENT 'ID',
   `name` varchar(50) NOT NULL COMMENT '名称',
@@ -1880,7 +1880,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for t_sys_info
 -- ----------------------------
-DROP TABLE IF EXISTS `t_sys_info`;
+
 CREATE TABLE `t_sys_info` (
   `id` varchar(64) COLLATE utf8mb4_bin NOT NULL COMMENT '主键',
   `name` varchar(64) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '系统名称',
@@ -1906,7 +1906,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for t_template
 -- ----------------------------
-DROP TABLE IF EXISTS `t_template`;
+
 CREATE TABLE `t_template` (
   `id` varchar(64) COLLATE utf8mb4_bin NOT NULL,
   `name` varchar(64) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '模板标题',
@@ -1934,7 +1934,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for t_user
 -- ----------------------------
-DROP TABLE IF EXISTS `t_user`;
+
 CREATE TABLE `t_user` (
   `id` varchar(64) NOT NULL COMMENT 'ID',
   `name` varchar(50) NOT NULL COMMENT '真实姓名',
@@ -1964,7 +1964,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for t_user_position
 -- ----------------------------
-DROP TABLE IF EXISTS `t_user_position`;
+
 CREATE TABLE `t_user_position` (
   `id` varchar(64) NOT NULL COMMENT 'ID',
   `user_id` varchar(64) NOT NULL,
@@ -1988,7 +1988,7 @@ COMMIT;
 -- ----------------------------
 -- Table structure for t_user_role
 -- ----------------------------
-DROP TABLE IF EXISTS `t_user_role`;
+
 CREATE TABLE `t_user_role` (
   `id` varchar(64) NOT NULL COMMENT 'ID',
   `user_type` varchar(100) NOT NULL DEFAULT 'SysUser' COMMENT '用户类型',
