@@ -3,6 +3,7 @@ package cn.surveyking.server.impl;
 import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.constant.ErrorCode;
+import cn.surveyking.server.core.constant.ProjectModeEnum;
 import cn.surveyking.server.core.exception.ErrorCodeException;
 import cn.surveyking.server.core.exception.InternalServerError;
 import cn.surveyking.server.core.security.PasswordEncoder;
@@ -68,6 +69,8 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 
 	private final SystemService systemService;
 
+	private final ProjectMapper projectMapper;
+
 	/**
 	 * @param username 账号密码登录认证使用
 	 * @return
@@ -108,6 +111,14 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 		});
 		userInfo.setAuthorities(
 				authorities.stream().map(authority -> (GrantedAuthority) () -> authority).collect(Collectors.toSet()));
+		// 设置用户部门
+		if (user.getDeptId() != null) {
+			Dept dept = deptMapper.selectById(user.getDeptId());
+			if (dept != null) {
+				userInfo.setDeptName(dept.getName());
+			}
+		}
+
 		return userInfo;
 	}
 
@@ -359,6 +370,17 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 					}).collect(Collectors.toList());
 		}
 		return new ArrayList<>();
+	}
+
+	@Override
+	public UserOverview getUserOverviewData() {
+		UserOverview userOverview = new UserOverview();
+		userOverview.setSurveyCount(projectMapper
+				.selectCount(Wrappers.<Project>lambdaQuery().eq(Project::getStatus, AppConsts.PROJECT_STATUS_RUNNING)
+						.eq(Project::getMode, ProjectModeEnum.survey)));
+		userOverview.setExamCount(projectMapper.selectCount(Wrappers.<Project>lambdaQuery()
+				.eq(Project::getStatus, AppConsts.PROJECT_STATUS_RUNNING).eq(Project::getMode, ProjectModeEnum.exam)));
+		return userOverview;
 	}
 
 }

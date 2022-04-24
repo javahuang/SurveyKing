@@ -44,6 +44,16 @@ public class AppConsts {
 	public static final String VARIABLE_PARENT_ORG_ID = "parentOrgId";
 
 	/**
+	 * 项目状态，运行
+	 */
+	public static final Integer PROJECT_STATUS_RUNNING = 1;
+
+	/**
+	 * 项目状态，暂停
+	 */
+	public static final Integer PROJECT_STATUS_SUSPEND = 0;
+
+	/**
 	 * 存储的文件类型 TODO: 文件添加权限控制
 	 */
 	public interface StorageType {

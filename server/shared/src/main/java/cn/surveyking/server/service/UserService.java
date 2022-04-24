@@ -37,4 +37,6 @@ public interface UserService extends UserDetailsService {
 
 	List<RegisterRoleView> getRegisterRoles();
 
+	UserOverview getUserOverviewData();
+
 }

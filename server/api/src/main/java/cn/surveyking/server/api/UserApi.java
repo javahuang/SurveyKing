@@ -82,6 +82,12 @@ public class UserApi {
 		return userService.loadUserById(SecurityContextUtils.getUserId());
 	}
 
+	@GetMapping("/userOverview")
+	@PreAuthorize("isAuthenticated()")
+	public UserOverview userOverview() {
+		return userService.getUserOverviewData();
+	}
+
 	@PostMapping("/user")
 	@PreAuthorize("hasAuthority('user:update')")
 	public UserInfo updateUser(@RequestBody UserRequest request) {

@@ -43,6 +43,8 @@ public class UserInfo implements UserDetails, Serializable {
 
 	private String profile;
 
+	private List<String> positionList;
+
 	@JsonIgnore
 	private Integer status;
 

@@ -23,7 +23,11 @@ public enum ErrorCode {
 	/** 问卷已提交 */
 	SurveySubmitted(4012, "问卷已提交"),
 	/** 答案不允许修改 */
-	AnswerChangeDisabled(4020, "答案不允许修改");
+	AnswerChangeDisabled(4020, "答案不允许修改"),
+	/** 附件不存在 */
+	FileNotExists(4040, "附件不存在"),
+	/** 文件上传失败 */
+	FileUploadError(4041, "文件上传失败");
 
 	/**
 	 * 前两位区分模块，后两位区分错误消息

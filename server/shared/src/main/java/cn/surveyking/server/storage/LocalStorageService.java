@@ -1,5 +1,7 @@
 package cn.surveyking.server.storage;
 
+import cn.surveyking.server.core.constant.ErrorCode;
+import cn.surveyking.server.core.exception.ErrorCodeException;
 import cn.surveyking.server.core.exception.InternalServerError;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -66,8 +68,7 @@ public class LocalStorageService extends AbstractStorageService {
 			return storePath;
 		}
 		catch (IOException e) {
-			e.printStackTrace();
-			throw new InternalServerError("图片上传失败", e);
+			throw new ErrorCodeException(ErrorCode.FileUploadError);
 		}
 	}
 
@@ -76,8 +77,7 @@ public class LocalStorageService extends AbstractStorageService {
 			Files.copy(inputStream, this.rootLocation.resolve(filePath), StandardCopyOption.REPLACE_EXISTING);
 		}
 		catch (IOException e) {
-			e.printStackTrace();
-			throw new InternalServerError("文件上传失败", e);
+			throw new ErrorCodeException(ErrorCode.FileUploadError);
 		}
 	}
 
@@ -87,8 +87,7 @@ public class LocalStorageService extends AbstractStorageService {
 			return Files.readAllBytes(rootLocation.resolve(filePath));
 		}
 		catch (IOException e) {
-			e.printStackTrace();
-			throw new InternalServerError("下载失败", e);
+			throw new ErrorCodeException(ErrorCode.FileNotExists);
 		}
 	}
 
@@ -98,8 +97,7 @@ public class LocalStorageService extends AbstractStorageService {
 			return Files.newInputStream(rootLocation.resolve(filePath));
 		}
 		catch (IOException e) {
-			e.printStackTrace();
-			throw new InternalServerError("下载失败", e);
+			throw new ErrorCodeException(ErrorCode.FileNotExists);
 		}
 	}
 

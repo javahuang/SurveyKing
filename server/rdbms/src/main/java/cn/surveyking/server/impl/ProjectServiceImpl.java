@@ -2,7 +2,6 @@ package cn.surveyking.server.impl;
 
 import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.constant.AppConsts;
-import cn.surveyking.server.core.constant.CacheConsts;
 import cn.surveyking.server.core.uitls.NanoIdUtils;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.*;
@@ -18,7 +17,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -101,6 +99,10 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 			ProjectSetting setting = getById(request.getId()).getSetting();
 			spelParser.parseExpression(request.getSettingKey()).setValue(setting, request.getSettingValue());
 			project.setSetting(setting);
+			// 同步更新项目状态
+			if ("status".equals(request.getSettingKey())) {
+				project.setStatus((Integer) request.getSettingValue());
+			}
 		}
 		updateById(project);
 	}
