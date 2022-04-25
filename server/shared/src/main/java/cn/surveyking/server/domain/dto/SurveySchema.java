@@ -255,6 +255,11 @@ public class SurveySchema implements Cloneable {
 		 */
 		private String examCorrectAnswer;
 
+		/**
+		 * 多选题选项排他
+		 */
+		private RejectOtherOption rejectOtherOption;
+
 	}
 
 	public enum ExamMatchRule {
@@ -264,6 +269,17 @@ public class SurveySchema implements Cloneable {
 		/** 包含答案，多个答案分号间隔 */
 		contain
 
+	}
+	
+	public enum RejectOtherOption {
+		/**
+		 * 选项排他
+		 */
+		rejectAll,
+		/**
+		 * 排他选项互斥
+		 */
+		rejectOther
 	}
 
 	public enum ExamScoreMode {
