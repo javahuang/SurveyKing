@@ -101,6 +101,11 @@ public class ProjectSetting {
 		 */
 		private Boolean enableUpdate;
 
+		/**
+		 * 答题完成后跳转自定义链接
+		 */
+		private String redirectUrl;
+
 	}
 
 	@Data
