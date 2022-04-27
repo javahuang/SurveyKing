@@ -2,6 +2,10 @@
 
 简体中文 | [English](./README.en-us.md)
 
+## [一文了解开源调查问卷天花板-卷王](https://zhuanlan.zhihu.com/p/505131248)
+
+需要您的 star ⭐️⭐️⭐️ 支持鼓励 🙏🙏🙏
+
 ## 问卷产品对比
 
 |            | [问卷网](https://www.wenjuan.com/) | [腾讯问卷](https://wj.qq.com) | [问卷星](https://www.wjx.cn/) | [金数据](https://jinshuju.net/) | [填鸭企业版](https://www.tduckcloud.com/) | [调问企业版](https://www.diaowen.net/) | [卷王](https://surveyking.cn/) | 演示                                 |
@@ -19,7 +23,7 @@
 | 手机端编辑 | ✔️                            | ✔️                       | ✔️                       | ✔️                         | ❌                                     | ❌                                  | ✔️                        |                                      |
 | 私有部署   | 💰💰💰                          | 💰💰💰                     | 💰💰💰                     | 💰💰💰                       | 💰                                     | 💰💰                                | 🆓                          |                                      |
 
-注: 上表与卷王对比的全部是商业问卷产品，他们有很多地方值得卷王学习，仅列出部分主要功能供大家参考，如果对结果有疑问，可以点击对应产品的链接自行对比体验。 
+注: 上表与卷王对比的全部是商业问卷产品，他们有很多地方值得卷王学习，仅列出部分主要功能供大家参考，如果对结果有疑问，可以点击对应产品的链接自行对比体验。
 
 🥇强  🥈中 🥉弱
 
@@ -72,7 +76,7 @@
 
 <!-- 点击[下载 surveyking-h2 版本](https://gitee.com/surveyking/surveyking/attach_files/948414/download/surveyking-h2-v0.2.1.jar)到本地 -->
 
-点击[下载 surveyking-mysql 版本](https://gitee.com/surveyking/surveyking/attach_files/1003944/download/surveyking-v0.3.0-beta.11.jar)到本地
+点击[下载 surveyking-mysql 版本](https://gitee.com/surveyking/surveyking/attach_files/1044180/download/surveyking-v0.3.0-beta.18.jar)到本地
 
 ### 使用源码编译安装
 
@@ -167,7 +171,7 @@ java -jar surveyking-v0.x.x.jar
 
 ## 联系作者
 
-本项目后端代码完全开源，前端代码待稳定之后也会有开源计划。如果觉得对您有帮助，可以点击右上角的 star。
+本项目后端代码完全开源，前端代码开源版本正在开发，即将发布。如果觉得对您有帮助，可以点击右上角的 star。
 
 如果遇到任何问题或者建议，欢迎加群讨论。
 
