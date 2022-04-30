@@ -17,7 +17,7 @@ public class TemplateQuery extends PageQuery {
 	/**
 	 * 如果为空则查询普通的题型
 	 */
-	SurveySchema.QuestionType questionType;
+	private SurveySchema.QuestionType questionType;
 
 	private String name;
 
@@ -26,8 +26,10 @@ public class TemplateQuery extends PageQuery {
 	 */
 	private Integer shared = 1;
 
-	List<String> categories = new ArrayList<>();
+	private List<String> categories = new ArrayList<>();
 
-	List<String> tags = new ArrayList<>();
+	private List<String> tag = new ArrayList<>();
+
+	private String repoId;
 
 }

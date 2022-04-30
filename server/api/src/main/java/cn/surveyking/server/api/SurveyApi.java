@@ -2,8 +2,6 @@ package cn.surveyking.server.api;
 
 import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.domain.dto.*;
-import cn.surveyking.server.flow.constant.FlowApprovalType;
-import cn.surveyking.server.flow.domain.dto.ApprovalTaskRequest;
 import cn.surveyking.server.flow.service.FlowService;
 import cn.surveyking.server.service.AnswerService;
 import cn.surveyking.server.service.FileService;
@@ -13,7 +11,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -68,15 +65,15 @@ public class SurveyApi {
 	@PostMapping("/saveAnswer")
 	public PublicAnswerView saveAnswer(@RequestBody AnswerRequest answer, HttpServletRequest request) {
 		PublicAnswerView publicAnswerView = surveyService.saveAnswer(answer, request);
-		// 发起审批流程
-		if (!StringUtils.hasText(answer.getId())) {
-			ApprovalTaskRequest approvalTaskRequest = new ApprovalTaskRequest();
-			approvalTaskRequest.setType(FlowApprovalType.SAVE);
-			approvalTaskRequest.setAnswerId(publicAnswerView.getAnswerId());
-			approvalTaskRequest.setProjectId(answer.getProjectId());
-			approvalTaskRequest.setActivityId(answer.getProjectId());
-			flowService.approvalTask(approvalTaskRequest);
-		}
+		// // 发起审批流程
+		// if (!StringUtils.hasText(answer.getId())) {
+		// ApprovalTaskRequest approvalTaskRequest = new ApprovalTaskRequest();
+		// approvalTaskRequest.setType(FlowApprovalType.SAVE);
+		// approvalTaskRequest.setAnswerId(publicAnswerView.getAnswerId());
+		// approvalTaskRequest.setProjectId(answer.getProjectId());
+		// approvalTaskRequest.setActivityId(answer.getProjectId());
+		// flowService.approvalTask(approvalTaskRequest);
+		// }
 		return publicAnswerView;
 	}
 

@@ -103,6 +103,9 @@ public class AnswerScoreEvaluator {
 
 		@Override
 		public boolean support(SurveySchema qSchema) {
+			if (qSchema.getAttribute() == null) {
+				return false;
+			}
 			return SurveySchema.ExamScoreMode.onlyOne.equals(qSchema.getAttribute().getExamAnswerMode())
 					&& qSchema.getAttribute().getExamScore() != null && answer.get(qSchema.getId()) != null;
 		}
@@ -142,6 +145,9 @@ public class AnswerScoreEvaluator {
 
 		@Override
 		public boolean support(SurveySchema qSchema) {
+			if (qSchema.getAttribute() == null) {
+				return false;
+			}
 			return SurveySchema.ExamScoreMode.selectAll.equals(qSchema.getAttribute().getExamAnswerMode())
 					&& qSchema.getAttribute().getExamScore() != null && answer.get(qSchema.getId()) != null;
 		}
@@ -177,6 +183,9 @@ public class AnswerScoreEvaluator {
 
 		@Override
 		public boolean support(SurveySchema qSchema) {
+			if (qSchema.getAttribute() == null) {
+				return false;
+			}
 			return SurveySchema.ExamScoreMode.selectCorrect.equals(qSchema.getAttribute().getExamAnswerMode())
 					&& qSchema.getAttribute().getExamScore() != null && answer.get(qSchema.getId()) != null;
 		}
@@ -212,6 +221,9 @@ public class AnswerScoreEvaluator {
 
 		@Override
 		public boolean support(SurveySchema qSchema) {
+			if (qSchema.getAttribute() == null) {
+				return false;
+			}
 			return SurveySchema.ExamScoreMode.select.equals(qSchema.getAttribute().getExamAnswerMode())
 					&& qSchema.getAttribute().getExamScore() != null && answer.get(qSchema.getId()) != null;
 		}

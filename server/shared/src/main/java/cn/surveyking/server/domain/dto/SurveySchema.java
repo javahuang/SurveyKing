@@ -28,6 +28,11 @@ public class SurveySchema implements Cloneable {
 
 	private List<Row> row;
 
+	/**
+	 * 当前 schema 标签
+	 */
+	private List<String> tags;
+
 	public enum QuestionType {
 
 		FillBlank, Textarea, MultipleBlank, Signature, Score, Radio, Checkbox, Select, Cascader, Upload, MatrixAuto, MatrixRadio, MatrixCheckbox, MatrixFillBlank, MatrixScore, MatrixNps, Survey, QuestionSet, Pagination, Remark, SplitLine, Option, User, Dept, Nps, HorzBlank, Address;
@@ -236,6 +241,11 @@ public class SurveySchema implements Cloneable {
 		private String calculate;
 
 		/**
+		 * 多选题选项排他
+		 */
+		private RejectOtherOption rejectOtherOption;
+
+		/**
 		 * 分值
 		 */
 		private Double examScore;
@@ -256,9 +266,9 @@ public class SurveySchema implements Cloneable {
 		private String examCorrectAnswer;
 
 		/**
-		 * 多选题选项排他
+		 * 答案解析
 		 */
-		private RejectOtherOption rejectOtherOption;
+		private String examAnalysis;
 
 	}
 
@@ -270,8 +280,9 @@ public class SurveySchema implements Cloneable {
 		contain
 
 	}
-	
+
 	public enum RejectOtherOption {
+
 		/**
 		 * 选项排他
 		 */
@@ -280,6 +291,7 @@ public class SurveySchema implements Cloneable {
 		 * 排他选项互斥
 		 */
 		rejectOther
+
 	}
 
 	public enum ExamScoreMode {
@@ -293,7 +305,9 @@ public class SurveySchema implements Cloneable {
 		/** 部分选中，按选中分值算分/按选中计分 */
 		select,
 		/** 人工打分 */
-		manual
+		manual,
+		/** 非考试题型 */
+		none
 
 	}
 

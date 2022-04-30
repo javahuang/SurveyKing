@@ -19,6 +19,8 @@ public class TemplateView {
 
 	private SurveySchema template;
 
+	private String[] tag;
+
 	private String category;
 
 	/**

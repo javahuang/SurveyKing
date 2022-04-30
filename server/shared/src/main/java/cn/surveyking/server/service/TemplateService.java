@@ -16,12 +16,16 @@ public interface TemplateService {
 
 	String addTemplate(TemplateRequest template);
 
+	void batchAddTemplate(List<TemplateRequest> templateRequests);
+
+	void batchUpdateTemplate(List<TemplateRequest> templateRequests);
+
 	void updateTemplate(TemplateRequest template);
 
-	void deleteTemplate(String id);
+	void deleteTemplate(List<String> ids);
 
 	List<String> listTemplateCategories(CategoryQuery query);
 
-	Set<String> listTemplateTags(TagQuery query);
+	Set<String> getTags(TagQuery query);
 
 }

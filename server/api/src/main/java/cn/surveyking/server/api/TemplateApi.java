@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -43,8 +44,8 @@ public class TemplateApi {
 
 	@DeleteMapping
 	@PreAuthorize("hasAuthority('template:delete')")
-	public void deleteTemplate(String id) {
-		templateService.deleteTemplate(id);
+	public void deleteTemplate(String[] ids) {
+		templateService.deleteTemplate(Arrays.asList(ids));
 	}
 
 	@GetMapping("/getCategories")
@@ -53,8 +54,8 @@ public class TemplateApi {
 	}
 
 	@GetMapping("/getTags")
-	public Set<String> listTemplateTags(TagQuery query) {
-		return templateService.listTemplateTags(query);
+	public Set<String> getTags(TagQuery query) {
+		return templateService.getTags(query);
 	}
 
 }

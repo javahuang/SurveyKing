@@ -4,6 +4,7 @@ import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.domain.mapper.TemplateViewMapper;
+import cn.surveyking.server.domain.model.Tag;
 import cn.surveyking.server.domain.model.Template;
 import cn.surveyking.server.mapper.TemplateMapper;
 import cn.surveyking.server.service.BaseService;
@@ -35,19 +36,26 @@ public class TemplateServiceImpl extends BaseService<TemplateMapper, Template> i
 
 	private final TemplateViewMapper templateViewMapper;
 
+	private final TagServiceImpl tagService;
+
 	@Override
 	public PaginationResponse<TemplateView> listTemplate(TemplateQuery query) {
 		Page<Template> templatePage = pageByQuery(query, Wrappers.<Template>lambdaQuery()
 				.like(isNotEmpty(query.getName()), Template::getName, query.getName())
 				.eq(query.getQuestionType() != null, Template::getQuestionType, query.getQuestionType())
 				// 默认查询额是普通题型
-				.ne(query.getQuestionType() == null, Template::getQuestionType, SurveySchema.QuestionType.Survey)
+				// .ne(query.getQuestionType() != null, Template::getQuestionType,
+				// query.getQuestionType())
 				.in(query.getCategories().size() > 0, Template::getCategory, query.getCategories())
-				.eq(Template::getShared, query.getShared())
+				// .eq(Template::getShared, query.getShared())
+				.exists(query.getRepoId() != null, String.format(
+						"select 1 from t_repo_template t where t.repo_id = '%s' and t.template_id = t_template.id",
+						query.getRepoId()))
+				.exists(query.getTag().size() > 0,
+						String.format("select 1 from t_tag t where t.entity_id = t_template.id and t.name in (%s)",
+								query.getTag().stream().map(x -> "'" + x + "'").collect(Collectors.joining(","))))
 				.eq(query.getShared() == 0, Template::getCreateBy, SecurityContextUtils.getUserId())
-				.and(query.getTags().size() > 0, i -> query.getTags().forEach(tag -> {
-					i.or(j -> j.like(Template::getTag, tag));
-				})).orderByAsc(Template::getPriority));
+				.orderByAsc(Template::getPriority));
 		return new PaginationResponse<>(templatePage.getTotal(),
 				templatePage.getRecords().stream().map(x -> templateViewMapper.toView(x)).collect(Collectors.toList()));
 	}
@@ -60,13 +68,23 @@ public class TemplateServiceImpl extends BaseService<TemplateMapper, Template> i
 	}
 
 	@Override
+	public void batchAddTemplate(List<TemplateRequest> templateRequests) {
+		saveBatch(templateViewMapper.fromRequest(templateRequests));
+	}
+
+	@Override
+	public void batchUpdateTemplate(List<TemplateRequest> templateRequests) {
+		updateBatchById(templateViewMapper.fromRequest(templateRequests));
+	}
+
+	@Override
 	public void updateTemplate(TemplateRequest request) {
 		updateById(templateViewMapper.fromRequest(request));
 	}
 
 	@Override
-	public void deleteTemplate(String id) {
-		removeById(id);
+	public void deleteTemplate(List<String> ids) {
+		removeBatchByIds(ids);
 	}
 
 	@Override
@@ -81,14 +99,13 @@ public class TemplateServiceImpl extends BaseService<TemplateMapper, Template> i
 	}
 
 	@Override
-	public Set<String> listTemplateTags(TagQuery query) {
-		QueryWrapper<Template> queryWrapper = new QueryWrapper<>();
-		queryWrapper.select("DISTINCT tag").like(hasText(query.getName()), "tag", query.getName()).isNotNull("tag");
-		queryWrapper.eq("shared", query.getShared());
-		queryWrapper.eq("question_type", query.getQuestionType());
+	public Set<String> getTags(TagQuery query) {
+		QueryWrapper<Tag> queryWrapper = new QueryWrapper<>();
+		queryWrapper.select("DISTINCT name").like(hasText(query.getName()), "name", query.getName())
+				.eq("category", query.getCategory()).last("limit 20");
 		Set<String> tags = new HashSet<>();
-		list(queryWrapper).stream().filter(x -> x != null).forEach(x -> {
-			tags.addAll(Arrays.asList(x.getTag()));
+		tagService.list(queryWrapper).stream().filter(x -> x != null).forEach(x -> {
+			tags.addAll(Arrays.asList(x.getName()));
 		});
 		return tags;
 	}
