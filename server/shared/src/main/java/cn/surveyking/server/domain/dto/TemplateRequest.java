@@ -1,5 +1,6 @@
 package cn.surveyking.server.domain.dto;
 
+import cn.surveyking.server.core.constant.ProjectModeEnum;
 import lombok.Data;
 
 /**
@@ -25,6 +26,11 @@ public class TemplateRequest {
 	 * 问题模板
 	 */
 	private SurveySchema template;
+
+	/**
+	 * 模板模式
+	 */
+	private ProjectModeEnum mode;
 
 	/**
 	 * 标签

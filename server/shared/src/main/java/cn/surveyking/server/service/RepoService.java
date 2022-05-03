@@ -1,10 +1,9 @@
 package cn.surveyking.server.service;
 
 import cn.surveyking.server.core.common.PaginationResponse;
-import cn.surveyking.server.domain.dto.RepoQuery;
-import cn.surveyking.server.domain.dto.RepoRequest;
-import cn.surveyking.server.domain.dto.RepoTemplateRequest;
-import cn.surveyking.server.domain.dto.RepoView;
+import cn.surveyking.server.domain.dto.*;
+
+import java.util.List;
 
 /**
  * @author javahuang
@@ -54,5 +53,12 @@ public interface RepoService {
 	 * @param request
 	 */
 	void batchUnBindTemplate(RepoTemplateRequest request);
+
+	/**
+	 * 从题库里面挑选试题
+	 * @param repos
+	 * @return
+	 */
+	List<SurveySchema> pickQuestionFromRepo(List<PickRepoQuestionRequest> repos);
 
 }

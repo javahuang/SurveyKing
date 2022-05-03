@@ -7,6 +7,7 @@ import cn.surveyking.server.domain.mapper.RepoViewMapper;
 import cn.surveyking.server.domain.model.Repo;
 import cn.surveyking.server.domain.model.RepoTemplate;
 import cn.surveyking.server.domain.model.Tag;
+import cn.surveyking.server.domain.model.Template;
 import cn.surveyking.server.mapper.RepoMapper;
 import cn.surveyking.server.service.BaseService;
 import cn.surveyking.server.service.RepoService;
@@ -16,6 +17,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +51,10 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 		result.getList().forEach(repoView -> {
 			repoView.setTotal(repoTemplateService
 					.count(Wrappers.<RepoTemplate>lambdaQuery().eq(RepoTemplate::getRepoId, repoView.getId())));
+			// 获取每个标签对应的题的数量
+			repoView.setTemplateTags(this.getBaseMapper().selectRepoTemplateTags(repoView.getId()));
+			// 获取每个问题类型对应的题的数量
+			repoView.setRepoQuestionTypes(this.getBaseMapper().selectRepoQuestionTypes(repoView.getId()));
 		});
 		return result;
 	}
@@ -154,6 +160,36 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 					.remove(Wrappers.<RepoTemplate>lambdaUpdate().eq(RepoTemplate::getRepoId, request.getRepoId())
 							.in(RepoTemplate::getTemplateId, request.getIds()));
 		}
+	}
+
+	@Override
+	public List<SurveySchema> pickQuestionFromRepo(List<PickRepoQuestionRequest> repos) {
+		List<Template> templates = new ArrayList<>();
+		repos.forEach(repo -> {
+			List<Template> repoTemplates = templateService.list(Wrappers.<Template>lambdaQuery()
+					.exists(String.format(
+							"select 1 from t_repo_template t where t.repo_id = '%s' and t.template_id = t_template.id",
+							repo.getRepoId()))
+					.in(!CollectionUtils.isEmpty(repo.getTypes()), Template::getQuestionType, repo.getTypes())
+					.exists(!CollectionUtils.isEmpty(repo.getTags()),
+							String.format("select 1 from t_tag t where t.entity_id = t_template.id and t.name in (%s)",
+									repo.getTags().stream().map(x -> "'" + x + "'").collect(Collectors.joining(","))))
+					.last(repo.getQuestionsNum() != null, "limit " + repo.getQuestionsNum()));
+			// 给问题添加分值
+			repoTemplates.forEach(template -> {
+				if (templates.stream().filter(x -> x.getId().equals(template.getId())).findFirst().isPresent()) {
+					return;
+				}
+				if (repo.getExamScore() != null) {
+					if (template.getTemplate().getAttribute() == null) {
+						template.getTemplate().setAttribute(new SurveySchema.Attribute());
+					}
+					template.getTemplate().getAttribute().setExamScore(repo.getExamScore());
+				}
+				templates.add(template);
+			});
+		});
+		return templates.stream().map(x -> x.getTemplate()).collect(Collectors.toList());
 	}
 
 }

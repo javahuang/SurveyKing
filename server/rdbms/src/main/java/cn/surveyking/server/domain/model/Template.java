@@ -1,5 +1,6 @@
 package cn.surveyking.server.domain.model;
 
+import cn.surveyking.server.core.constant.ProjectModeEnum;
 import cn.surveyking.server.core.model.BaseModel;
 import cn.surveyking.server.domain.dto.SurveySchema;
 import com.baomidou.mybatisplus.annotation.FieldFill;
@@ -42,6 +43,11 @@ public class Template extends BaseModel {
 	 */
 	@TableField(typeHandler = JacksonTypeHandler.class, jdbcType = JdbcType.VARCHAR)
 	private String[] tag;
+
+	/**
+	 * 模板模式 survey问卷 exam考试
+	 */
+	private ProjectModeEnum mode;
 
 	/**
 	 * 模板分类

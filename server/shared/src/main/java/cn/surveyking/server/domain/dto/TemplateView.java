@@ -1,5 +1,6 @@
 package cn.surveyking.server.domain.dto;
 
+import cn.surveyking.server.core.constant.ProjectModeEnum;
 import lombok.Data;
 
 import java.util.Date;
@@ -18,6 +19,8 @@ public class TemplateView {
 	private String questionType;
 
 	private SurveySchema template;
+
+	private ProjectModeEnum mode;
 
 	private String[] tag;
 

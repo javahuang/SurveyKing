@@ -1,14 +1,13 @@
 package cn.surveyking.server.api;
 
 import cn.surveyking.server.core.common.PaginationResponse;
-import cn.surveyking.server.domain.dto.RepoQuery;
-import cn.surveyking.server.domain.dto.RepoRequest;
-import cn.surveyking.server.domain.dto.RepoTemplateRequest;
-import cn.surveyking.server.domain.dto.RepoView;
+import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.service.RepoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @author javahuang
@@ -59,6 +58,16 @@ public class RepoApi {
 	@PostMapping("/unbind")
 	public void batchUnBindTemplate(@RequestBody RepoTemplateRequest request) {
 		repoService.batchUnBindTemplate(request);
+	}
+
+	/**
+	 * 从题库里面挑选试题
+	 * @param repos
+	 * @return
+	 */
+	@PostMapping("/pick")
+	public List<SurveySchema> pickQuestionFromRepo(@RequestBody List<PickRepoQuestionRequest> repos) {
+		return repoService.pickQuestionFromRepo(repos);
 	}
 
 }

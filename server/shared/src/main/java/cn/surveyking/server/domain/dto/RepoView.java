@@ -2,6 +2,8 @@ package cn.surveyking.server.domain.dto;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @author javahuang
  * @date 2022/4/27
@@ -37,5 +39,15 @@ public class RepoView {
 	private String setting;
 
 	private Long total;
+
+	/**
+	 * 模板标签数量
+	 */
+	private List<TemplateTagTotalView> templateTags;
+
+	/**
+	 * 模板
+	 */
+	private List<RepoQuestionTypeTotalView> repoQuestionTypes;
 
 }
