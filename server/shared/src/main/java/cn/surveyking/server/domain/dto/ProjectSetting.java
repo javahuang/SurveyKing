@@ -86,6 +86,10 @@ public class ProjectSetting {
 		 */
 		private UniqueLimitSetting loginLimit;
 
+		/**
+		 * 一页一题
+		 */
+		private Boolean onePageOneQuestion;
 	}
 
 	@Data
