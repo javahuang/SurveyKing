@@ -90,6 +90,12 @@ public class ProjectSetting {
 		 * 一页一题
 		 */
 		private Boolean onePageOneQuestion;
+
+		/**
+		 * 是否显示答题卡
+		 */
+		private Boolean answerSheetVisible;
+
 	}
 
 	@Data
