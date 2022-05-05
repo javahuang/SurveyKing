@@ -2,13 +2,13 @@ package cn.surveyking.server.api;
 
 import cn.surveyking.server.domain.dto.FileQuery;
 import cn.surveyking.server.domain.dto.FileView;
+import cn.surveyking.server.domain.dto.UploadFileRequest;
 import cn.surveyking.server.service.FileService;
 import lombok.AllArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotEmpty;
 import java.util.List;
@@ -39,8 +39,8 @@ public class FileApi {
 
 	@PostMapping
 	@PreAuthorize("hasAuthority('file:import')")
-	public FileView upload(@RequestParam("file") MultipartFile file, int storageType) {
-		return fileService.upload(file, storageType);
+	public FileView upload(UploadFileRequest request) {
+		return fileService.upload(request);
 	}
 
 	@DeleteMapping("/{id}")

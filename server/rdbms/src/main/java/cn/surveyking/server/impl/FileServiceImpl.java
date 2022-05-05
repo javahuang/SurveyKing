@@ -4,12 +4,12 @@ import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.uitls.HTTPUtils;
 import cn.surveyking.server.domain.dto.FileQuery;
 import cn.surveyking.server.domain.dto.FileView;
+import cn.surveyking.server.domain.dto.UploadFileRequest;
 import cn.surveyking.server.domain.mapper.FileViewMapper;
 import cn.surveyking.server.domain.model.File;
 import cn.surveyking.server.mapper.FileMapper;
 import cn.surveyking.server.service.FileService;
 import cn.surveyking.server.storage.StorageService;
-import cn.surveyking.server.storage.StorePath;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author javahuang
@@ -42,21 +44,34 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 
 	private final FileViewMapper fileViewMapper;
 
+	private AtomicLong seq = new AtomicLong(new Date().getTime());
+
 	@Override
 	public void deleteFile(String id) {
 		removeById(id);
 	}
 
 	@Override
-	public FileView upload(MultipartFile uploadFile, int storageType) {
-		StorePath storePath;
+	@SneakyThrows
+	public FileView upload(UploadFileRequest request) {
+		MultipartFile uploadFile = request.getFile();
+		String filePath = seq.incrementAndGet() + "_" + uploadFile.getOriginalFilename();
+		File file = new File();
+		file.setStorageType(request.getStorageType());
+		file.setOriginalName(uploadFile.getOriginalFilename());
+		file.setFileName(filePath);
+		if (request.getBasePath() != null) {
+			filePath = request.getBasePath() + java.io.File.separator + filePath;
+		}
+		file.setFilePath(filePath);
+
 		if (isSupportImage(uploadFile.getOriginalFilename())) {
-			storePath = storageService.uploadImage(uploadFile);
+			String thumbImagePath = storageService.getThumbImageFilePath(filePath);
+			storageService.uploadFile(storageService.generateThumbImage(uploadFile.getInputStream()), thumbImagePath);
+			file.setThumbFilePath(thumbImagePath);
 		}
-		else {
-			storePath = storageService.uploadFile(uploadFile);
-		}
-		File file = fileViewMapper.toFile(storePath, uploadFile.getOriginalFilename(), storageType);
+		storageService.uploadFile(uploadFile.getInputStream(), filePath);
+
 		save(file);
 		FileView fileView = fileViewMapper.toFileView(file);
 		return fileView;
@@ -64,9 +79,9 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 
 	@Override
 	public List<FileView> listFiles(FileQuery query) {
-		return fileViewMapper.toFileView(
-				list(Wrappers.<File>lambdaQuery().eq(query.getType() != null, File::getStorageType, query.getType())
-						.in(query.getIds() != null && query.getIds().size() > 0, File::getId, query.getIds())));
+		return fileViewMapper.toFileView(list(Wrappers.<File>lambdaQuery()
+				.eq(query.getType() != null, File::getStorageType, query.getType().getType())
+				.in(query.getIds() != null && query.getIds().size() > 0, File::getId, query.getIds())));
 	}
 
 	@Override

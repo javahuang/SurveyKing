@@ -17,11 +17,11 @@ public class StorePath {
 
 	private String thumbFilePath;
 
-	public StorePath(String filePath) {
-		this.filePath = filePath;
+	public StorePath(String fileName) {
+		this.fileName = fileName;
 	}
 
-	public StorePath(String fileNae, String filePath) {
+	public StorePath(String fileName, String filePath) {
 		this.fileName = fileName;
 		this.filePath = filePath;
 	}

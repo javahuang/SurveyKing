@@ -3,9 +3,9 @@ package cn.surveyking.server.service;
 import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.domain.dto.FileQuery;
 import cn.surveyking.server.domain.dto.FileView;
+import cn.surveyking.server.domain.dto.UploadFileRequest;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,7 +18,7 @@ public interface FileService {
 
 	List<String> SUPPORT_IMAGE_LIST = Arrays.asList(AppConsts.SUPPORT_IMAGE_TYPE);
 
-	FileView upload(MultipartFile file, int storageType);
+	FileView upload(UploadFileRequest request);
 
 	List<FileView> listFiles(FileQuery query);
 

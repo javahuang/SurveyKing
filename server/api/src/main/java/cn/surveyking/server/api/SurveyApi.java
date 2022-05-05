@@ -12,7 +12,6 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.Duration;
@@ -78,8 +77,9 @@ public class SurveyApi {
 	}
 
 	@PostMapping("/upload")
-	public FileView upload(@RequestParam("file") MultipartFile file) {
-		return fileService.upload(file, AppConsts.StorageType.ANSWER_ATTACHMENT);
+	public FileView upload(UploadFileRequest request) {
+		request.setStorageType(AppConsts.StorageType.ANSWER_ATTACHMENT);
+		return fileService.upload(request);
 	}
 
 	@GetMapping("/preview/{attachmentId}")

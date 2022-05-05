@@ -33,14 +33,16 @@ public abstract class AbstractStorageService implements StorageService {
 		return buffer.append("_").append(thumbImageWidth).append("x").append(thumbImageHeight).toString();
 	}
 
-	protected String getThumbImagePath(String fileName) {
-		StringBuilder buff = new StringBuilder(fileName);
+	@Override
+	public String getThumbImageFilePath(String filePath) {
+		StringBuilder buff = new StringBuilder(filePath);
 		int index = buff.lastIndexOf(".");
 		buff.insert(index, getThumbPrefixName());
 		return buff.toString();
 	}
 
-	protected ByteArrayInputStream generateThumbImageByDefault(InputStream inputStream) throws IOException {
+	@Override
+	public ByteArrayInputStream generateThumbImage(InputStream inputStream) throws IOException {
 		// 在内存当中生成缩略图
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		Thumbnails.of(inputStream).size(thumbImageWidth, thumbImageHeight).toOutputStream(out);

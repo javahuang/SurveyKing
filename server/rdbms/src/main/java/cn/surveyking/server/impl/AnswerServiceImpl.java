@@ -1,9 +1,9 @@
 package cn.surveyking.server.impl;
 
 import cn.surveyking.server.core.common.PaginationResponse;
-import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.constant.AttachmentNameVariableEnum;
 import cn.surveyking.server.core.constant.ProjectModeEnum;
+import cn.surveyking.server.core.constant.StorageTypeEnum;
 import cn.surveyking.server.core.exception.InternalServerError;
 import cn.surveyking.server.core.uitls.AnswerScoreEvaluator;
 import cn.surveyking.server.core.uitls.ExcelExporter;
@@ -122,7 +122,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 					else if (questionType == SurveySchema.QuestionType.Signature
 							|| questionType == SurveySchema.QuestionType.Upload) {
 						FileQuery query = new FileQuery();
-						query.setType(AppConsts.StorageType.ANSWER_ATTACHMENT);
+						query.setType(StorageTypeEnum.ANSWER_ATTACHMENT);
 						query.setIds(ids);
 						// 图片上传和签名需要做一个合并
 						view.getAttachment().addAll(fileService.listFiles(query));

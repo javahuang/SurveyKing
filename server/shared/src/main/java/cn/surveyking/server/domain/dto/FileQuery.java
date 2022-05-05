@@ -1,6 +1,7 @@
 package cn.surveyking.server.domain.dto;
 
 import cn.surveyking.server.core.constant.AppConsts;
+import cn.surveyking.server.core.constant.StorageTypeEnum;
 import lombok.Data;
 import org.springframework.http.HttpHeaders;
 
@@ -20,7 +21,7 @@ public class FileQuery {
 		this.id = id;
 	}
 
-	Integer type;
+	StorageTypeEnum type;
 
 	List<String> ids;
 

@@ -2,8 +2,6 @@ package cn.surveyking.server.storage;
 
 import cn.surveyking.server.core.constant.ErrorCode;
 import cn.surveyking.server.core.exception.ErrorCodeException;
-import cn.surveyking.server.core.exception.InternalServerError;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,8 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Date;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author javahuang
@@ -22,8 +18,6 @@ import java.util.concurrent.atomic.AtomicLong;
 public class LocalStorageService extends AbstractStorageService {
 
 	private Path rootLocation;
-
-	AtomicLong seq;
 
 	public LocalStorageService(StorageProperties configuration) {
 		super(configuration);
@@ -34,7 +28,6 @@ public class LocalStorageService extends AbstractStorageService {
 		try {
 			this.rootLocation = Paths.get(getStorageConfig().getLocal().getRootPath());
 			Files.createDirectories(rootLocation);
-			seq = new AtomicLong(new Date().getTime());
 		}
 		catch (UnknownHostException e) {
 			e.printStackTrace();
@@ -45,38 +38,13 @@ public class LocalStorageService extends AbstractStorageService {
 	}
 
 	@Override
-	public StorePath uploadFile(MultipartFile file) {
-		String originalFilename = file.getOriginalFilename();
-		String filePath = seq.incrementAndGet() + "_" + originalFilename;
+	public void uploadFile(InputStream file, String path) {
 		try {
-			saveToLocal(filePath, file.getInputStream());
-			return new StorePath(filePath, filePath);
+			Files.createDirectories(this.rootLocation.resolve(path).getParent());
+			Files.copy(file, this.rootLocation.resolve(path), StandardCopyOption.REPLACE_EXISTING);
 		}
 		catch (IOException e) {
 			e.printStackTrace();
-			throw new InternalServerError("文件上传失败", e);
-		}
-	}
-
-	@Override
-	public StorePath uploadImage(MultipartFile file) {
-		try {
-			StorePath storePath = uploadFile(file);
-			String thumbFilePath = getThumbImagePath(storePath.getFilePath());
-			storePath.setThumbFilePath(thumbFilePath);
-			saveToLocal(thumbFilePath, generateThumbImageByDefault(file.getInputStream()));
-			return storePath;
-		}
-		catch (IOException e) {
-			throw new ErrorCodeException(ErrorCode.FileUploadError);
-		}
-	}
-
-	private void saveToLocal(String filePath, InputStream inputStream) {
-		try {
-			Files.copy(inputStream, this.rootLocation.resolve(filePath), StandardCopyOption.REPLACE_EXISTING);
-		}
-		catch (IOException e) {
 			throw new ErrorCodeException(ErrorCode.FileUploadError);
 		}
 	}
