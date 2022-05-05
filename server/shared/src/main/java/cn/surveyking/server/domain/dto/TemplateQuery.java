@@ -1,5 +1,6 @@
 package cn.surveyking.server.domain.dto;
 
+import cn.surveyking.server.core.constant.ProjectModeEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -31,5 +32,7 @@ public class TemplateQuery extends PageQuery {
 	private List<String> tag = new ArrayList<>();
 
 	private String repoId;
+
+	private ProjectModeEnum mode;
 
 }

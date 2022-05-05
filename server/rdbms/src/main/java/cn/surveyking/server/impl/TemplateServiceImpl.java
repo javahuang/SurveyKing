@@ -47,7 +47,7 @@ public class TemplateServiceImpl extends BaseService<TemplateMapper, Template> i
 				// .ne(query.getQuestionType() != null, Template::getQuestionType,
 				// query.getQuestionType())
 				.in(query.getCategories().size() > 0, Template::getCategory, query.getCategories())
-				// .eq(Template::getShared, query.getShared())
+				.eq(query.getMode() != null, Template::getMode, query.getMode())
 				.exists(query.getRepoId() != null, String.format(
 						"select 1 from t_repo_template t where t.repo_id = '%s' and t.template_id = t_template.id",
 						query.getRepoId()))
