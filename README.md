@@ -2,9 +2,67 @@
 
 简体中文 | [English](./README.en-us.md)
 
+## [一文了解开源考试系统天花板-卷王](https://zhuanlan.zhihu.com/p/509950590)
+
 ## [一文了解开源调查问卷天花板-卷王](https://zhuanlan.zhihu.com/p/505131248)
 
-需要您的 star ⭐️⭐️⭐️ 支持鼓励 🙏🙏🙏
+需要您的 star ⭐️⭐️⭐️ 支持鼓励 🙏🙏🙏，**点 star 加群(338461197)获取最新的数据库脚本**。
+
+## 考试预览
+
+* 考试系统预览
+
+<table>
+    <tr>
+        <td><img src="docs/images/exam-editor.jpg"/></td>
+        <td><img src="docs/images/exam-import.jpg"/></td>
+    </tr>
+     <tr>
+        <td><img src="docs/images/exam-pc-prev.jpg"/></td>
+        <td><img src="docs/images/exam-mb-preview.jpeg"/></td>
+    </tr>
+     <tr>
+        <td><img src="docs/images/exam-repo-list.jpg"/></td>
+        <td><img src="docs/images/exam-repo-pick.jpg"/></td>
+    </tr>
+     <tr>
+        <td><img src="docs/images/exam-repo-qedit.jpg"/></td>
+        <td><img src="docs/images/exam-repo.jpg"/></td>
+    </tr>
+</table>
+
+* 调查问卷预览
+
+<table>
+    <tr>
+        <td><img src="docs/images/survey-editor.jpg"/></td>
+        <td><img src="docs/images/survey-editor-formula.jpg"/></td>
+    </tr>
+    <tr>
+        <td><img src="docs/images/survey-editor-preview.jpg"/></td>
+        <td><img src="docs/images/survey-imp.jpg"/></td>
+    </tr>
+    <tr>
+        <td><img src="docs/images/survey-export.jpg"/></td>
+        <td><img src="docs/images/survey-exp-preview.jpg"/></td>
+    </tr>
+    <tr>
+        <td><img src="docs/images/survey-exp-formula.jpg"/></td>
+        <td><img src="docs/images/survey-formula.jpg"/></td>
+    </tr>
+    <tr>
+        <td><img src="docs/images/survey-editor-preview.jpg"/></td>
+        <td><img src="docs/images/survey-prev-mbmi.jpeg"/></td>
+    </tr>
+    <tr>
+        <td><img src="docs/images/survey-report.jpg"/></td>
+        <td><img src="docs/images/survey-setting.jpg"/></td>
+    </tr>
+    <tr>
+        <td><img src="docs/images/survey-sys.jpg"/></td>
+        <td><img src="docs/images/survey-post.jpg"/></td>
+    </tr>
+</table>
 
 ## 问卷产品对比
 
