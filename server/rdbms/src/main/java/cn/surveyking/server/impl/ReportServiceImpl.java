@@ -51,7 +51,6 @@ public class ReportServiceImpl implements ReportService {
 			}
 			else if (value instanceof Number) {
 				Number numberValue = (Number) value;
-				optionData.setTotal(optionData.getTotal() + 1);
 				if (optionData.getMin() == null || optionData.getMax() == null || optionData.getAverage() == null) {
 					optionData.setMin(numberValue);
 					optionData.setMax(numberValue);
