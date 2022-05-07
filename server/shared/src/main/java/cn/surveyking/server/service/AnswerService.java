@@ -5,7 +5,6 @@ import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.exception.InternalServerError;
 import cn.surveyking.server.core.uitls.HTTPUtils;
 import cn.surveyking.server.core.uitls.IPUtils;
-import cn.surveyking.server.core.uitls.UserAgentUtils;
 import cn.surveyking.server.domain.dto.*;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -38,9 +37,12 @@ public interface AnswerService {
 
 	DownloadData downloadSurvey(String shortId);
 
-	default AnswerMetaInfo.ClientInfo parseClientInfo(HttpServletRequest request) {
+	default AnswerMetaInfo.ClientInfo parseClientInfo(HttpServletRequest request, AnswerMetaInfo.ClientInfo clientInfo) {
+		if(clientInfo ==null) {
+			clientInfo = new AnswerMetaInfo.ClientInfo();
+		}
 		String userAgentStr = request.getHeader("User-Agent");
-		AnswerMetaInfo.ClientInfo clientInfo = UserAgentUtils.parseAgent(userAgentStr);
+		clientInfo.setAgent(userAgentStr);
 		clientInfo.setRemoteIp(IPUtils.getClientIpAddress(request));
 		Cookie limitCookie = WebUtils.getCookie(request, AppConsts.COOKIE_LIMIT_NAME);
 		if (limitCookie != null) {

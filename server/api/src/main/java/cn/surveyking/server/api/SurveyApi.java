@@ -2,7 +2,6 @@ package cn.surveyking.server.api;
 
 import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.domain.dto.*;
-import cn.surveyking.server.flow.service.FlowService;
 import cn.surveyking.server.service.AnswerService;
 import cn.surveyking.server.service.FileService;
 import cn.surveyking.server.service.SurveyService;
@@ -33,13 +32,10 @@ public class SurveyApi {
 
 	private final FileService fileService;
 
-	private final FlowService flowService;
-
 	@PostMapping("/loadProject")
 	public PublicProjectView loadProject(@RequestBody ProjectQuery query) {
 		PublicProjectView projectView = surveyService.loadProject(query.getId());
 		if (projectView.getSurvey() != null) {
-			flowService.beforeLaunchProcess(projectView);
 		}
 		return projectView;
 	}
@@ -52,7 +48,6 @@ public class SurveyApi {
 	@PostMapping("/verifyPassword")
 	public PublicProjectView verifyPassword(@RequestBody ProjectQuery query) {
 		PublicProjectView projectView = surveyService.verifyPassword(query);
-		flowService.beforeLaunchProcess(projectView);
 		return projectView;
 	}
 
@@ -64,15 +59,6 @@ public class SurveyApi {
 	@PostMapping("/saveAnswer")
 	public PublicAnswerView saveAnswer(@RequestBody AnswerRequest answer, HttpServletRequest request) {
 		PublicAnswerView publicAnswerView = surveyService.saveAnswer(answer, request);
-		// // 发起审批流程
-		// if (!StringUtils.hasText(answer.getId())) {
-		// ApprovalTaskRequest approvalTaskRequest = new ApprovalTaskRequest();
-		// approvalTaskRequest.setType(FlowApprovalType.SAVE);
-		// approvalTaskRequest.setAnswerId(publicAnswerView.getAnswerId());
-		// approvalTaskRequest.setProjectId(answer.getProjectId());
-		// approvalTaskRequest.setActivityId(answer.getProjectId());
-		// flowService.approvalTask(approvalTaskRequest);
-		// }
 		return publicAnswerView;
 	}
 

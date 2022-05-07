@@ -171,7 +171,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
 	@Override
 	public AnswerView saveAnswer(AnswerRequest request, HttpServletRequest httpRequest) {
-		request.getMetaInfo().setClientInfo(parseClientInfo(httpRequest));
+		request.getMetaInfo().setClientInfo(parseClientInfo(httpRequest, request.getMetaInfo().getClientInfo()));
+
 		if (StringUtils.hasText(request.getId())) {
 			return updateAnswer(request);
 		}

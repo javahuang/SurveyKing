@@ -30,7 +30,10 @@ subprojects {
         annotationProcessor "org.mapstruct:mapstruct-processor:1.4.2.Final"
         annotationProcessor "org.projectlombok:lombok"
 
-        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation ('org.springframework.boot:spring-boot-starter-web') {
+            exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+        }
+        implementation 'org.springframework.boot:spring-boot-starter-undertow'
         implementation 'org.springframework.boot:spring-boot-starter-validation'
         implementation 'org.springframework.boot:spring-boot-starter-security'
         implementation 'org.apache.commons:commons-lang3:3.0'

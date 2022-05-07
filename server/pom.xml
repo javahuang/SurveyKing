@@ -74,11 +74,6 @@
                 <version>2.6.3</version>
             </dependency>
             <dependency>
-                <groupId>com.blueconic</groupId>
-                <artifactId>browscap-java</artifactId>
-                <version>1.3.6</version>
-            </dependency>
-            <dependency>
                 <groupId>org.dhatim</groupId>
                 <artifactId>fastexcel</artifactId>
                 <version>0.12.11</version>
