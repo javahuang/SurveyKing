@@ -37,8 +37,9 @@ public interface AnswerService {
 
 	DownloadData downloadSurvey(String shortId);
 
-	default AnswerMetaInfo.ClientInfo parseClientInfo(HttpServletRequest request, AnswerMetaInfo.ClientInfo clientInfo) {
-		if(clientInfo ==null) {
+	default AnswerMetaInfo.ClientInfo parseClientInfo(HttpServletRequest request,
+			AnswerMetaInfo.ClientInfo clientInfo) {
+		if (clientInfo == null) {
 			clientInfo = new AnswerMetaInfo.ClientInfo();
 		}
 		String userAgentStr = request.getHeader("User-Agent");

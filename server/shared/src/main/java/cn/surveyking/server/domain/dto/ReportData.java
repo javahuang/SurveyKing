@@ -15,6 +15,11 @@ public class ReportData {
 
 	private Map<String, Data> statistics;
 
+	/**
+	 * 每日答卷数量统计
+	 */
+	private Map<String, Integer> dailyCountStat;
+
 	@lombok.Data
 	public static class Data {
 

@@ -4,12 +4,13 @@ import cn.surveyking.server.domain.dto.ReportData;
 import cn.surveyking.server.domain.model.Answer;
 import cn.surveyking.server.mapper.AnswerMapper;
 import cn.surveyking.server.service.ReportService;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -24,22 +25,32 @@ public class ReportServiceImpl implements ReportService {
 
 	@Override
 	public ReportData getData(String shortId) {
-		QueryWrapper<Answer> wrapper = new QueryWrapper<>();
-		wrapper.select("answer").eq("project_id", shortId);
-		List<Answer> answerList = answerMapper.selectList(wrapper);
+		List<Answer> answerList = answerMapper
+				.selectList(Wrappers.<Answer>lambdaQuery().select(Answer::getAnswer, Answer::getCreateAt)
+						.eq(Answer::getProjectId, shortId).orderByAsc(Answer::getCreateAt));
 		ReportData result = new ReportData();
 		result.setTotal(answerList.size());
 		Map<String, ReportData.Data> data = new HashMap<>();
 		result.setStatistics(data);
+		Map<String, Integer> dailyCountStat = new LinkedHashMap<>();
+		result.setDailyCountStat(dailyCountStat);
 		for (Answer answer : answerList) {
 			parseAnswer(data, answer.getAnswer());
+			computeDailyAnswer(dailyCountStat, answer);
 		}
 		return result;
 	}
 
 	// TODO: 考虑分页取，然后计算
+
+	/**
+	 * 选项报表统计
+	 * @param data
+	 * @param answer
+	 */
 	private void parseAnswer(Map<String, ReportData.Data> data, LinkedHashMap answer) {
 		Iterator it = answer.entrySet().iterator();
+
 		while (it.hasNext()) {
 			Map.Entry pair = (Map.Entry) it.next();
 			String id = (String) pair.getKey();
@@ -69,7 +80,11 @@ public class ReportServiceImpl implements ReportService {
 						.setScale(2, BigDecimal.ROUND_HALF_UP));
 			}
 		}
+	}
 
+	private void computeDailyAnswer(Map<String, Integer> dailyCountStat, Answer answer) {
+		String day = new SimpleDateFormat("yyyy-MM-dd").format(answer.getCreateAt());
+		dailyCountStat.merge(day, 1, Integer::sum);
 	}
 
 	public int compareTo(Number n1, Number n2) {
