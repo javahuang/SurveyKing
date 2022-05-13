@@ -170,12 +170,12 @@ public class ProjectSetting {
 		private Long endTime;
 
 		/**
-		 * 最短交卷时间
+		 * 最短交卷时间(分钟)
 		 */
 		private Integer minSubmitMinutes;
 
 		/**
-		 * 最长交卷时间
+		 * 最长交卷时间(分钟)
 		 */
 		private Integer maxSubmitMinutes;
 
@@ -183,6 +183,26 @@ public class ProjectSetting {
 		 * 显示排名
 		 */
 		private Boolean rankingEnabled;
+
+		/**
+		 * 练习模式 打完问题后立即显示答案
+		 */
+		private Boolean exerciseMode;
+
+		/**
+		 * 闯关模式，打完本题才能答下一题
+		 */
+		private Boolean passMode;
+
+		/**
+		 * 闯关模式每一题的答题限制时间
+		 */
+		private Integer passModePerSeconds;
+
+		/**
+		 * 随机问题顺序
+		 */
+		private Boolean randomOrder;
 
 	}
 

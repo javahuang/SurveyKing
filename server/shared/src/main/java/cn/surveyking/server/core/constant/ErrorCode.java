@@ -27,7 +27,13 @@ public enum ErrorCode {
 	/** 附件不存在 */
 	FileNotExists(4040, "附件不存在"),
 	/** 文件上传失败 */
-	FileUploadError(4041, "文件上传失败");
+	FileUploadError(4041, "文件上传失败"),
+	/** 考试未开始 */
+	ExamUnStarted(6000, "考试未开始"),
+	/** 考试已结束 */
+	ExamFinished(6010, "考试已结束"),
+
+	;
 
 	/**
 	 * 前两位区分模块，后两位区分错误消息

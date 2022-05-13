@@ -139,7 +139,24 @@ public class SurveyServiceImpl implements SurveyService {
 		if (setting.getAnswerSetting().getIpLimit() != null) {
 			validateIpLimit(projectId, setting);
 		}
+		validateExamSetting(project);
 		return setting;
+	}
+
+	private void validateExamSetting(ProjectView project) {
+		ProjectSetting.ExamSetting examSetting = project.getSetting().getExamSetting();
+		if (examSetting == null || !ProjectModeEnum.exam.equals(project.getMode())) {
+			return;
+		}
+		// 校验考试开始时间
+		if (examSetting.getStartTime() != null && new Date(examSetting.getStartTime()).compareTo(new Date()) > 0) {
+			throw new ErrorCodeException(ErrorCode.ExamUnStarted);
+		}
+		// 校验考试结束时间
+		if (examSetting.getEndTime() != null && new Date(examSetting.getEndTime()).compareTo(new Date()) < 0) {
+			throw new ErrorCodeException(ErrorCode.ExamFinished);
+		}
+
 	}
 
 	@Override

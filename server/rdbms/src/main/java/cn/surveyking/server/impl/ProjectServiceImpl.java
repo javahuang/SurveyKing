@@ -46,7 +46,7 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 	@Override
 	public PaginationResponse<ProjectView> listProject(ProjectQuery query) {
 		Page<Project> page = pageByQuery(query, Wrappers.<Project>lambdaQuery()
-				.eq(isNotBlank(query.getName()), Project::getName, query.getName())
+				.like(isNotBlank(query.getName()), Project::getName, query.getName())
 				.exists(String.format(
 						"select 1 from t_project_partner t where t.user_id = '%s' and t.project_id = t_project.id",
 						SecurityContextUtils.getUserId()))
