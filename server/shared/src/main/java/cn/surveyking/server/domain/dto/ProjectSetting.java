@@ -5,6 +5,7 @@ import cn.surveyking.server.core.constant.ProjectModeEnum;
 import lombok.Data;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  * @author javahuang
@@ -116,6 +117,11 @@ public class ProjectSetting {
 		 */
 		private String redirectUrl;
 
+		/**
+		 * 公开查询
+		 */
+		private List<PublicQuery> publicQuery;
+
 	}
 
 	@Data
@@ -203,6 +209,59 @@ public class ProjectSetting {
 		 * 随机问题顺序
 		 */
 		private Boolean randomOrder;
+
+	}
+
+	/**
+	 * 公开查询
+	 */
+	@Data
+	public static class PublicQuery {
+
+		/**
+		 * 公开查询id
+		 */
+		private String id;
+
+		/**
+		 * 页面标题
+		 */
+		private String title;
+
+		/**
+		 * 是否开启
+		 */
+		private Boolean enabled;
+
+		/**
+		 * 页面介绍
+		 */
+		private String description;
+
+		/**
+		 * 查看权限，是否需要密码查看
+		 */
+		private String password;
+
+		/**
+		 * 条件问题
+		 */
+		private String conditionQuestion;
+
+		/**
+		 * 查询字段权限 0隐藏 1读 2写
+		 */
+		private LinkedHashMap<String, Integer> fieldPermission;
+
+		/**
+		 * 允许更新答案
+		 */
+		private Boolean enableUpdate;
+
+		/**
+		 * 链接有效时间段
+		 */
+		private List<String> linkValidityPeriod;
 
 	}
 
