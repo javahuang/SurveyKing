@@ -266,8 +266,8 @@ public class AnswerScoreEvaluator {
 			log.warn("问卷{}问题{}选项{}未设置正确答案", schema.getId(), qSchema.getId(), optionSchema.getId());
 			return false;
 		}
-		// 多个正确答案可以按照分号隔开，只要有一个正确即可
-		for (String item : correctAnswer.split(":")) {
+		// 多个正确答案可以按照（回车键）隔开，只要有一个正确即可
+		for (String item : correctAnswer.split("\n")) {
 			if (SurveySchema.ExamMatchRule.completeSame.equals(matchRule) && item.equals(optionValue.toString())) {
 				return true;
 			}
