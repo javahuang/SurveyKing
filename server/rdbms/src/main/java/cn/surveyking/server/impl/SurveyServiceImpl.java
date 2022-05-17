@@ -3,15 +3,19 @@ package cn.surveyking.server.impl;
 import cn.surveyking.server.core.common.Tuple2;
 import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.constant.ErrorCode;
+import cn.surveyking.server.core.constant.FieldPermissionType;
 import cn.surveyking.server.core.constant.ProjectModeEnum;
 import cn.surveyking.server.core.exception.ErrorCodeException;
 import cn.surveyking.server.core.uitls.*;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.domain.mapper.ProjectViewMapper;
+import cn.surveyking.server.domain.model.Answer;
 import cn.surveyking.server.service.AnswerService;
 import cn.surveyking.server.service.ProjectService;
 import cn.surveyking.server.service.SurveyService;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -21,11 +25,13 @@ import org.springframework.web.util.WebUtils;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * @author javahuang
@@ -216,6 +222,42 @@ public class SurveyServiceImpl implements SurveyService {
 	}
 
 	/**
+	 * @param request
+	 * @return
+	 */
+	@Override
+	@SneakyThrows
+	public PublicQueryVerifyView loadQuery(PublicQueryRequest request) {
+		Tuple2<ProjectView, ProjectSetting.PublicQuery> projectAndQuery = getProjectAndQuery(request);
+		SurveySchema schema = buildVerifyFormSchema(projectAndQuery.getFirst(), projectAndQuery.getSecond());
+		PublicQueryVerifyView view = new PublicQueryVerifyView();
+		view.setSchema(schema);
+		return view;
+	}
+
+	@Override
+	public PublicQueryView getQueryResult(PublicQueryRequest request) {
+		Tuple2<ProjectView, ProjectSetting.PublicQuery> projectAndQuery = getProjectAndQuery(request);
+		SurveySchema schema = buildQueryResultSchema(projectAndQuery.getFirst(), projectAndQuery.getSecond());
+		PublicQueryView view = new PublicQueryView();
+		view.setSchema(schema);
+		List<Answer> answers = findAnswerByQuery(request, projectAndQuery);
+		answers.forEach(answer -> {
+			filterAnswerByFieldPermission(answer.getAnswer(), projectAndQuery.getSecond().getFieldPermission());
+		});
+
+		view.setAnswers(answers.stream().map(x -> {
+			PublicAnswerView answerView = new PublicAnswerView();
+			answerView.setAnswerId(x.getId());
+			answerView.setAnswer(x.getAnswer());
+			answerView.setCreateAt(x.getCreateAt());
+			return answerView;
+		}).collect(Collectors.toList()));
+		view.setFieldPermission(projectAndQuery.getSecond().getFieldPermission());
+		return view;
+	}
+
+	/**
 	 * 校验问卷并且判断是否要更新最近一次的答案
 	 * @param project
 	 * @return
@@ -317,6 +359,133 @@ public class SurveyServiceImpl implements SurveyService {
 		if (setting.getLimitNum() != null && total >= setting.getLimitNum()) {
 			throw new ErrorCodeException(ErrorCode.SurveySubmitted);
 		}
+	}
+
+	private Tuple2<ProjectView, ProjectSetting.PublicQuery> getProjectAndQuery(PublicQueryRequest request) {
+		ProjectView project = projectService.getProject(request.getId());
+		List<ProjectSetting.PublicQuery> queries = project.getSetting().getSubmittedSetting().getPublicQuery();
+		if (queries == null || queries.size() == 0) {
+			throw new ErrorCodeException(ErrorCode.QueryNotExist);
+		}
+		ProjectSetting.PublicQuery query = queries.stream().filter(x -> x.getId().equals(request.getResultId()))
+				.findFirst().orElseThrow(() -> new ErrorCodeException(ErrorCode.QueryNotExist));
+		PublicQueryVerifyView view = new PublicQueryVerifyView();
+		validatePublicQuery(query);
+		return new Tuple2<>(project, query);
+	}
+
+	@SneakyThrows
+	private void validatePublicQuery(ProjectSetting.PublicQuery query) {
+		if (Boolean.FALSE.equals(query.getEnabled())) {
+			throw new ErrorCodeException(ErrorCode.QueryDisabled);
+		}
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		List<String> linkValidityPeriod = query.getLinkValidityPeriod();
+		if (linkValidityPeriod != null && linkValidityPeriod.size() == 2 && !DateUtils.isBetween(new Date(),
+				sdf.parse(linkValidityPeriod.get(0)), sdf.parse(linkValidityPeriod.get(1)))) {
+			throw new ErrorCodeException(ErrorCode.QueryDisabled);
+		}
+	}
+
+	/**
+	 * 前端支持动态主题(问卷主题/表单主题)切换，动态构建查询表单
+	 * @param project
+	 * @param query
+	 * @return
+	 */
+	private SurveySchema buildVerifyFormSchema(ProjectView project, ProjectSetting.PublicQuery query) {
+		SurveySchema schema = new SurveySchema();
+		schema.setId(query.getId());
+		schema.setTitle(query.getTitle());
+		SurveySchema.Attribute attribute = new SurveySchema.Attribute();
+		attribute.setSubmitButton("查询");
+		schema.setAttribute(attribute);
+		schema.setDescription(query.getDescription());
+		List<SurveySchema> children = new ArrayList<>();
+		schema.setChildren(children);
+		// 目前只支持文本题 #{huaw}#{fhpd}
+		schema.setChildren(findMatchChildrenInSchema(query.getConditionQuestion(), project));
+		return schema;
+	}
+
+	private List<SurveySchema> findMatchChildrenInSchema(String conditionQuestion, ProjectView project) {
+		Pattern condPattern = Pattern.compile("#\\{(.*?)\\}");
+		Matcher m = condPattern.matcher(conditionQuestion);
+		List<String> conditionIds = new ArrayList<>();
+		while (m.find()) {
+			String qId = m.group(1);
+			conditionIds.add(qId);
+		}
+		return SchemaParser.flatSurveySchema(project.getSurvey()).stream()
+				.filter(qSchema -> conditionIds.contains(qSchema.getId())).collect(Collectors.toList());
+	}
+
+	/**
+	 * 根据配置的字段权限信息来过滤要查询的字段
+	 * @param project
+	 * @param query
+	 * @return
+	 */
+	private SurveySchema buildQueryResultSchema(ProjectView project, ProjectSetting.PublicQuery query) {
+		SurveySchema schema = project.getSurvey();
+		SchemaParser.updateSchemaByPermission(query.getFieldPermission(), schema);
+		return schema;
+	}
+
+	/**
+	 * @param request 提交的请求
+	 * @param projectAndQuery 项目信息和当前查询信息
+	 * @return
+	 */
+	private List<Answer> findAnswerByQuery(PublicQueryRequest request,
+			Tuple2<ProjectView, ProjectSetting.PublicQuery> projectAndQuery) {
+		ProjectView projectView = projectAndQuery.getFirst();
+		List<SurveySchema> conditionSchemaList = findMatchChildrenInSchema(
+				projectAndQuery.getSecond().getConditionQuestion(), projectAndQuery.getFirst());
+		// 构建查询条件，找到结果
+		List<Answer> answer = ((AnswerServiceImpl) answerService)
+				.list(Wrappers.<Answer>lambdaQuery().eq(Answer::getProjectId, projectView.getId())
+						.and(i -> conditionSchemaList.forEach(conditionSchema -> i.like(Answer::getAnswer,
+								buildLikeQueryConditionOfQuestion(conditionSchema, request.getAnswer())))));
+		if (answer.size() == 0) {
+			throw new ErrorCodeException(ErrorCode.QueryResultNotExist);
+		}
+		// 根据配置过滤结果
+		return answer;
+	}
+
+	/**
+	 * 手动构建like 查询
+	 * @param schema
+	 * @param queryFormValues
+	 */
+	private String buildLikeQueryConditionOfQuestion(SurveySchema schema, LinkedHashMap queryFormValues) {
+		String qId = schema.getId();
+		String oId = schema.getChildren().get(0).getId();
+		if (queryFormValues.get(qId) == null || ((Map) queryFormValues.get(qId)).get(oId) == null) {
+			throw new ErrorCodeException(ErrorCode.QueryConditionNull);
+		}
+		Object optionValue = ((Map) queryFormValues.get(qId)).get(oId);
+		String value = optionValue.toString();
+		if (optionValue instanceof String) {
+			value = "\"" + value + "\"";
+		}
+		return String.format("{\"%s\":%s}", oId, value);
+	}
+
+	/**
+	 * 根据字段权限配置过滤结果集，过滤掉隐藏题的答案
+	 * @param answer
+	 * @param fieldPermission
+	 */
+	private void filterAnswerByFieldPermission(LinkedHashMap answer, LinkedHashMap<String, Integer> fieldPermission) {
+		fieldPermission.entrySet().forEach(entry -> {
+			String qId = entry.getKey();
+			Integer permission = entry.getValue();
+			if (FieldPermissionType.hidden == permission) {
+				answer.remove(qId);
+			}
+		});
 	}
 
 }

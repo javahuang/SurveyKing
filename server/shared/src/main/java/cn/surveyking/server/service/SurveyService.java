@@ -20,4 +20,8 @@ public interface SurveyService {
 
 	PublicAnswerView loadAnswer(AnswerQuery query);
 
+	PublicQueryVerifyView loadQuery(PublicQueryRequest request);
+
+	PublicQueryView getQueryResult(PublicQueryRequest request);
+
 }

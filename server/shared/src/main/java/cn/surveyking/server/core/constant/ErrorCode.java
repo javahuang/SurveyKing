@@ -33,6 +33,15 @@ public enum ErrorCode {
 	/** 考试已结束 */
 	ExamFinished(6010, "考试已结束"),
 
+	/** 公开查询链接不存在 */
+	QueryNotExist(7000, "该查询链接已失效，请联系项目的发布者"),
+	/** 公开查询链接已停止 */
+	QueryDisabled(7001, "该查询链接已停止，请联系项目的发布者"),
+	/** 公开查询条件不能为空 */
+	QueryConditionNull(7002, "查询条件不能为空"),
+	/** 公开查询结果不存在 */
+	QueryResultNotExist(7003, "没有查询到结果，请确认所填信息正确"),
+
 	;
 
 	/**

@@ -2,6 +2,7 @@ package cn.surveyking.server.flow.service.impl;
 
 import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.uitls.ContextHelper;
+import cn.surveyking.server.core.uitls.SchemaParser;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.flow.constant.*;
@@ -100,7 +101,7 @@ public class FlowServiceImpl implements FlowService {
 		}
 		// 流程申请人为空
 		if (node.getIdentity() == null) {
-			updateSchemaByPermission(node.getFieldPermission(), schema);
+			SchemaParser.updateSchemaByPermission(node.getFieldPermission(), schema);
 			return;
 		}
 		// 需要登录，如开启了工作流或者设置了成员/部门题都需要登录才能答卷
@@ -113,7 +114,7 @@ public class FlowServiceImpl implements FlowService {
 		Set<String> userGroups = userService.getUserGroups(userId);
 		for (String identity : node.getIdentity()) {
 			if (userGroups.contains(identity)) {
-				updateSchemaByPermission(node.getFieldPermission(), schema);
+				SchemaParser.updateSchemaByPermission(node.getFieldPermission(), schema);
 				return;
 			}
 		}
@@ -308,7 +309,7 @@ public class FlowServiceImpl implements FlowService {
 		if (element == null) {
 			return schema;
 		}
-		updateSchemaByPermission(element.getFieldPermission(), schema);
+		SchemaParser.updateSchemaByPermission(element.getFieldPermission(), schema);
 		return schema;
 	}
 
@@ -487,31 +488,6 @@ public class FlowServiceImpl implements FlowService {
 			}
 			return false;
 		});
-	}
-
-	private void updateSchemaByPermission(LinkedHashMap<String, Integer> fieldPermission, SurveySchema schema) {
-		if (schema.getChildren() == null || fieldPermission == null) {
-			return;
-		}
-		schema.getChildren().removeIf(child -> {
-			Integer permValue = fieldPermission.get(child.getId());
-			if (permValue == null) {
-				return false;
-			}
-			// 隐藏题目
-			if (permValue == FieldPermissionType.hidden) {
-				return true;
-			}
-			// 只读
-			if (permValue == FieldPermissionType.visible) {
-				if (child.getAttribute() == null) {
-					child.setAttribute(new SurveySchema.Attribute());
-				}
-				child.getAttribute().setReadOnly(true);
-			}
-			return false;
-		});
-		schema.getChildren().forEach(child -> updateSchemaByPermission(fieldPermission, child));
 	}
 
 }

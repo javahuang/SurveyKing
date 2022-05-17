@@ -1,5 +1,6 @@
 package cn.surveyking.server.core.uitls;
 
+import cn.surveyking.server.core.constant.FieldPermissionType;
 import cn.surveyking.server.core.constant.ProjectModeEnum;
 import cn.surveyking.server.domain.dto.*;
 
@@ -253,6 +254,31 @@ public class SchemaParser {
 			return "";
 		}
 		return string.replaceAll("(<.*?>)|(&.*?;)", " ").replaceAll("\\s{2,}", " ").trim();
+	}
+
+	public static void updateSchemaByPermission(LinkedHashMap<String, Integer> fieldPermission, SurveySchema schema) {
+		if (schema.getChildren() == null || fieldPermission == null) {
+			return;
+		}
+		schema.getChildren().removeIf(child -> {
+			Integer permValue = fieldPermission.get(child.getId());
+			if (permValue == null) {
+				return false;
+			}
+			// 隐藏题目
+			if (permValue == FieldPermissionType.hidden) {
+				return true;
+			}
+			// 只读
+			if (permValue == FieldPermissionType.visible) {
+				if (child.getAttribute() == null) {
+					child.setAttribute(new SurveySchema.Attribute());
+				}
+				child.getAttribute().setReadOnly(true);
+			}
+			return false;
+		});
+		schema.getChildren().forEach(child -> updateSchemaByPermission(fieldPermission, child));
 	}
 
 }

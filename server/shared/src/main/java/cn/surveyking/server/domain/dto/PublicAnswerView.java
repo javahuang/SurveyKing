@@ -2,6 +2,7 @@ package cn.surveyking.server.domain.dto;
 
 import lombok.Data;
 
+import java.util.Date;
 import java.util.LinkedHashMap;
 
 /**
@@ -29,5 +30,7 @@ public class PublicAnswerView {
 	private LinkedHashMap questionScore;
 
 	private LinkedHashMap<String, Object> answer;
+
+	private Date createAt;
 
 }

@@ -2,7 +2,6 @@ package cn.surveyking.server.api;
 
 import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.domain.dto.*;
-import cn.surveyking.server.service.AnswerService;
 import cn.surveyking.server.service.FileService;
 import cn.surveyking.server.service.SurveyService;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +26,6 @@ import java.time.Duration;
 public class SurveyApi {
 
 	private final SurveyService surveyService;
-
-	private final AnswerService answerService;
 
 	private final FileService fileService;
 
@@ -75,6 +72,24 @@ public class SurveyApi {
 		headers.add(HttpHeaders.CACHE_CONTROL, CacheControl.maxAge(Duration.ofDays(30)).getHeaderValue());
 		query.setHeaders(headers);
 		return fileService.loadFile(query);
+	}
+
+	/**
+	 * @param request
+	 * @return 公开查询验证页面视图数据
+	 */
+	@PostMapping("/loadQuery")
+	public PublicQueryVerifyView loadQuery(@RequestBody PublicQueryRequest request) {
+		return surveyService.loadQuery(request);
+	}
+
+	/**
+	 * @param request
+	 * @return
+	 */
+	@PostMapping("/getQueryResult")
+	public PublicQueryView getQueryResult(@RequestBody PublicQueryRequest request) {
+		return surveyService.getQueryResult(request);
 	}
 
 }
