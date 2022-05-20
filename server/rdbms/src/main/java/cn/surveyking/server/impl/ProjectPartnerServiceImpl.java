@@ -1,5 +1,6 @@
 package cn.surveyking.server.impl;
 
+import cn.surveyking.server.core.constant.CacheConsts;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.ProjectPartnerRequest;
 import cn.surveyking.server.domain.dto.ProjectPartnerView;
@@ -10,6 +11,7 @@ import cn.surveyking.server.service.ProjectPartnerService;
 import cn.surveyking.server.service.UserService;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,8 @@ public class ProjectPartnerServiceImpl extends BaseService<ProjectPartnerMapper,
 		implements ProjectPartnerService {
 
 	private final UserService userService;
+
+	private final CacheManager cacheManager;
 
 	@Override
 	public List<ProjectPartnerView> listProjectPartner(String projectId) {
@@ -51,6 +55,7 @@ public class ProjectPartnerServiceImpl extends BaseService<ProjectPartnerMapper,
 			if (existUserIds.contains(userId)) {
 				return false;
 			}
+			cacheManager.getCache(CacheConsts.projectPermissionCacheName).evict(userId);
 			return true;
 		}).map(userId -> {
 			ProjectPartner partner = new ProjectPartner();
