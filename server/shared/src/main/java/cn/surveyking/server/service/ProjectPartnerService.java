@@ -16,8 +16,8 @@ public interface ProjectPartnerService {
 
 	List<ProjectPartnerView> listProjectPartner(String projectId);
 
-	@CacheEvict(cacheNames = CacheConsts.projectPermissionCacheName,
-			key = "T(cn.surveyking.server.core.uitls.SecurityContextUtils).getUserId()")
+//	@CacheEvict(cacheNames = CacheConsts.projectPermissionCacheName,
+//			key = "T(cn.surveyking.server.core.uitls.SecurityContextUtils).getUserId()")
 	void addProjectPartner(ProjectPartnerRequest request);
 
 	@CacheEvict(cacheNames = CacheConsts.projectPermissionCacheName,
