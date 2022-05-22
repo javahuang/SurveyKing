@@ -44,6 +44,7 @@ module.exports = {
             "guides/logic/replaceText",
           ],
         },
+        "guides/public_query",
       ],
     },
     "faq",

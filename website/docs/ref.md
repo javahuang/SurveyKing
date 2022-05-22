@@ -92,6 +92,8 @@ Images from any folder can be used by providing path to file. Path should be rel
 
 ![img](../static/img/logo_small.png)
 
+[img使用jsx](https://github.com/facebook/docusaurus/blob/main/website/docs/guides/markdown-features/markdown-features-assets.mdx)
+
 ---
 
 ## Code
