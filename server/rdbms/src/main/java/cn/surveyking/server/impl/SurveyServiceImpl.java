@@ -33,6 +33,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /**
  * @author javahuang
  * @date 2021/8/22
@@ -183,7 +186,16 @@ public class SurveyServiceImpl implements SurveyService {
 		ProjectView project = projectService.getProject(projectId);
 		ProjectSetting setting = project.getSetting();
 
-		String answerId = validateAndGetLatestAnswer(project);
+		String answerId;
+		if (isBlank(answer.getId())) {
+			// 问卷允许修改答案开关修改答案
+			answerId = validateAndGetLatestAnswer(project);
+		}
+		else {
+			// 公开查询修改答案
+			answerId = answer.getId();
+			validateAndMergeAnswer(project, answer);
+		}
 		answer.setId(answerId);
 		AnswerView answerView = answerService.saveAnswer(answer, request);
 
@@ -228,8 +240,8 @@ public class SurveyServiceImpl implements SurveyService {
 	@Override
 	@SneakyThrows
 	public PublicQueryVerifyView loadQuery(PublicQueryRequest request) {
-		Tuple2<ProjectView, ProjectSetting.PublicQuery> projectAndQuery = getProjectAndQuery(request);
-		SurveySchema schema = buildVerifyFormSchema(projectAndQuery.getFirst(), projectAndQuery.getSecond());
+		Tuple2<ProjectView, ProjectSetting.PublicQuery> projectAndQuery = getProjectAndQueryThenValidate(request);
+		SurveySchema schema = buildQueryFormSchema(projectAndQuery.getFirst(), projectAndQuery.getSecond());
 		PublicQueryVerifyView view = new PublicQueryVerifyView();
 		view.setSchema(schema);
 		return view;
@@ -237,7 +249,7 @@ public class SurveyServiceImpl implements SurveyService {
 
 	@Override
 	public PublicQueryView getQueryResult(PublicQueryRequest request) {
-		Tuple2<ProjectView, ProjectSetting.PublicQuery> projectAndQuery = getProjectAndQuery(request);
+		Tuple2<ProjectView, ProjectSetting.PublicQuery> projectAndQuery = getProjectAndQueryThenValidate(request);
 		SurveySchema schema = buildQueryResultSchema(projectAndQuery.getFirst(), projectAndQuery.getSecond());
 		PublicQueryView view = new PublicQueryView();
 		view.setSchema(schema);
@@ -295,6 +307,37 @@ public class SurveyServiceImpl implements SurveyService {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * 公开查询修改答案，因为涉及到权限操作，需要将之前的答案和更新的答案做一个 merge 操作
+	 * @param project
+	 * @param answer
+	 */
+	private void validateAndMergeAnswer(ProjectView project, AnswerRequest answer) {
+		if (isBlank(answer.getQueryId()) || isBlank(answer.getId())) {
+			throw new ErrorCodeException(ErrorCode.QueryResultUpdateError);
+		}
+		try {
+			// 公开查询设置必须存在，并且包含可编辑字段
+			ProjectSetting.PublicQuery query = project.getSetting().getSubmittedSetting().getPublicQuery().stream()
+					.filter(x -> x.getId().equals(answer.getQueryId())).findFirst().get();
+			if (!query.getFieldPermission().values().contains(FieldPermissionType.editable)) {
+				throw new ErrorCodeException(ErrorCode.QueryResultUpdateError);
+			}
+			AnswerQuery answerQuery = new AnswerQuery();
+			answerQuery.setId(answer.getId());
+			AnswerView latestAnswer = answerService.getAnswer(answerQuery);
+			LinkedHashMap<String, Object> existAnswer = latestAnswer.getAnswer();
+			existAnswer.forEach((key, value) -> {
+				if (!answer.getAnswer().containsKey(key)) {
+					answer.getAnswer().put(key, value);
+				}
+			});
+		}
+		catch (Exception e) {
+			throw new ErrorCodeException(ErrorCode.QueryResultUpdateError);
+		}
 	}
 
 	private void validateLoginLimit(String projectId, ProjectSetting setting) {
@@ -361,7 +404,7 @@ public class SurveyServiceImpl implements SurveyService {
 		}
 	}
 
-	private Tuple2<ProjectView, ProjectSetting.PublicQuery> getProjectAndQuery(PublicQueryRequest request) {
+	private Tuple2<ProjectView, ProjectSetting.PublicQuery> getProjectAndQueryThenValidate(PublicQueryRequest request) {
 		ProjectView project = projectService.getProject(request.getId());
 		List<ProjectSetting.PublicQuery> queries = project.getSetting().getSubmittedSetting().getPublicQuery();
 		if (queries == null || queries.size() == 0) {
@@ -369,13 +412,16 @@ public class SurveyServiceImpl implements SurveyService {
 		}
 		ProjectSetting.PublicQuery query = queries.stream().filter(x -> x.getId().equals(request.getResultId()))
 				.findFirst().orElseThrow(() -> new ErrorCodeException(ErrorCode.QueryNotExist));
-		PublicQueryVerifyView view = new PublicQueryVerifyView();
-		validatePublicQuery(query);
+		validatePublicQuery(query, request.getAnswer());
 		return new Tuple2<>(project, query);
 	}
 
+	/**
+	 * @param query 公开查询配置
+	 * @param answer 查询答案
+	 */
 	@SneakyThrows
-	private void validatePublicQuery(ProjectSetting.PublicQuery query) {
+	private void validatePublicQuery(ProjectSetting.PublicQuery query, LinkedHashMap answer) {
 		if (Boolean.FALSE.equals(query.getEnabled())) {
 			throw new ErrorCodeException(ErrorCode.QueryDisabled);
 		}
@@ -385,6 +431,18 @@ public class SurveyServiceImpl implements SurveyService {
 				sdf.parse(linkValidityPeriod.get(0)), sdf.parse(linkValidityPeriod.get(1)))) {
 			throw new ErrorCodeException(ErrorCode.QueryDisabled);
 		}
+		// 校验密码
+		if (isNotBlank(query.getPassword()) && answer != null) {
+			if (!answer.containsKey(AppConsts.PUBLIC_QUERY_PASSWORD_FIELD_ID)) {
+				throw new ErrorCodeException(ErrorCode.QueryPasswordError);
+			}
+			String password = (String) ((Map) answer.get(AppConsts.PUBLIC_QUERY_PASSWORD_FIELD_ID))
+					.get(AppConsts.PUBLIC_QUERY_PASSWORD_FIELD_ID);
+			if (isBlank(password) || !query.getPassword().equals(password.trim())) {
+				throw new ErrorCodeException(ErrorCode.QueryPasswordError);
+			}
+			answer.remove(AppConsts.PUBLIC_QUERY_PASSWORD_FIELD_ID);
+		}
 	}
 
 	/**
@@ -393,22 +451,28 @@ public class SurveyServiceImpl implements SurveyService {
 	 * @param query
 	 * @return
 	 */
-	private SurveySchema buildVerifyFormSchema(ProjectView project, ProjectSetting.PublicQuery query) {
-		SurveySchema schema = new SurveySchema();
-		schema.setId(query.getId());
-		schema.setTitle(query.getTitle());
-		SurveySchema.Attribute attribute = new SurveySchema.Attribute();
-		attribute.setSubmitButton("查询");
-		schema.setAttribute(attribute);
-		schema.setDescription(query.getDescription());
-		List<SurveySchema> children = new ArrayList<>();
-		schema.setChildren(children);
+	private SurveySchema buildQueryFormSchema(ProjectView project, ProjectSetting.PublicQuery query) {
+		SurveySchema schema = SurveySchema.builder().id(query.getId()).title(query.getTitle())
+				.description(query.getDescription())
+				.children(findMatchChildrenInSchema(query.getConditionQuestion(), project))
+				.attribute(SurveySchema.Attribute.builder().submitButton("查询").build()).build();
 		// 目前只支持文本题 #{huaw}#{fhpd}
-		schema.setChildren(findMatchChildrenInSchema(query.getConditionQuestion(), project));
+		if (isNotBlank(query.getPassword())) {
+			// 添加一个password的schema，用于密码校验
+			SurveySchema passwordSchema = SurveySchema.builder().id(AppConsts.PUBLIC_QUERY_PASSWORD_FIELD_ID)
+					.title("密码").type(SurveySchema.QuestionType.FillBlank)
+					.attribute(SurveySchema.Attribute.builder().required(true).build()).build();
+			passwordSchema.setChildren(Collections
+					.singletonList(SurveySchema.builder().id(AppConsts.PUBLIC_QUERY_PASSWORD_FIELD_ID).build()));
+			schema.getChildren().add(passwordSchema);
+		}
 		return schema;
 	}
 
 	private List<SurveySchema> findMatchChildrenInSchema(String conditionQuestion, ProjectView project) {
+		if (isBlank(conditionQuestion)) {
+			return new ArrayList<>();
+		}
 		Pattern condPattern = Pattern.compile("#\\{(.*?)\\}");
 		Matcher m = condPattern.matcher(conditionQuestion);
 		List<String> conditionIds = new ArrayList<>();
@@ -427,8 +491,14 @@ public class SurveyServiceImpl implements SurveyService {
 	 * @return
 	 */
 	private SurveySchema buildQueryResultSchema(ProjectView project, ProjectSetting.PublicQuery query) {
-		SurveySchema schema = project.getSurvey();
+		SurveySchema schema = project.getSurvey().deepCopy();
 		SchemaParser.updateSchemaByPermission(query.getFieldPermission(), schema);
+		if (query.getFieldPermission().values().contains(FieldPermissionType.editable)) {
+			schema.setAttribute(SurveySchema.Attribute.builder().submitButton("修改").suffix(null).build());
+		}
+		else {
+			schema.setAttribute(null);
+		}
 		return schema;
 	}
 
@@ -442,11 +512,24 @@ public class SurveyServiceImpl implements SurveyService {
 		ProjectView projectView = projectAndQuery.getFirst();
 		List<SurveySchema> conditionSchemaList = findMatchChildrenInSchema(
 				projectAndQuery.getSecond().getConditionQuestion(), projectAndQuery.getFirst());
+		if (conditionSchemaList.size() == 0 && request.getQuery().size() == 0) {
+			throw new ErrorCodeException(ErrorCode.QueryResultNotExist);
+		}
 		// 构建查询条件，找到结果
-		List<Answer> answer = ((AnswerServiceImpl) answerService)
-				.list(Wrappers.<Answer>lambdaQuery().eq(Answer::getProjectId, projectView.getId())
-						.and(i -> conditionSchemaList.forEach(conditionSchema -> i.like(Answer::getAnswer,
-								buildLikeQueryConditionOfQuestion(conditionSchema, request.getAnswer())))));
+		List<Answer> answer = ((AnswerServiceImpl) answerService).list(Wrappers.<Answer>lambdaQuery()
+				.eq(Answer::getProjectId, projectView.getId()).and(i -> {
+					// 通过查询表单构建查询参数
+					conditionSchemaList.forEach(conditionSchema -> i.like(Answer::getAnswer,
+							buildLikeQueryConditionOfQuestion(conditionSchema, request.getAnswer())));
+					// 通过 url 参数构建查询参数
+					if (request.getQuery() != null) {
+						request.getQuery().entrySet().forEach(optionId2Value -> {
+							String optionId = optionId2Value.getKey();
+							String optionValue = optionId2Value.getValue();
+							i.like(Answer::getAnswer, String.format("{\"%s\":\"%s\"}", optionId, optionValue));
+						});
+					}
+				}));
 		if (answer.size() == 0) {
 			throw new ErrorCodeException(ErrorCode.QueryResultNotExist);
 		}

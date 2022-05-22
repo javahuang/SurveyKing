@@ -76,7 +76,12 @@
             <dependency>
                 <groupId>org.dhatim</groupId>
                 <artifactId>fastexcel</artifactId>
-                <version>0.12.11</version>
+                <version>0.12.13</version>
+            </dependency>
+            <dependency>
+                <groupId>org.dhatim</groupId>
+                <artifactId>fastexcel-reader</artifactId>
+                <version>0.12.3</version>
             </dependency>
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>

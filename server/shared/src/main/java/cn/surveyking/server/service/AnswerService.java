@@ -77,4 +77,6 @@ public interface AnswerService {
 
 	void restoreAnswer(AnswerRequest request);
 
+	AnswerUploadView upload(AnswerUploadRequest request);
+
 }

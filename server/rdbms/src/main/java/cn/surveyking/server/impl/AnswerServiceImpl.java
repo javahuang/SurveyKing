@@ -5,25 +5,22 @@ import cn.surveyking.server.core.constant.AttachmentNameVariableEnum;
 import cn.surveyking.server.core.constant.ProjectModeEnum;
 import cn.surveyking.server.core.constant.StorageTypeEnum;
 import cn.surveyking.server.core.exception.InternalServerError;
-import cn.surveyking.server.core.uitls.AnswerScoreEvaluator;
-import cn.surveyking.server.core.uitls.ExcelExporter;
-import cn.surveyking.server.core.uitls.SchemaParser;
-import cn.surveyking.server.core.uitls.SecurityContextUtils;
+import cn.surveyking.server.core.uitls.*;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.domain.mapper.AnswerViewMapper;
 import cn.surveyking.server.domain.model.Answer;
 import cn.surveyking.server.domain.model.Project;
 import cn.surveyking.server.mapper.AnswerMapper;
 import cn.surveyking.server.mapper.ProjectMapper;
-import cn.surveyking.server.service.AnswerService;
-import cn.surveyking.server.service.DeptService;
-import cn.surveyking.server.service.FileService;
-import cn.surveyking.server.service.UserService;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import cn.surveyking.server.service.*;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import org.dhatim.fastexcel.reader.ReadableWorkbook;
+import org.dhatim.fastexcel.reader.Row;
+import org.dhatim.fastexcel.reader.Sheet;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
@@ -33,11 +30,14 @@ import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -59,6 +59,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	private final UserService userService;
 
 	private final DeptService deptService;
+
+	private final ProjectService projectService;
 
 	@Override
 	public PaginationResponse<AnswerView> listAnswer(AnswerQuery query) {
@@ -172,8 +174,10 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
 	@Override
 	public AnswerView saveAnswer(AnswerRequest request, HttpServletRequest httpRequest) {
-		request.getMetaInfo().setClientInfo(parseClientInfo(httpRequest, request.getMetaInfo().getClientInfo()));
-
+		// 公开查询修改答案时不会传元数据
+		if (request.getMetaInfo() != null) {
+			request.getMetaInfo().setClientInfo(parseClientInfo(httpRequest, request.getMetaInfo().getClientInfo()));
+		}
 		if (StringUtils.hasText(request.getId())) {
 			return updateAnswer(request);
 		}
@@ -291,6 +295,38 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	@Override
 	public void restoreAnswer(AnswerRequest request) {
 		this.getBaseMapper().restoreAnswer(request.getIds());
+	}
+
+	@Override
+	@SneakyThrows
+	public AnswerUploadView upload(AnswerUploadRequest request) {
+		AnswerUploadView view = new AnswerUploadView();
+		try (InputStream is = request.getFile().getInputStream(); ReadableWorkbook wb = new ReadableWorkbook(is)) {
+			Sheet sheet = wb.getFirstSheet();
+			String name = request.getFile().getOriginalFilename().substring(0,
+					request.getFile().getOriginalFilename().lastIndexOf("."));
+			List<Answer> answers = new ArrayList<>();
+			try (Stream<Row> rows = sheet.openStream()) {
+				// 第一行作为行头
+				rows.forEach(r -> {
+					int rowNum = r.getRowNum();
+					if (rowNum == 1 && Boolean.TRUE.equals(request.getAutoSchema())) {
+						ProjectView projectView = parseRow2Schema(r, name);
+						view.setProjectId(projectView.getId());
+						view.setSchema(projectView.getSurvey());
+					}
+					else {
+						// 处理答案
+						answers.add(parseRow2Answer(view, r));
+					}
+				});
+			}
+			if (answers.size() > 0) {
+				saveBatch(answers);
+			}
+
+		}
+		return view;
 	}
 
 	private DownloadData generateSurveyAttachment(Project project, AnswerView answer) {
@@ -485,6 +521,52 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 			examInfo.setQuestionScore(evaluator.getQuestionScore());
 			answer.setExamInfo(examInfo);
 		}
+		return answer;
+	}
+
+	private ProjectView parseRow2Schema(Row row, String name) {
+		// 处理行头自动生成 schema
+		SurveySchema schema = createSurveyFromExcelRowHeader(row);
+		schema.setTitle(name);
+		ProjectRequest projectRequest = new ProjectRequest();
+		projectRequest.setSurvey(schema);
+		projectRequest.setName(name);
+		projectRequest.setMode(ProjectModeEnum.survey);
+		projectRequest.setSetting(ProjectSetting.builder().mode(ProjectModeEnum.survey).status(1).build());
+		return projectService.addProject(projectRequest);
+	}
+
+	private SurveySchema createSurveyFromExcelRowHeader(Row row) {
+		Set<String> ids = new HashSet<>();
+		SurveySchema schema = SurveySchema.builder()
+				.children(row.stream()
+						.map(cell -> SurveySchema.builder().id(NanoIdUtils.randomNanoId(4, ids))
+								.type(SurveySchema.QuestionType.FillBlank).title(cell.getText())
+								.children(Collections.singletonList(
+										SurveySchema.builder().id(NanoIdUtils.randomNanoId(4, ids)).build()))
+								.build())
+						.collect(Collectors.toList()))
+				.build();
+		return schema;
+	}
+
+	private Answer parseRow2Answer(AnswerUploadView view, Row r) {
+		Answer answer = new Answer();
+		answer.setProjectId(view.getProjectId());
+		LinkedHashMap<String, Map<String, String>> answerMap = new LinkedHashMap();
+		int i = 0;
+		for (SurveySchema questionSchema : view.getSchema().getChildren()) {
+			String cellValue = r.getCellText(i);
+			String questionId = questionSchema.getId();
+			String optionId = questionSchema.getChildren().get(0).getId();
+			if (cellValue != null) {
+				Map<String, String> optionValue = new LinkedHashMap<>();
+				optionValue.put(optionId, cellValue);
+				answerMap.put(questionId, optionValue);
+			}
+			i++;
+		}
+		answer.setAnswer(answerMap);
 		return answer;
 	}
 

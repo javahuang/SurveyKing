@@ -67,7 +67,9 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 	@Override
 	public ProjectView addProject(ProjectRequest request) {
 		Project project = projectViewMapper.fromRequest(request);
-		project.setId(generateProjectId());
+		String projectId = generateProjectId();
+		project.setId(projectId);
+		project.getSurvey().setId(projectId);
 		save(project);
 
 		ProjectPartnerRequest partnerRequest = new ProjectPartnerRequest();

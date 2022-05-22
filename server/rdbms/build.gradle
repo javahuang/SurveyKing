@@ -12,7 +12,8 @@ dependencies {
     implementation project(':shared')
     implementation 'com.baomidou:mybatis-plus-boot-starter:3.5.0'
     implementation 'org.springframework.boot:spring-boot-starter-security'
-
+    implementation 'org.dhatim:fastexcel-reader:0.12.3'
+    
 //    implementation 'com.h2database:h2:1.4.200'
     implementation 'mysql:mysql-connector-java:8.0.26'
 }

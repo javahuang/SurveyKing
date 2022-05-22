@@ -1,10 +1,7 @@
 package cn.surveyking.server.api;
 
 import cn.surveyking.server.core.common.PaginationResponse;
-import cn.surveyking.server.domain.dto.AnswerQuery;
-import cn.surveyking.server.domain.dto.AnswerRequest;
-import cn.surveyking.server.domain.dto.AnswerView;
-import cn.surveyking.server.domain.dto.DownloadQuery;
+import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.service.AnswerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -79,6 +76,12 @@ public class AnswerApi {
 	@PreAuthorize("hasAuthority('answer:export')")
 	public ResponseEntity<Resource> download(DownloadQuery query) {
 		return answerService.download(query);
+	}
+
+	@PostMapping("/upload")
+	@PreAuthorize("hasAuthority('answer:upload')")
+	public AnswerUploadView upload(AnswerUploadRequest request) {
+		return answerService.upload(request);
 	}
 
 }

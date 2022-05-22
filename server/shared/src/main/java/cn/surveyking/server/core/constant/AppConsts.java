@@ -54,6 +54,11 @@ public class AppConsts {
 	public static final Integer PROJECT_STATUS_SUSPEND = 0;
 
 	/**
+	 * 公开查询密码校验字段名称
+	 */
+	public static final String PUBLIC_QUERY_PASSWORD_FIELD_ID = "password";
+
+	/**
 	 * 存储的文件类型 TODO: 文件添加权限控制
 	 */
 	public interface StorageType {

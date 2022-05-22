@@ -14,9 +14,14 @@ public class AnswerRequest {
 
 	private String id;
 
+	/**
+	 * 公开查询 id
+	 */
+	private String queryId;
+
 	private String projectId;
 
-	private LinkedHashMap answer;
+	private LinkedHashMap<String, Object> answer;
 
 	private AnswerMetaInfo metaInfo;
 

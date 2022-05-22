@@ -48,7 +48,7 @@ public class SchemaParser {
 	public static List<SurveySchema> flatSurveySchema(SurveySchema schema) {
 		List<SurveySchema> dataTypes = new ArrayList<>();
 		if (SurveySchema.QuestionType.dataType().contains(schema.getType())) {
-			SurveySchema dataType = (SurveySchema) schema.clone();
+			SurveySchema dataType = schema.deepCopy();
 			dataType.setTitle(trimHtmlTag(schema.getTitle()));
 			dataTypes.add(dataType);
 		}

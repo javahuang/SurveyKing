@@ -39,10 +39,12 @@ public enum ErrorCode {
 	QueryDisabled(7001, "该查询链接已停止，请联系项目的发布者"),
 	/** 公开查询条件不能为空 */
 	QueryConditionNull(7002, "查询条件不能为空"),
+	/** 查询密码认证失败 */
+	QueryPasswordError(7003, "查询密码认证失败"),
 	/** 公开查询结果不存在 */
-	QueryResultNotExist(7003, "没有查询到结果，请确认所填信息正确"),
-
-	;
+	QueryResultNotExist(7010, "没有查询到结果，请确认所填信息正确"),
+	/** 公开查询答案更新失败 */
+	QueryResultUpdateError(7020, "答案更新失败"),;
 
 	/**
 	 * 前两位区分模块，后两位区分错误消息

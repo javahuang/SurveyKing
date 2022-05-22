@@ -1,7 +1,12 @@
 package cn.surveyking.server.domain.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.SerializationUtils;
 
+import java.io.Serializable;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -10,7 +15,10 @@ import java.util.List;
  * @date 2021/8/10
  */
 @Data
-public class SurveySchema implements Cloneable {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class SurveySchema implements Serializable {
 
 	private String id;
 
@@ -56,7 +64,7 @@ public class SurveySchema implements Cloneable {
 	}
 
 	@Data
-	public static class Row {
+	public static class Row implements Serializable {
 
 		private String id;
 
@@ -65,7 +73,10 @@ public class SurveySchema implements Cloneable {
 	}
 
 	@Data
-	public static class Attribute {
+	@Builder
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public static class Attribute implements Serializable {
 
 		/**
 		 * none/visible/hidden
@@ -312,7 +323,7 @@ public class SurveySchema implements Cloneable {
 	}
 
 	@Data
-	public static class DataSource {
+	public static class DataSource implements Serializable {
 
 		private String label;
 
@@ -331,15 +342,8 @@ public class SurveySchema implements Cloneable {
 
 	}
 
-	@Override
-	public Object clone() {
-		try {
-			return super.clone();
-		}
-		catch (CloneNotSupportedException e) {
-			e.printStackTrace();
-			return new SurveySchema();
-		}
+	public SurveySchema deepCopy() {
+		return SerializationUtils.clone(this);
 	}
 
 }

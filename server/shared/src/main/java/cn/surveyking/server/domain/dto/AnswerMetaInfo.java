@@ -1,12 +1,18 @@
 package cn.surveyking.server.domain.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author javahuang
  * @date 2021/8/6
  */
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class AnswerMetaInfo {
 
 	private ClientInfo clientInfo;

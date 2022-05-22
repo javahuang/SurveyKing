@@ -2,7 +2,10 @@ package cn.surveyking.server.domain.dto;
 
 import cn.surveyking.server.core.constant.AnswerFreqEnum;
 import cn.surveyking.server.core.constant.ProjectModeEnum;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -12,6 +15,9 @@ import java.util.List;
  * @date 2021/8/6
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ProjectSetting {
 
 	/**

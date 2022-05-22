@@ -24,6 +24,7 @@ package cn.surveyking.server.core.uitls;
 
 import java.security.SecureRandom;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * A class for generating unique String IDs.
@@ -75,6 +76,37 @@ public final class NanoIdUtils {
 	 */
 	public static String randomNanoId() {
 		return randomNanoId(DEFAULT_NUMBER_GENERATOR, DEFAULT_ALPHABET, DEFAULT_SIZE);
+	}
+
+	/**
+	 * Static factory to retrieve a url-friendly, pseudo randomly generated, NanoId
+	 * String.
+	 *
+	 * The generated NanoId String will have 21 symbols.
+	 *
+	 * The NanoId String is generated using a cryptographically strong pseudo random
+	 * number generator.
+	 * @param size The number of symbols in the NanoId String.
+	 * @return A randomly generated NanoId String.
+	 */
+	public static String randomNanoId(int size) {
+		return randomNanoId(DEFAULT_NUMBER_GENERATOR, DEFAULT_ALPHABET, DEFAULT_SIZE);
+	}
+
+	/**
+	 * @param size The number of symbols in the NanoId String.
+	 * @param ids A group of ids generated.
+	 * @return A randomly generated NanoId String.
+	 */
+	public static String randomNanoId(int size, Set<String> ids) {
+		String newId = randomNanoId(size);
+		if (ids.contains(newId)) {
+			return randomNanoId(size, ids);
+		}
+		else {
+			ids.add(newId);
+			return newId;
+		}
 	}
 
 	/**
