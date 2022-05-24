@@ -1,0 +1,88 @@
+---
+id: custom_field
+title: 自定义字段
+---
+
+import Image from '@theme/IdealImage';
+import myImageUrl from '../../static/img/custom_field_2.jpg';
+
+## 自定义字段 openid
+
+:::tip 什么是自定义字段？
+卷王支持在投放问卷时在链接中添加参数 openid，可用于识别答案的回答人。
+
+该参数的值将会与答案关联。后台导出答案为 Excel / 数据表格 等形式均能获取到答案以及关联自定义字段。
+:::
+
+### 如何使用
+
+在问卷投放时添加 openid 参数，例如：
+
+```bash
+https://wj.surveyking.cn/s/pDexWZ?openid=123456
+```
+
+#### 浏览答案与获取自定义字段结果
+
+- 方法1：直接再数据表格显示（如下图）
+  <Image
+  img={require('../../static/img/custom_field_1.jpg')}
+  size={400}
+  style={{width:700, height:200, border:"1px solid #dadde1", display:"block"}}
+/>
+- 方法2: 数据-导出，导出excel会显示该字段
+
+提交问卷之后，会在数据表格里面显示
+
+## 自定义链接参数预填答案
+
+:::tip 如何通过链接预填答案？
+通过在问卷链接后带一些参数，实现问卷中部分题目的预先填答，可以与自定义逻辑组合使用实现更自由的问卷。
+:::
+
+### 如何使用
+
+简单示例
+
+```bash
+https://wj.surveyking.cn/s/pDexWZ?name=dahuang&age=18
+```
+
+name 表示选项的 ID，dahuang 是预填的答案
+
+:::tip 如何获取选项的 ID？
+如下图，点开选项设置，在设置栏里面可以看到选项的 ID，可以进行修改和复制操作
+
+<Image
+  img={require('../../static/img/custom_field_2.jpg')}
+  size={400}
+   style={{width:700, height:300, border:"1px solid #dadde1"}}
+/>
+:::
+
+每个问题的答案为一个参数，多个问题间使用 `&` 连接
+
+不同题型的答案格式见下表
+
+| 题型                               | 自定义参数    | 说明           |
+| ---------------------------------- | ------------- | -------------- |
+| 单行文本题、多行文本题、横向填空题 | ?name=dahuang | 答案为文本答案 |
+| 更多题型陆续支持中...              |               |                |
+
+## 更多玩法
+
+### 通过链接参数预填答案但不显示在问卷里
+
+:::tip 使用场景
+<https://wj.surveyking.cn/s/pDexWZ?name=dahuang&age=18&num=123>
+
+上面问卷参数分别是姓名、年龄和学号，但是我不想给学号(num)显示在问卷里，只有导出或者在数据表格里面才能看到，这样可以吗？
+:::
+
+我们只需要将问题设置为默认隐藏，此时通过链接设置的答案会回填到该问题里面，但是不会对答卷者暴露，并且导出答案的时候能正常的看到该问题和答案。
+
+<Image
+  img={require('../../static/img/custom_field_3.jpg')}
+  size={400}
+  style={{width:600, height:400, border:"1px solid #dadde1"}}
+/>

@@ -45,6 +45,7 @@ module.exports = {
           ],
         },
         "guides/public_query",
+        "guides/custom_field",
       ],
     },
     "faq",
