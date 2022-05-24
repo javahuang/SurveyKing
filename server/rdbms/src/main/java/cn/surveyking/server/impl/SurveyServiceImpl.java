@@ -152,6 +152,7 @@ public class SurveyServiceImpl implements SurveyService {
 		return setting;
 	}
 
+
 	private void validateExamSetting(ProjectView project) {
 		ProjectSetting.ExamSetting examSetting = project.getSetting().getExamSetting();
 		if (examSetting == null || !ProjectModeEnum.exam.equals(project.getMode())) {

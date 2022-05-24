@@ -3,13 +3,14 @@ package cn.surveyking.server.domain.dto;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * @author javahuang
  * @date 2021/9/17
  */
 @Data
-public class DownloadQuery {
+public class DownloadQuery extends PageQuery {
 
 	/**
 	 * 问卷 id
@@ -26,6 +27,11 @@ public class DownloadQuery {
 	 * 导出附件命名表达式
 	 */
 	private String nameExp;
+
+	/**
+	 * 答案ids
+	 */
+	private List<String> ids;
 
 	@NotNull
 	private DownloadType type;

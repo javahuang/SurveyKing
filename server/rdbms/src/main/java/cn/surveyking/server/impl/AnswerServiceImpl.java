@@ -212,12 +212,18 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	}
 
 	@Override
-	public DownloadData downloadSurvey(String id) {
+	public DownloadData downloadSurvey(String id, Integer current, Integer pageSize, List<String> ids) {
 		Project project = projectMapper.selectById(id);
 
 		AnswerQuery query = new AnswerQuery();
 		query.setProjectId(id);
-		query.setPageSize(Integer.MAX_VALUE);
+		query.setIds(ids);
+		if (current != null && pageSize != null) {
+			query.setCurrent(current);
+			query.setPageSize(pageSize);
+		}else{
+			query.setPageSize(Integer.MAX_VALUE);
+		}
 		List<AnswerView> answerViews = listAnswer(query).getList();
 
 		DownloadData download = new DownloadData();
@@ -261,8 +267,14 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		Project project = projectMapper.selectById(query.getProjectId());
 		DownloadData downloadData = new DownloadData();
 		AnswerQuery answerQuery = new AnswerQuery();
+		answerQuery.setIds(query.getIds());
 		answerQuery.setProjectId(query.getProjectId());
-		answerQuery.setPageSize(Integer.MAX_VALUE);
+		if (query.getCurrent() != 0 && query.getPageSize() != 0) {
+			answerQuery.setCurrent(query.getCurrent());
+			answerQuery.setPageSize(query.getPageSize());
+		}else{
+			answerQuery.setPageSize(Integer.MAX_VALUE);
+		}
 		// 下载某个问卷答案的附件
 		if (query.getAnswerId() != null) {
 			answerQuery.setId(query.getAnswerId());

@@ -35,7 +35,7 @@ public interface AnswerService {
 
 	DownloadData downloadAttachment(DownloadQuery query);
 
-	DownloadData downloadSurvey(String shortId);
+	DownloadData downloadSurvey(String shortId, Integer current, Integer pageSize,List<String> ids);
 
 	default AnswerMetaInfo.ClientInfo parseClientInfo(HttpServletRequest request,
 			AnswerMetaInfo.ClientInfo clientInfo) {
@@ -56,7 +56,7 @@ public interface AnswerService {
 		DownloadData download;
 		// 下载问卷答案
 		if (query.getType() == DownloadQuery.DownloadType.answer) {
-			download = downloadSurvey(query.getProjectId());
+			download = downloadSurvey(query.getProjectId(), query.getCurrent(), query.getPageSize(),query.getIds());
 		}
 		// 下载附件
 		else if (query.getType() == DownloadQuery.DownloadType.answerAttachment
