@@ -61,7 +61,7 @@ public class AppConsts {
 	/**
 	 * 存储的文件类型 TODO: 文件添加权限控制
 	 */
-	public interface StorageType {
+	public interface FileType {
 
 		/** 背景图片 */
 		int BACKGROUND_IMAGE = 1;
@@ -77,6 +77,9 @@ public class AppConsts {
 
 		/** 问题模板预览图 */
 		int TEMPLATE_PREVIEW_IMAGE = 5;
+
+		/** 二维码图片 */
+		int QR_CODE = 6;
 
 	}
 

@@ -17,6 +17,6 @@ public class UploadFileRequest {
 
 	private MultipartFile file;
 
-	private int storageType;
+	private int fileType;
 
 }

@@ -61,7 +61,6 @@ public class SurveyApi {
 
 	@PostMapping("/upload")
 	public FileView upload(UploadFileRequest request) {
-		request.setStorageType(AppConsts.StorageType.ANSWER_ATTACHMENT);
 		return fileService.upload(request);
 	}
 

@@ -27,11 +27,11 @@ public class ProjectSetting {
 
 	private ProjectModeEnum mode;
 
-	private AnswerSetting answerSetting = new AnswerSetting();
+	private final AnswerSetting answerSetting = new AnswerSetting();
 
-	private SubmittedSetting submittedSetting = new SubmittedSetting();
+	private final SubmittedSetting submittedSetting = new SubmittedSetting();
 
-	private ExamSetting examSetting = new ExamSetting();
+	private final ExamSetting examSetting = new ExamSetting();
 
 	@Data
 	public static class AnswerSetting {

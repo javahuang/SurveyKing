@@ -28,4 +28,9 @@ public class FileView {
 	@JsonIgnore
 	private String filePath;
 
+	/**
+	 * 文件内容
+	 */
+	private String content;
+
 }

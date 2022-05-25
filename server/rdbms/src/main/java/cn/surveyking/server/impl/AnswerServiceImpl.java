@@ -221,7 +221,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		if (current != null && pageSize != null) {
 			query.setCurrent(current);
 			query.setPageSize(pageSize);
-		}else{
+		}
+		else {
 			query.setPageSize(Integer.MAX_VALUE);
 		}
 		List<AnswerView> answerViews = listAnswer(query).getList();
@@ -272,7 +273,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		if (query.getCurrent() != 0 && query.getPageSize() != 0) {
 			answerQuery.setCurrent(query.getCurrent());
 			answerQuery.setPageSize(query.getPageSize());
-		}else{
+		}
+		else {
 			answerQuery.setPageSize(Integer.MAX_VALUE);
 		}
 		// 下载某个问卷答案的附件

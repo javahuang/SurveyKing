@@ -2,6 +2,7 @@ package cn.surveyking.server.impl;
 
 import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.uitls.HTTPUtils;
+import cn.surveyking.server.core.uitls.QrCodeReader;
 import cn.surveyking.server.domain.dto.FileQuery;
 import cn.surveyking.server.domain.dto.FileView;
 import cn.surveyking.server.domain.dto.UploadFileRequest;
@@ -57,7 +58,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 		MultipartFile uploadFile = request.getFile();
 		String filePath = seq.incrementAndGet() + "_" + uploadFile.getOriginalFilename();
 		File file = new File();
-		file.setStorageType(request.getStorageType());
+		file.setStorageType(request.getFileType());
 		file.setOriginalName(uploadFile.getOriginalFilename());
 		file.setFileName(filePath);
 		if (request.getBasePath() != null) {
@@ -74,6 +75,10 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 
 		save(file);
 		FileView fileView = fileViewMapper.toFileView(file);
+
+		if (AppConsts.FileType.QR_CODE == request.getFileType()) {
+			fileView.setContent(QrCodeReader.readQRCode(uploadFile.getInputStream()));
+		}
 		return fileView;
 	}
 
