@@ -2,7 +2,7 @@ package cn.surveyking.server.impl;
 
 import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.uitls.HTTPUtils;
-import cn.surveyking.server.core.uitls.QrCodeReader;
+import cn.surveyking.server.core.uitls.BarcodeReader;
 import cn.surveyking.server.domain.dto.FileQuery;
 import cn.surveyking.server.domain.dto.FileView;
 import cn.surveyking.server.domain.dto.UploadFileRequest;
@@ -76,8 +76,8 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 		save(file);
 		FileView fileView = fileViewMapper.toFileView(file);
 
-		if (AppConsts.FileType.QR_CODE == request.getFileType()) {
-			fileView.setContent(QrCodeReader.readQRCode(uploadFile.getInputStream()));
+		if (AppConsts.FileType.BARCODE == request.getFileType()) {
+			fileView.setContent(BarcodeReader.readBarcode(uploadFile.getInputStream()));
 		}
 		return fileView;
 	}

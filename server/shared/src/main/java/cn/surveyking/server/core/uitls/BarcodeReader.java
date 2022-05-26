@@ -7,7 +7,6 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import lombok.SneakyThrows;
 
 import javax.imageio.ImageIO;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,14 +17,14 @@ import java.util.Map;
  * @author javahuang
  * @date 2022/5/25
  */
-public class QrCodeReader {
+public class BarcodeReader {
 
 	@SneakyThrows
-	public static String readQRCode(InputStream inputStream) {
+	public static String readBarcode(InputStream inputStream) {
 		Map<EncodeHintType, ErrorCorrectionLevel> hintMap = new HashMap<EncodeHintType, ErrorCorrectionLevel>();
 		hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
 		String charset = "UTF-8"; // or "ISO-8859-1"
-		return readQRCode(inputStream, charset, hintMap);
+		return readBarcode(inputStream, charset, hintMap);
 	}
 
 	/**
@@ -37,7 +36,7 @@ public class QrCodeReader {
 	 * @throws IOException
 	 * @throws NotFoundException
 	 */
-	public static String readQRCode(InputStream inputStream, String charset, Map hintMap)
+	public static String readBarcode(InputStream inputStream, String charset, Map hintMap)
 			throws FileNotFoundException, IOException, NotFoundException {
 		BinaryBitmap binaryBitmap = new BinaryBitmap(
 				new HybridBinarizer(new BufferedImageLuminanceSource(ImageIO.read(inputStream))));
