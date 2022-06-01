@@ -16,6 +16,11 @@ public class ErrorCodeException extends RuntimeException {
 		this.errorCode = errorCode;
 	}
 
+	public ErrorCodeException(ErrorCode errorCode, Throwable cause) {
+		super(cause);
+		this.errorCode = errorCode;
+	}
+
 	public ErrorCode getErrorCode() {
 		return errorCode;
 	}

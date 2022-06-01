@@ -23,15 +23,19 @@ public class ProjectSetting {
 	/**
 	 * 1开启 0停止
 	 */
+	@Builder.Default
 	private Integer status = 0;
 
 	private ProjectModeEnum mode;
 
-	private final AnswerSetting answerSetting = new AnswerSetting();
+	@Builder.Default
+	AnswerSetting answerSetting = new AnswerSetting();
 
-	private final SubmittedSetting submittedSetting = new SubmittedSetting();
+	@Builder.Default
+	SubmittedSetting submittedSetting = new SubmittedSetting();
 
-	private final ExamSetting examSetting = new ExamSetting();
+	@Builder.Default
+	ExamSetting examSetting = new ExamSetting();
 
 	@Data
 	public static class AnswerSetting {

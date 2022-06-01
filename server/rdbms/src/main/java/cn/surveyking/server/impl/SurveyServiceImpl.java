@@ -515,20 +515,19 @@ public class SurveyServiceImpl implements SurveyService {
 		if (conditionSchemaList.size() == 0 && request.getQuery().size() == 0) {
 			throw new ErrorCodeException(ErrorCode.QueryResultNotExist);
 		}
-		// 构建查询条件，找到结果
-		List<Answer> answer = ((AnswerServiceImpl) answerService).list(Wrappers.<Answer>lambdaQuery()
-				.eq(Answer::getProjectId, projectView.getId()).and(i -> {
-					// 通过查询表单构建查询参数
-					conditionSchemaList.forEach(conditionSchema -> i.like(Answer::getAnswer,
-							buildLikeQueryConditionOfQuestion(conditionSchema, request.getAnswer())));
-					// 通过 url 参数构建查询参数
-					if (request.getQuery() != null) {
-						request.getQuery().entrySet().forEach(optionId2Value -> {
-							String optionId = optionId2Value.getKey();
-							String optionValue = optionId2Value.getValue();
-							i.like(Answer::getAnswer, String.format("{\"%s\":\"%s\"}", optionId, optionValue));
-						});
-					}
+		SchemaParser.TreeNode treeNode = SchemaParser.SurveySchema2TreeNode(projectView.getSurvey());
+
+		// 通过 url 参数构建查询表单
+		LinkedHashMap<String, Map> queryFormValues = buildFormValuesFromQueryParrameter(treeNode, request.getQuery());
+		// 将查询表单和url参数构建的查询表单合并
+		queryFormValues.putAll(request.getAnswer());
+
+		List<Answer> answer = ((AnswerServiceImpl) answerService)
+				.list(Wrappers.<Answer>lambdaQuery().eq(Answer::getProjectId, projectView.getId()).and(i -> {
+					queryFormValues.forEach((qId, qValueObj) -> {
+						i.like(Answer::getAnswer,
+								buildLikeQueryConditionOfQuestion(treeNode.getTreeNodeMap().get(qId), qValueObj));
+					});
 				}));
 		if (answer.size() == 0) {
 			throw new ErrorCodeException(ErrorCode.QueryResultNotExist);
@@ -538,22 +537,40 @@ public class SurveyServiceImpl implements SurveyService {
 	}
 
 	/**
-	 * 手动构建like 查询
-	 * @param schema
-	 * @param queryFormValues
+	 * 通过查询参数里面构建 form values
+	 * @param query
+	 * @return
 	 */
-	private String buildLikeQueryConditionOfQuestion(SurveySchema schema, LinkedHashMap queryFormValues) {
-		String qId = schema.getId();
-		String oId = schema.getChildren().get(0).getId();
-		if (queryFormValues.get(qId) == null || ((Map) queryFormValues.get(qId)).get(oId) == null) {
-			throw new ErrorCodeException(ErrorCode.QueryConditionNull);
-		}
-		Object optionValue = ((Map) queryFormValues.get(qId)).get(oId);
+	private LinkedHashMap buildFormValuesFromQueryParrameter(SchemaParser.TreeNode surveySchemaTreeNode,
+			Map<String, String> query) {
+		LinkedHashMap<String, Map> formValues = new LinkedHashMap<>();
+		query.forEach((id, value) -> {
+			// 默认为选项
+			SchemaParser.TreeNode findNode = surveySchemaTreeNode.getTreeNodeMap().get(id);
+			String questionId = findNode.getParent().getData().getId();
+			Map questionValueMap = formValues.computeIfAbsent(questionId, k -> new HashMap<>());
+			questionValueMap.put(id, value);
+		});
+		return formValues;
+	}
+
+	/**
+	 * 通过问题答案手动构建like 查询
+	 * @param qNode 当前问题的 schema node 节点
+	 * @param qValueObj 当前问题的答案
+	 * @return
+	 */
+	private String buildLikeQueryConditionOfQuestion(SchemaParser.TreeNode qNode, Map qValueObj) {
+		SurveySchema optionSchema = qNode.getData().getChildren().get(0);
+		String optionId = optionSchema.getId();
+		Object optionValue = qValueObj.get(optionId);
 		String value = optionValue.toString();
-		if (optionValue instanceof String) {
+		// 选项非数值类型
+		if (optionSchema.getAttribute() == null
+				|| !SurveySchema.DataType.number.equals(optionSchema.getAttribute().getDataType())) {
 			value = "\"" + value + "\"";
 		}
-		return String.format("{\"%s\":%s}", oId, value);
+		return String.format("{\"%s\":%s}", optionId, value);
 	}
 
 	/**

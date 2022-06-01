@@ -2,12 +2,11 @@ package cn.surveyking.server.impl;
 
 import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.constant.TagCategoryEnum;
+import cn.surveyking.server.core.uitls.HTTPUtils;
+import cn.surveyking.server.core.uitls.RepoTemplateExcelParseHelper;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.domain.mapper.RepoViewMapper;
-import cn.surveyking.server.domain.model.Repo;
-import cn.surveyking.server.domain.model.RepoTemplate;
-import cn.surveyking.server.domain.model.Tag;
-import cn.surveyking.server.domain.model.Template;
+import cn.surveyking.server.domain.model.*;
 import cn.surveyking.server.mapper.RepoMapper;
 import cn.surveyking.server.service.BaseService;
 import cn.surveyking.server.service.RepoService;
@@ -15,13 +14,25 @@ import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import org.dhatim.fastexcel.reader.ReadableWorkbook;
+import org.dhatim.fastexcel.reader.Row;
+import org.dhatim.fastexcel.reader.Sheet;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.baomidou.mybatisplus.core.toolkit.StringUtils.isNotBlank;
 
@@ -45,7 +56,7 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 	@Override
 	public PaginationResponse<RepoView> listRepo(RepoQuery query) {
 		Page<Repo> page = pageByQuery(query, Wrappers.<Repo>lambdaQuery()
-				.eq(isNotBlank(query.getName()), Repo::getName, query.getName()).orderByAsc(Repo::getCreateAt));
+				.like(isNotBlank(query.getName()), Repo::getName, query.getName()).orderByAsc(Repo::getCreateAt));
 		PaginationResponse<RepoView> result = new PaginationResponse<>(page.getTotal(),
 				repoViewMapper.toView(page.getRecords()));
 		result.getList().forEach(repoView -> {
@@ -190,6 +201,26 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 			});
 		});
 		return templates.stream().map(x -> x.getTemplate()).collect(Collectors.toList());
+	}
+
+	@Override
+	public ResponseEntity<Resource> downloadTemplate() {
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, HTTPUtils.getContentDispositionValue("卷王题库导入模板.xlsx"))
+				.contentType(MediaType.parseMediaType("application/vnd.ms-excel"))
+				.body(new ClassPathResource("template/卷王题库导入模板.xlsx"));
+	}
+
+	@Override
+	@SneakyThrows
+	public void importFromTemplate(RepoTemplateRequest request) {
+		request.setTemplates(parseExcelToTemplate(request.getFile()));
+		batchAddRepoTemplate(request);
+	}
+
+	@SneakyThrows
+	private List<TemplateRequest> parseExcelToTemplate(MultipartFile file) {
+		return new RepoTemplateExcelParseHelper(file).parse();
 	}
 
 }

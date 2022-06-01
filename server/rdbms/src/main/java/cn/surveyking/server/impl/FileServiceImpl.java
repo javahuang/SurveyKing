@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
@@ -68,8 +69,10 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 
 		if (isSupportImage(uploadFile.getOriginalFilename())) {
 			String thumbImagePath = storageService.getThumbImageFilePath(filePath);
-			storageService.uploadFile(storageService.generateThumbImage(uploadFile.getInputStream()), thumbImagePath);
-			file.setThumbFilePath(thumbImagePath);
+			try (InputStream inputStream = uploadFile.getInputStream()) {
+				storageService.uploadFile(storageService.generateThumbImage(inputStream), thumbImagePath);
+				file.setThumbFilePath(thumbImagePath);
+			}
 		}
 		storageService.uploadFile(uploadFile.getInputStream(), filePath);
 

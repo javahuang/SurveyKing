@@ -87,7 +87,7 @@ public class SurveySchema implements Serializable {
 
 		private Integer width;
 
-		private String dataType;
+		private DataType dataType;
 
 		private Boolean required;
 
@@ -280,6 +280,18 @@ public class SurveySchema implements Serializable {
 		 * 答案解析
 		 */
 		private String examAnalysis;
+
+	}
+
+	/**
+	 * 文本数据类型
+	 */
+	public enum DataType {
+
+		/**
+		 * 不限、数字、日期、日期时间、时间、邮箱、手机号、身份证号、下拉单选、中文、字母
+		 */
+		text, number, date, dateTime, time, email, mobile, idCard, select, chinese, alphabet,
 
 	}
 

@@ -28,6 +28,8 @@ public enum ErrorCode {
 	FileNotExists(4040, "附件不存在"),
 	/** 文件上传失败 */
 	FileUploadError(4041, "文件上传失败"),
+	/** 文件解析失败 */
+	FileParseError(4042, "文件解析失败"),
 	/** 考试未开始 */
 	ExamUnStarted(6000, "考试未开始"),
 	/** 考试已结束 */
@@ -41,6 +43,8 @@ public enum ErrorCode {
 	QueryConditionNull(7002, "查询条件不能为空"),
 	/** 查询密码认证失败 */
 	QueryPasswordError(7003, "查询密码认证失败"),
+	/** 查询条件不存在 */
+	QueryConditionNotExist(7004, "查询密码认证失败"),
 	/** 公开查询结果不存在 */
 	QueryResultNotExist(7010, "没有查询到结果，请确认所填信息正确"),
 	/** 公开查询答案更新失败 */

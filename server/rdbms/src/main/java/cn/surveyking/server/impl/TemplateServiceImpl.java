@@ -54,7 +54,9 @@ public class TemplateServiceImpl extends BaseService<TemplateMapper, Template> i
 				.exists(query.getTag().size() > 0,
 						String.format("select 1 from t_tag t where t.entity_id = t_template.id and t.name in (%s)",
 								query.getTag().stream().map(x -> "'" + x + "'").collect(Collectors.joining(","))))
-				.eq(query.getShared() == 0, Template::getCreateBy, SecurityContextUtils.getUserId())
+				.eq(query.getShared() != null, Template::getShared, query.getShared())
+				.eq(query.getShared() != null && query.getShared() == 0, Template::getCreateBy,
+						SecurityContextUtils.getUserId())
 				.orderByAsc(Template::getPriority));
 		return new PaginationResponse<>(templatePage.getTotal(),
 				templatePage.getRecords().stream().map(x -> templateViewMapper.toView(x)).collect(Collectors.toList()));

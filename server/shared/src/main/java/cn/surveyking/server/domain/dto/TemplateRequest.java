@@ -1,13 +1,19 @@
 package cn.surveyking.server.domain.dto;
 
 import cn.surveyking.server.core.constant.ProjectModeEnum;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author javahuang
  * @date 2021/10/6
  */
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class TemplateRequest {
 
 	private String id;
@@ -56,5 +62,7 @@ public class TemplateRequest {
 	 * 与其他用户共享
 	 */
 	private Integer shared;
+
+	private String repoId;
 
 }

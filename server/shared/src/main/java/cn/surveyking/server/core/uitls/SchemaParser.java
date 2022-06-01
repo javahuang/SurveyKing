@@ -46,15 +46,26 @@ public class SchemaParser {
 	 * @return 有数据
 	 */
 	public static List<SurveySchema> flatSurveySchema(SurveySchema schema) {
+		return flatSurveySchemaWitchOption(schema, false);
+	}
+
+	/**
+	 * @param schema
+	 * @param withOption 是否解析选项
+	 * @return 有数据
+	 */
+	public static List<SurveySchema> flatSurveySchemaWitchOption(SurveySchema schema, boolean withOption) {
 		List<SurveySchema> dataTypes = new ArrayList<>();
-		if (SurveySchema.QuestionType.dataType().contains(schema.getType())) {
+		// 选项 schema 额类型为 Option 或者为空
+		if (SurveySchema.QuestionType.dataType().contains(schema.getType()) || (withOption
+				&& (SurveySchema.QuestionType.Option.equals(schema.getType()) || schema.getType() == null))) {
 			SurveySchema dataType = schema.deepCopy();
 			dataType.setTitle(trimHtmlTag(schema.getTitle()));
 			dataTypes.add(dataType);
 		}
 		if (schema.getChildren() != null) {
 			schema.getChildren().forEach(child -> {
-				dataTypes.addAll(flatSurveySchema(child));
+				dataTypes.addAll(flatSurveySchemaWitchOption(child, withOption));
 			});
 		}
 
@@ -124,18 +135,23 @@ public class SchemaParser {
 			}
 			else if (!questionType.name().startsWith("Matrix")) {
 				// 需要将数字类型转换成字符串
-				List<String> result = new ArrayList<>();
-				((Map<?, ?>) valueObj).forEach((optionId, v) -> {
-					if (v != null && v instanceof Boolean) {
+				// 通过 valueObj 遍历可能会导致选项的顺序乱掉，所以得按照 children schema 的顺序来构建答案
+				rowData.add(schemaType.getChildren().stream().map(optionSchema -> {
+					Object optionValue = ((Map<?, ?>) valueObj).get(optionSchema.getId());
+					if (optionValue == null) {
+						return null;
+					}
+					if (optionValue != null && optionValue instanceof Boolean) {
 						// 单选、多选题，选中的话，答案会是 true，需要转换成标题
-						result.add(trimHtmlTag(schemaType.getChildren().stream().filter(x -> x.getId().equals(optionId))
-								.findFirst().get().getTitle()));
+						return trimHtmlTag(optionSchema.getTitle());
 					}
-					else {
-						result.add(v + "");
+					// 如果是单选填空，需要同时显示选项标题和答案
+					if (schemaType.getType().equals(SurveySchema.QuestionType.Radio)
+							|| schemaType.getType().equals(SurveySchema.QuestionType.Checkbox)) {
+						return String.format("%s(%s)", trimHtmlTag(optionSchema.getTitle()), optionValue);
 					}
-				});
-				rowData.add(String.join(",", result));
+					return optionValue.toString();
+				}).filter(x -> x != null).collect(Collectors.joining(",")));
 			}
 			else if (questionType == SurveySchema.QuestionType.MatrixAuto) {
 				List<String> result = new ArrayList<>();
@@ -199,12 +215,17 @@ public class SchemaParser {
 		Format formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		rowData.add(formatter.format(answerInfo.getCreateAt()));
 		rowData.add(parseHumanReadableDuration(answerInfo));
-		rowData.add(answerInfo.getMetaInfo().getClientInfo().getDeviceType());
-		rowData.add(answerInfo.getMetaInfo().getClientInfo().getPlatform());
-		rowData.add(answerInfo.getMetaInfo().getClientInfo().getBrowser());
-		rowData.add(answerInfo.getMetaInfo().getClientInfo().getRegion());
-		rowData.add(answerInfo.getMetaInfo().getClientInfo().getRemoteIp());
-		rowData.add(answerInfo.getId());
+		if (answerInfo.getMetaInfo() == null || answerInfo.getMetaInfo().getClientInfo() == null) {
+			rowData.addAll(Arrays.asList("", "", "", "", ""));
+		}
+		else {
+			rowData.add(answerInfo.getMetaInfo().getClientInfo().getDeviceType());
+			rowData.add(answerInfo.getMetaInfo().getClientInfo().getPlatform());
+			rowData.add(answerInfo.getMetaInfo().getClientInfo().getBrowser());
+			rowData.add(answerInfo.getMetaInfo().getClientInfo().getRegion());
+			rowData.add(answerInfo.getMetaInfo().getClientInfo().getRemoteIp());
+			rowData.add(answerInfo.getId());
+		}
 
 		avoidFormulaInjection(rowData);
 		return rowData;
@@ -222,13 +243,16 @@ public class SchemaParser {
 	}
 
 	private static String parseHumanReadableDuration(AnswerView answerInfo) {
+		String result = "";
+		if (answerInfo.getMetaInfo() == null || answerInfo.getMetaInfo().getAnswerInfo() == null) {
+			return result;
+		}
 		long duration = answerInfo.getMetaInfo().getAnswerInfo().getEndTime()
 				- answerInfo.getMetaInfo().getAnswerInfo().getStartTime();
 		double d = Math.floor(duration / (3600000 * 24));
 		double h = Math.floor((duration / 3600000) % 24);
 		double m = Math.floor((duration / 60000) % 60);
 		double s = Math.floor((duration / 1000) % 60);
-		String result = "";
 		if (d > 0) {
 			result += d + "天";
 		}
@@ -279,6 +303,51 @@ public class SchemaParser {
 			return false;
 		});
 		schema.getChildren().forEach(child -> updateSchemaByPermission(fieldPermission, child));
+	}
+
+	public static TreeNode SurveySchema2TreeNode(SurveySchema surveySchema) {
+		return new TreeNode(surveySchema, null);
+	}
+
+	public static class TreeNode {
+
+		SurveySchema data;
+
+		TreeNode parent;
+
+		TreeNode root;
+
+		Map<String, TreeNode> treeNodeMap = new LinkedHashMap<>();
+
+		public TreeNode(SurveySchema data, TreeNode parent) {
+			this.data = data;
+			if (parent == null) {
+				this.root = this;
+			}
+			else {
+				this.root = parent.root;
+				this.parent = parent;
+			}
+			this.root.getTreeNodeMap().put(data.getId(), this);
+			if (data.getChildren() != null) {
+				data.getChildren().forEach(child -> {
+					new TreeNode(child, this);
+				});
+			}
+		}
+
+		public Map<String, TreeNode> getTreeNodeMap() {
+			return treeNodeMap;
+		}
+
+		public TreeNode getParent() {
+			return parent;
+		}
+
+		public SurveySchema getData() {
+			return data;
+		}
+
 	}
 
 }

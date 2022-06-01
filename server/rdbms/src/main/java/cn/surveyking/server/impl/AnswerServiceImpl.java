@@ -212,20 +212,20 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	}
 
 	@Override
-	public DownloadData downloadSurvey(String id, Integer current, Integer pageSize, List<String> ids) {
-		Project project = projectMapper.selectById(id);
+	public DownloadData downloadSurvey(DownloadQuery query) {
+		Project project = projectMapper.selectById(query.getProjectId());
 
-		AnswerQuery query = new AnswerQuery();
-		query.setProjectId(id);
-		query.setIds(ids);
-		if (current != null && pageSize != null) {
-			query.setCurrent(current);
-			query.setPageSize(pageSize);
+		AnswerQuery answerQuery = new AnswerQuery();
+		answerQuery.setProjectId(query.getProjectId());
+		answerQuery.setIds(query.getIds());
+		if (query.getPageSize() != 0) {
+			answerQuery.setCurrent(query.getCurrent());
+			answerQuery.setPageSize(query.getPageSize());
 		}
 		else {
-			query.setPageSize(Integer.MAX_VALUE);
+			answerQuery.setPageSize(Integer.MAX_VALUE);
 		}
-		List<AnswerView> answerViews = listAnswer(query).getList();
+		List<AnswerView> answerViews = listAnswer(answerQuery).getList();
 
 		DownloadData download = new DownloadData();
 		download.setFileName(project.getName() + ".xlsx");

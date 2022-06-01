@@ -25,7 +25,7 @@ public class TemplateQuery extends PageQuery {
 	/**
 	 * 默认查询的是公共库
 	 */
-	private Integer shared = 1;
+	private Integer shared;
 
 	private List<String> categories = new ArrayList<>();
 
