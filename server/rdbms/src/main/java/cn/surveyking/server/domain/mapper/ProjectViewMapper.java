@@ -32,8 +32,10 @@ public interface ProjectViewMapper {
 
 	@AfterMapping
 	default void calledWithSourceAndTargetType(ProjectView source, @MappingTarget PublicProjectView view) {
-		// 去掉 schema 里面的答案信息
-		if (ProjectModeEnum.exam.name().equals(source.getMode())) {
+		// 非练习模式需要去掉 schema 里面的答案信息
+		if (ProjectModeEnum.exam.equals(source.getMode())
+				&& !((source.getSetting() != null && source.getSetting().getExamSetting() != null
+						&& Boolean.TRUE.equals(source.getSetting().getExamSetting().getExerciseMode())))) {
 			trimExamAnswerInfo(view.getSurvey());
 		}
 	}
