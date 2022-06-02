@@ -1,6 +1,7 @@
 package cn.surveyking.server.domain.dto;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.List;
  * @date 2021/9/17
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class DownloadQuery extends PageQuery {
 
 	/**
