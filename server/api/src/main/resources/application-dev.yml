@@ -9,6 +9,10 @@ server:
 file-storage:
   local:
     root-path: ./files
+    # set the file path
+    pathStrategy: byId
+    dateFormat: yyyyMM/dd
+    nameStrategy: seqAndOriginalName
 custom-cache:
   entries:
     projectCache: 1d
