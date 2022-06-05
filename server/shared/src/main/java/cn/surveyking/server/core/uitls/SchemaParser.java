@@ -112,6 +112,9 @@ public class SchemaParser {
 							.orElse(new SurveySchema.DataSource("", "", new ArrayList<>()));
 					result.add(dataSource.getLabel());
 					dataSources = dataSource.getChildren();
+					if (dataSources == null) {
+						break;
+					}
 				}
 				rowData.add(String.join(",", result));
 			}
