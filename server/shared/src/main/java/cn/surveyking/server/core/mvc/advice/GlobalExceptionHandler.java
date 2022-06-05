@@ -80,8 +80,8 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ApiResponse<String>> handleErrorCodeException(HttpServletRequest request,
 			ErrorCodeException ex) {
 		ErrorCode errorCode = ex.getErrorCode();
-		log.error("handleErrorCodeError {} errorCode={}, errorMessage={}", request.getRequestURI(), errorCode.code,
-				errorCode.message);
+		log.error(String.format("handleErrorCodeError %s errorCode=%d, errorMessage=%s", request.getRequestURI(),
+				errorCode.code, errorCode.message), ex);
 		return ResponseEntity.ok().body(new ApiResponse<>(errorCode.code, errorCode.message));
 	}
 

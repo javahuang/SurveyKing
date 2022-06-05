@@ -72,11 +72,6 @@ public class RepoApi {
 		return repoService.pickQuestionFromRepo(repos);
 	}
 
-	@GetMapping("/downloadTemplate")
-	public ResponseEntity<Resource> downloadTemplate() {
-		return repoService.downloadTemplate();
-	}
-
 	@PostMapping("/import")
 	public void importFromTemplate(RepoTemplateRequest request) {
 		repoService.importFromTemplate(request);

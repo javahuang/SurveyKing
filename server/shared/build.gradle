@@ -23,6 +23,7 @@ dependencies {
     implementation 'com.google.zxing:javase:3.5.0'
     implementation 'net.coobird:thumbnailator:0.4.14'
     implementation 'com.github.ben-manes.caffeine:caffeine:2.9.2'
+    implementation 'com.belerweb:pinyin4j:2.5.0'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'

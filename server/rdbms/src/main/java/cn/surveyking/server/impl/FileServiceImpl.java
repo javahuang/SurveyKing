@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -103,11 +104,14 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 		String fileType = originalName.substring(idx);
 		if (LocalStorageNameStrategyEnum.SEQ_ADN_ORIGINAL_NAME.getStrategy().equals(strategy)) {
 			return seq.incrementAndGet() + "_" + originalName;
-		} else if (LocalStorageNameStrategyEnum.ORIGINAL_NAME_AND_SEQ.getStrategy().equals(strategy)) {
+		}
+		else if (LocalStorageNameStrategyEnum.ORIGINAL_NAME_AND_SEQ.getStrategy().equals(strategy)) {
 			return originalName.substring(0, idx) + "_" + seq.incrementAndGet() + fileType;
-		} else if (LocalStorageNameStrategyEnum.SEQ.getStrategy().equals(strategy)) {
+		}
+		else if (LocalStorageNameStrategyEnum.SEQ.getStrategy().equals(strategy)) {
 			return seq.incrementAndGet() + fileType;
-		} else {
+		}
+		else {
 			return UUID.randomUUID().toString().replace("-", "") + fileType;
 		}
 	}
@@ -122,14 +126,16 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 		String strategy = storageProperties.getLocal().getPathStrategy();
 		if (LocalStoragePathStrategyEnum.BY_ID.getStrategy().equals(strategy) && request.getBasePath() != null) {
 			return request.getBasePath() + java.io.File.separator + fileName;
-		} else if (LocalStoragePathStrategyEnum.BY_DATE.getStrategy().equals(strategy)) {
+		}
+		else if (LocalStoragePathStrategyEnum.BY_DATE.getStrategy().equals(strategy)) {
 			String dateFormat = storageProperties.getLocal().getDateFormat();
 			DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(dateFormat);
 			LocalDate now = LocalDate.now();
-			dateFormat = now.format(dateTimeFormatter).replace("/", java.io.File.separator)
-					.replace("\\", java.io.File.separator);
+			dateFormat = now.format(dateTimeFormatter).replace("/", java.io.File.separator).replace("\\",
+					java.io.File.separator);
 			return dateFormat + java.io.File.separator + fileName;
-		} else {
+		}
+		else {
 			return fileName;
 		}
 	}
@@ -167,6 +173,15 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 								: HTTPUtils.getContentDispositionValue(file.getOriginalName()))
 				.body(new ByteArrayResource(storageService
 						.download(query.getId().contains("@") ? file.getThumbFilePath() : file.getFilePath())));
+	}
+
+	@Override
+	public ResponseEntity<Resource> downloadTemplate(String name) {
+		String templateName = name + ".xlsx";
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, HTTPUtils.getContentDispositionValue(templateName))
+				.contentType(MediaType.parseMediaType("application/vnd.ms-excel"))
+				.body(new ClassPathResource("template/" + templateName));
 	}
 
 }

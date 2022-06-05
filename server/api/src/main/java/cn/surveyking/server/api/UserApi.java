@@ -102,4 +102,13 @@ public class UserApi {
 		return userService.getRegisterRoles();
 	}
 
+	/**
+	 * 导入用户
+	 * @param request
+	 */
+	@PostMapping("/users/import")
+	public void importUser(UserRequest request) {
+		userService.importUser(request);
+	}
+
 }

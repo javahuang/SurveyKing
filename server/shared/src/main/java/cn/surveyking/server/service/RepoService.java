@@ -63,8 +63,6 @@ public interface RepoService {
 	 */
 	List<SurveySchema> pickQuestionFromRepo(List<PickRepoQuestionRequest> repos);
 
-	ResponseEntity<Resource> downloadTemplate();
-
 	void importFromTemplate(RepoTemplateRequest request);
 
 }

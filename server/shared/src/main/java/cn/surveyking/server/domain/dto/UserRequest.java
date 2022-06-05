@@ -1,6 +1,7 @@
 package cn.surveyking.server.domain.dto;
 
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -41,5 +42,7 @@ public class UserRequest {
 	private Integer status;
 
 	private List<UserPositionRequest> userPositions;
+
+	private MultipartFile file;
 
 }

@@ -8,6 +8,7 @@ import cn.surveyking.server.core.exception.ErrorCodeException;
 import cn.surveyking.server.core.exception.InternalServerError;
 import cn.surveyking.server.core.security.PasswordEncoder;
 import cn.surveyking.server.core.uitls.ContextHelper;
+import cn.surveyking.server.core.uitls.PinyinUtils;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.domain.mapper.RoleViewMapper;
 import cn.surveyking.server.domain.mapper.UserPositionDtoMapper;
@@ -21,9 +22,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.dhatim.fastexcel.reader.ReadableWorkbook;
+import org.dhatim.fastexcel.reader.Row;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -32,11 +37,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -381,6 +388,64 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 		userOverview.setExamCount(projectMapper.selectCount(Wrappers.<Project>lambdaQuery()
 				.eq(Project::getStatus, AppConsts.PROJECT_STATUS_RUNNING).eq(Project::getMode, ProjectModeEnum.exam)));
 		return userOverview;
+	}
+
+	@Override
+	@SneakyThrows
+	public void importUser(UserRequest request) {
+		Map<String, String> roleName2Id = roleService.list().stream()
+				.collect(Collectors.toMap(Role::getName, Role::getId));
+		Map<String, String> deptName2Id = deptMapper.selectList(null).stream()
+				.collect(Collectors.toMap(Dept::getName, Dept::getId));
+		try (InputStream is = request.getFile().getInputStream(); ReadableWorkbook wb = new ReadableWorkbook(is)) {
+			wb.getSheets().forEach(sheet -> {
+				int[] rowNum = { 1 };
+				try (Stream<Row> rows = sheet.openStream()) {
+					rows.forEach(r -> {
+						if (r.getRowNum() == 1) {
+							return;
+						}
+						rowNum[0] = r.getRowNum();
+						UserRequest userRequest = new UserRequest();
+						userRequest.setName(
+								getCellValue(r, 0).orElseThrow(() -> new ErrorCodeException(ErrorCode.FileParseError)));
+						// 自动根据用户名设置登录名
+						// 登录名可能有重复，通过唯一索引抛异常由用户自己控制
+						userRequest.setUsername(
+								getCellValue(r, 1).orElse(PinyinUtils.chineseToPinyin(userRequest.getName())));
+						// 默认密码为 123456
+						userRequest.setPassword(getCellValue(r, 2).orElse("123456"));
+						userRequest.setPhone(r.getCellAsString(3).orElse(null));
+						userRequest.setEmail(r.getCellAsString(4).orElse(null));
+						String deptName = r.getCellAsString(5).orElse(null);
+						if (deptName != null && deptName2Id.containsKey(deptName)) {
+							userRequest.setDeptId(deptName2Id.get(deptName));
+						}
+						String roles = r.getCellAsString(6).orElse(null);
+						if (roles != null) {
+							List<String> roleIds = Arrays.stream(roles.split(",|\\s+")).filter(roleName2Id::containsKey)
+									.map(roleName2Id::get).collect(Collectors.toList());
+							userRequest.setRoles(roleIds);
+						}
+						createUser(userRequest);
+					});
+				}
+				catch (Exception e) {
+					if (e instanceof DuplicateKeyException) {
+						throw new InternalServerError(String.format("模板第%d行用户已存在", rowNum[0]), e);
+					}
+					throw new InternalServerError(String.format("模板第%d行解析失败", rowNum[0]), e);
+				}
+			});
+		}
+	}
+
+	private Optional<String> getCellValue(Row row, int cellIndex) {
+		String cellValue = row.getCellAsString(cellIndex).orElse(null);
+		if (isBlank(cellValue)) {
+			return Optional.empty();
+		}
+		return Optional.of(cellValue);
 	}
 
 }

@@ -204,14 +204,6 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 	}
 
 	@Override
-	public ResponseEntity<Resource> downloadTemplate() {
-		return ResponseEntity.ok()
-				.header(HttpHeaders.CONTENT_DISPOSITION, HTTPUtils.getContentDispositionValue("卷王题库导入模板.xlsx"))
-				.contentType(MediaType.parseMediaType("application/vnd.ms-excel"))
-				.body(new ClassPathResource("template/卷王题库导入模板.xlsx"));
-	}
-
-	@Override
 	@SneakyThrows
 	public void importFromTemplate(RepoTemplateRequest request) {
 		request.setTemplates(parseExcelToTemplate(request.getFile()));

@@ -49,4 +49,14 @@ public class FileApi {
 		fileService.deleteFile(id);
 	}
 
+	/**
+	 * 下载导入 Excel 模板
+	 * @param name 导入模板名称
+	 * @return
+	 */
+	@GetMapping("/downloadTemplate")
+	public ResponseEntity<Resource> downloadTemplate(String name) {
+		return fileService.downloadTemplate(name);
+	}
+
 }

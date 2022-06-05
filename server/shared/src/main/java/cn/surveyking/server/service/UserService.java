@@ -39,4 +39,6 @@ public interface UserService extends UserDetailsService {
 
 	UserOverview getUserOverviewData();
 
+	void importUser(UserRequest request);
+
 }

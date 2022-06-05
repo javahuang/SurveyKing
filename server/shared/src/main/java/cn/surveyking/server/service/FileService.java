@@ -36,4 +36,6 @@ public interface FileService {
 		return SUPPORT_IMAGE_LIST.contains(extType.toUpperCase());
 	}
 
+	ResponseEntity<Resource> downloadTemplate(String name);
+
 }
