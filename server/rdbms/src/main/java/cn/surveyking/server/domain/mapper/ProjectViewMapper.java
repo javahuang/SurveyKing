@@ -6,8 +6,12 @@ import cn.surveyking.server.domain.dto.ProjectView;
 import cn.surveyking.server.domain.dto.PublicProjectView;
 import cn.surveyking.server.domain.dto.SurveySchema;
 import cn.surveyking.server.domain.model.Project;
-import org.mapstruct.*;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -38,15 +42,31 @@ public interface ProjectViewMapper {
 						&& Boolean.TRUE.equals(source.getSetting().getExamSetting().getExerciseMode())))) {
 			trimExamAnswerInfo(view.getSurvey());
 		}
+		// 考试模式，随机问题顺序
+		if (ProjectModeEnum.exam.equals(source.getMode())
+				&& !((source.getSetting() != null && source.getSetting().getExamSetting() != null
+						&& Boolean.TRUE.equals(source.getSetting().getExamSetting().getRandomOrder())))) {
+			randomSchemaOrder(view.getSurvey());
+		}
 	}
 
 	default void trimExamAnswerInfo(SurveySchema schema) {
+		if (schema.getAttribute() == null) {
+			schema.setAttribute(SurveySchema.Attribute.builder().build());
+		}
 		schema.getAttribute().setExamAnswerMode(null);
 		schema.getAttribute().setExamCorrectAnswer(null);
 		schema.getAttribute().setExamScore(null);
 		schema.getAttribute().setExamMatchRule(null);
 		if (schema.getChildren() != null) {
 			schema.getChildren().forEach(sub -> trimExamAnswerInfo(sub));
+		}
+	}
+
+	default void randomSchemaOrder(SurveySchema schema) {
+		if (schema.getChildren() != null) {
+			Collections.shuffle(schema.getChildren());
+			schema.getChildren().forEach(child -> randomSchemaOrder(schema));
 		}
 	}
 

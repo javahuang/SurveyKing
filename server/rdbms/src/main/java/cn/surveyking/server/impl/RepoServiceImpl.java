@@ -2,11 +2,13 @@ package cn.surveyking.server.impl;
 
 import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.constant.TagCategoryEnum;
-import cn.surveyking.server.core.uitls.HTTPUtils;
 import cn.surveyking.server.core.uitls.RepoTemplateExcelParseHelper;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.domain.mapper.RepoViewMapper;
-import cn.surveyking.server.domain.model.*;
+import cn.surveyking.server.domain.model.Repo;
+import cn.surveyking.server.domain.model.RepoTemplate;
+import cn.surveyking.server.domain.model.Tag;
+import cn.surveyking.server.domain.model.Template;
 import cn.surveyking.server.mapper.RepoMapper;
 import cn.surveyking.server.service.BaseService;
 import cn.surveyking.server.service.RepoService;
@@ -15,24 +17,15 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.dhatim.fastexcel.reader.ReadableWorkbook;
-import org.dhatim.fastexcel.reader.Row;
-import org.dhatim.fastexcel.reader.Sheet;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.baomidou.mybatisplus.core.toolkit.StringUtils.isNotBlank;
 
@@ -184,8 +177,13 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 					.in(!CollectionUtils.isEmpty(repo.getTypes()), Template::getQuestionType, repo.getTypes())
 					.exists(!CollectionUtils.isEmpty(repo.getTags()),
 							String.format("select 1 from t_tag t where t.entity_id = t_template.id and t.name in (%s)",
-									repo.getTags().stream().map(x -> "'" + x + "'").collect(Collectors.joining(","))))
-					.last(repo.getQuestionsNum() != null, "limit " + repo.getQuestionsNum()));
+									repo.getTags().stream().map(x -> "'" + x + "'").collect(Collectors.joining(",")))));
+			if (repo.getQuestionsNum() != null) {
+				// 随机从问题里面挑选指定数量的题
+				Collections.shuffle(repoTemplates);
+				repoTemplates = repoTemplates.subList(0, repo.getQuestionsNum());
+			}
+
 			// 给问题添加分值
 			repoTemplates.forEach(template -> {
 				if (templates.stream().filter(x -> x.getId().equals(template.getId())).findFirst().isPresent()) {
