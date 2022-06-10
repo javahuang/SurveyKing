@@ -11,7 +11,6 @@ import org.dhatim.fastexcel.reader.Row;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -73,7 +72,7 @@ public class RepoTemplateExcelParseHelper {
 				}
 				catch (Exception e) {
 					e.printStackTrace();
-					throw new ErrorCodeException(ErrorCode.ExamFinished, e);
+					throw new ErrorCodeException(ErrorCode.FileParseError, e);
 				}
 			});
 		}
@@ -209,6 +208,7 @@ public class RepoTemplateExcelParseHelper {
 				name2index.put("examAnalysis", columnIndex);
 				break;
 			case "分数":
+			case "单空分数":
 				name2index.put("examScore", columnIndex);
 				break;
 			case "答案":
@@ -254,11 +254,11 @@ public class RepoTemplateExcelParseHelper {
 		if (name2index.get(cellName) == null) {
 			return null;
 		}
-		BigDecimal value = row.getCellAsNumber(name2index.get(cellName)).orElse(null);
-		if (value == null) {
+		String value = row.getCellText(name2index.get(cellName));
+		if (isBlank(value)) {
 			return null;
 		}
-		return value.doubleValue();
+		return Double.parseDouble(value);
 	}
 
 	private String generateId() {
