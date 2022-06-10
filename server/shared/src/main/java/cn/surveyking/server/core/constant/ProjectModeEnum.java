@@ -10,6 +10,8 @@ public enum ProjectModeEnum {
 	/** 问卷模式 */
 	survey,
 	/** 考试模式 */
-	exam
+	exam,
+	/** 文件夹 */
+	folder
 
 }

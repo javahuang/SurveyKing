@@ -39,4 +39,6 @@ public class ProjectView {
 
 	private Date updateAt;
 
+	private String parentId;
+
 }

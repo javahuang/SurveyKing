@@ -1,5 +1,6 @@
 package cn.surveyking.server.domain.dto;
 
+import cn.surveyking.server.core.constant.ProjectModeEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -16,5 +17,9 @@ public class ProjectQuery extends PageQuery {
 	private String password;
 
 	private String name;
+
+	private String parentId;
+
+	private ProjectModeEnum mode;
 
 }

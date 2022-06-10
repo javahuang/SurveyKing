@@ -19,4 +19,6 @@ public class AnswerUploadRequest {
 	 */
 	private Boolean autoSchema;
 
+	private String parentId;
+
 }

@@ -26,6 +26,11 @@ public class Project extends BaseModel {
 	private String name;
 
 	/**
+	 * 父id，0表示不存在父id
+	 */
+	private String parentId;
+
+	/**
 	 * 问卷模式 survey问卷 exam考试
 	 */
 	private ProjectModeEnum mode;
@@ -39,7 +44,10 @@ public class Project extends BaseModel {
 	// 1已发布 0未发布
 	private Integer status;
 
-	private String belongGroup;
+	/**
+	 * 优先级，值越小优先级越高
+	 */
+	private Long priority;
 
 	@TableField(fill = FieldFill.INSERT)
 	private Date createAt;

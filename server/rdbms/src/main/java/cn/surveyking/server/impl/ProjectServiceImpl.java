@@ -2,6 +2,7 @@ package cn.surveyking.server.impl;
 
 import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.constant.AppConsts;
+import cn.surveyking.server.core.constant.ProjectModeEnum;
 import cn.surveyking.server.core.uitls.NanoIdUtils;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.*;
@@ -25,6 +26,7 @@ import java.lang.reflect.Field;
 import java.util.Collections;
 
 import static com.baomidou.mybatisplus.core.toolkit.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * @author javahuang
@@ -47,15 +49,25 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 	public PaginationResponse<ProjectView> listProject(ProjectQuery query) {
 		Page<Project> page = pageByQuery(query, Wrappers.<Project>lambdaQuery()
 				.like(isNotBlank(query.getName()), Project::getName, query.getName())
+				.eq(isNotBlank(query.getParentId()), Project::getParentId, query.getParentId())
+				// 父id为空或者为 0 表示一级目录
+				.and(isBlank(query.getParentId()),
+						c -> c.isNull(Project::getParentId).or().eq(Project::getParentId, "0"))
+				.eq(query.getMode() != null, Project::getMode, query.getMode())
 				.exists(String.format(
 						"select 1 from t_project_partner t where t.user_id = '%s' and t.project_id = t_project.id",
 						SecurityContextUtils.getUserId()))
-				.orderByAsc(Project::getCreateAt));
+				.orderByAsc(Project::getPriority, Project::getCreateAt));
 		PaginationResponse<ProjectView> result = new PaginationResponse<>(page.getTotal(),
 				projectViewMapper.toProjectView(page.getRecords()));
 		result.getList().forEach(view -> {
-			view.setTotal(
-					answerMapper.selectCount(Wrappers.<Answer>lambdaQuery().eq(Answer::getProjectId, view.getId())));
+			if (ProjectModeEnum.folder.equals(view.getMode())) {
+				view.setTotal(count(Wrappers.<Project>lambdaQuery().eq(Project::getParentId, view.getId())));
+			}
+			else {
+				view.setTotal(answerMapper
+						.selectCount(Wrappers.<Answer>lambdaQuery().eq(Answer::getProjectId, view.getId())));
+			}
 		});
 		return result;
 	}
@@ -69,7 +81,17 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 		Project project = projectViewMapper.fromRequest(request);
 		String projectId = generateProjectId();
 		project.setId(projectId);
-		project.getSurvey().setId(projectId);
+		if (project.getSurvey() != null) {
+			project.getSurvey().setId(projectId);
+		}
+		if (ProjectModeEnum.folder.equals(request.getMode())) {
+			project.setPriority(
+					count(Wrappers.<Project>lambdaQuery().eq(Project::getMode, ProjectModeEnum.folder)) + 1);
+		}
+		else {
+			project.setPriority(
+					count(Wrappers.<Project>lambdaQuery().ne(Project::getMode, ProjectModeEnum.folder)) + 1000);
+		}
 		save(project);
 
 		ProjectPartnerRequest partnerRequest = new ProjectPartnerRequest();

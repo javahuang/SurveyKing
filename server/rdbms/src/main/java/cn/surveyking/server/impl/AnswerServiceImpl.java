@@ -30,9 +30,7 @@ import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -325,7 +323,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 				rows.forEach(r -> {
 					int rowNum = r.getRowNum();
 					if (rowNum == 1 && Boolean.TRUE.equals(request.getAutoSchema())) {
-						ProjectView projectView = parseRow2Schema(r, name);
+						ProjectView projectView = parseRow2Schema(r, name, request.getParentId());
 						view.setProjectId(projectView.getId());
 						view.setSchema(projectView.getSurvey());
 					}
@@ -538,7 +536,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		return answer;
 	}
 
-	private ProjectView parseRow2Schema(Row row, String name) {
+	private ProjectView parseRow2Schema(Row row, String name, String parentId) {
 		// 处理行头自动生成 schema
 		SurveySchema schema = createSurveyFromExcelRowHeader(row);
 		schema.setTitle(name);
@@ -546,6 +544,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		projectRequest.setSurvey(schema);
 		projectRequest.setName(name);
 		projectRequest.setMode(ProjectModeEnum.survey);
+		projectRequest.setParentId(parentId);
 		projectRequest.setSetting(ProjectSetting.builder().mode(ProjectModeEnum.survey).status(1).build());
 		return projectService.addProject(projectRequest);
 	}

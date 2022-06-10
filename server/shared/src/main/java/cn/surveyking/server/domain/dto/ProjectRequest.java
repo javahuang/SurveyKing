@@ -29,4 +29,6 @@ public class ProjectRequest {
 
 	private Object settingValue;
 
+	private String parentId;
+
 }
