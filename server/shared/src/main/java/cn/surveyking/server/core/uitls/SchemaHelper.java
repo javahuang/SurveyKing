@@ -10,15 +10,23 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
+ * schema的一些帮助方法
+ *
  * @author javahuang
  * @date 2021/8/10
  */
-public class SchemaParser {
+public class SchemaHelper {
 
 	protected static ThreadLocal<Boolean> localOpenId = new ThreadLocal<>();
 
 	public static final String openidColumnName = "自定义字段";
 
+	/**
+	 * 将 schema 解析为导出的 excel的header
+	 * @param schemaDataTypes
+	 * @param mode
+	 * @return
+	 */
 	public static List<String> parseColumns(List<SurveySchema> schemaDataTypes, ProjectModeEnum mode) {
 		List<String> result = new ArrayList<>();
 		result.add("序号");
@@ -72,6 +80,14 @@ public class SchemaParser {
 		return dataTypes;
 	}
 
+	/**
+	 * 转换答案为导出 excel 的行格式
+	 * @param answerInfo 单条答案记录
+	 * @param dataTypes 所有的问题 schema
+	 * @param index 当前行索引
+	 * @param mode 项目模式
+	 * @return excel 行记录
+	 */
 	public static List<Object> parseRowData(AnswerView answerInfo, List<SurveySchema> dataTypes, int index,
 			ProjectModeEnum mode) {
 		LinkedHashMap<String, Object> answer = answerInfo.getAnswer();
@@ -234,43 +250,6 @@ public class SchemaParser {
 		return rowData;
 	}
 
-	private static void avoidFormulaInjection(List<Object> rowData) {
-		ListIterator<Object> iterator = rowData.listIterator();
-		while (iterator.hasNext()) {
-			Object next = iterator.next();
-			if (next instanceof String && (((String) next).startsWith("=") || ((String) next).startsWith("+")
-					|| ((String) next).startsWith("-") || ((String) next).startsWith("@"))) {
-				iterator.set("'" + next);
-			}
-		}
-	}
-
-	private static String parseHumanReadableDuration(AnswerView answerInfo) {
-		String result = "";
-		if (answerInfo.getMetaInfo() == null || answerInfo.getMetaInfo().getAnswerInfo() == null) {
-			return result;
-		}
-		long duration = answerInfo.getMetaInfo().getAnswerInfo().getEndTime()
-				- answerInfo.getMetaInfo().getAnswerInfo().getStartTime();
-		double d = Math.floor(duration / (3600000 * 24));
-		double h = Math.floor((duration / 3600000) % 24);
-		double m = Math.floor((duration / 60000) % 60);
-		double s = Math.floor((duration / 1000) % 60);
-		if (d > 0) {
-			result += d + "天";
-		}
-		if (h > 0) {
-			result += h + "小时";
-		}
-		if (m > 0) {
-			result += m + "分钟";
-		}
-		if (s > 0) {
-			result += s + "秒";
-		}
-		return result;
-	}
-
 	/**
 	 * 更好的方式是使用 Jsoup.parse(html).text(); 但是我不想引入过多的第三方 jar
 	 * @param string
@@ -308,8 +287,76 @@ public class SchemaParser {
 		schema.getChildren().forEach(child -> updateSchemaByPermission(fieldPermission, child));
 	}
 
+	/**
+	 * 主要是用于构建 FillBlank 类型的查询表单
+	 * @param field
+	 * @return
+	 */
+	public static SurveySchema buildFillBlankQuerySchema(LoginFormFieldEnum field) {
+		return SurveySchema.builder().id(field.name()).type(SurveySchema.QuestionType.FillBlank).title(field.getTitle())
+				.attribute(SurveySchema.Attribute.builder().required(true).build())
+				.children(Collections.singletonList(SurveySchema.builder().id(field.name()).build())).build();
+	}
+
+	public static Object getLoginFormAnswer(LinkedHashMap<String, Object> answer, LoginFormFieldEnum field) {
+		Map<String, Object> questionValue = (Map<String, Object>) answer.get(field.name());
+		if (questionValue == null) {
+			return null;
+		}
+		return questionValue.get(field.name());
+	}
+
+	/**
+	 * 将问题 schema 添加到问卷里面
+	 * @param parent 问卷 schema
+	 * @param child 问题 schema
+	 */
+	public static void appendChildIfNotExist(SurveySchema parent, SurveySchema child) {
+		boolean exists = flatSurveySchema(parent).stream().anyMatch(x -> child.getId().equals(x.getId()));
+		if (!exists) {
+			parent.getChildren().add(child);
+		}
+	}
+
 	public static TreeNode SurveySchema2TreeNode(SurveySchema surveySchema) {
 		return new TreeNode(surveySchema, null);
+	}
+
+	private static void avoidFormulaInjection(List<Object> rowData) {
+		ListIterator<Object> iterator = rowData.listIterator();
+		while (iterator.hasNext()) {
+			Object next = iterator.next();
+			if (next instanceof String && (((String) next).startsWith("=") || ((String) next).startsWith("+")
+					|| ((String) next).startsWith("-") || ((String) next).startsWith("@"))) {
+				iterator.set("'" + next);
+			}
+		}
+	}
+
+	private static String parseHumanReadableDuration(AnswerView answerInfo) {
+		String result = "";
+		if (answerInfo.getMetaInfo() == null || answerInfo.getMetaInfo().getAnswerInfo() == null) {
+			return result;
+		}
+		long duration = answerInfo.getMetaInfo().getAnswerInfo().getEndTime()
+				- answerInfo.getMetaInfo().getAnswerInfo().getStartTime();
+		double d = Math.floor(duration / (3600000 * 24));
+		double h = Math.floor((duration / 3600000) % 24);
+		double m = Math.floor((duration / 60000) % 60);
+		double s = Math.floor((duration / 1000) % 60);
+		if (d > 0) {
+			result += d + "天";
+		}
+		if (h > 0) {
+			result += h + "小时";
+		}
+		if (m > 0) {
+			result += m + "分钟";
+		}
+		if (s > 0) {
+			result += s + "秒";
+		}
+		return result;
 	}
 
 	public static class TreeNode {
@@ -349,6 +396,22 @@ public class SchemaParser {
 
 		public SurveySchema getData() {
 			return data;
+		}
+
+	}
+
+	public enum LoginFormFieldEnum {
+
+		username("用户名"), password("密码"), extraPassword("请输入问卷密码"), whitelistName("请先输入名单，再进行填写");
+
+		private String title;
+
+		LoginFormFieldEnum(String title) {
+			this.title = title;
+		}
+
+		public String getTitle() {
+			return title;
 		}
 
 	}

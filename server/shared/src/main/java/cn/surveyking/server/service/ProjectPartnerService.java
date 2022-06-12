@@ -1,6 +1,7 @@
 package cn.surveyking.server.service;
 
 import cn.surveyking.server.core.constant.CacheConsts;
+import cn.surveyking.server.domain.dto.ProjectPartnerQuery;
 import cn.surveyking.server.domain.dto.ProjectPartnerRequest;
 import cn.surveyking.server.domain.dto.ProjectPartnerView;
 import org.springframework.cache.annotation.CacheEvict;
@@ -14,15 +15,15 @@ import java.util.List;
  */
 public interface ProjectPartnerService {
 
-	List<ProjectPartnerView> listProjectPartner(String projectId);
+	List<ProjectPartnerView> listProjectPartner(ProjectPartnerQuery query);
 
-//	@CacheEvict(cacheNames = CacheConsts.projectPermissionCacheName,
-//			key = "T(cn.surveyking.server.core.uitls.SecurityContextUtils).getUserId()")
+	@CacheEvict(cacheNames = CacheConsts.projectPermissionCacheName,
+			key = "T(cn.surveyking.server.core.uitls.SecurityContextUtils).getUserId()")
 	void addProjectPartner(ProjectPartnerRequest request);
 
 	@CacheEvict(cacheNames = CacheConsts.projectPermissionCacheName,
 			key = "T(cn.surveyking.server.core.uitls.SecurityContextUtils).getUserId()")
-	void deleteProjectPartner(String projectId, String id);
+	void deleteProjectPartner(ProjectPartnerRequest request);
 
 	@Cacheable(cacheNames = CacheConsts.projectPermissionCacheName,
 			key = "T(cn.surveyking.server.core.uitls.SecurityContextUtils).getUserId()")

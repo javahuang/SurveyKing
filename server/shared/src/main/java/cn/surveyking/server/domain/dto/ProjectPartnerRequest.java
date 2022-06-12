@@ -1,7 +1,7 @@
 package cn.surveyking.server.domain.dto;
 
-import cn.surveyking.server.core.constant.AppConsts;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -12,10 +12,16 @@ import java.util.List;
 @Data
 public class ProjectPartnerRequest {
 
-	private List<String> userIds;
+	private List<String> ids;
 
 	private String projectId;
 
-	private Integer type = AppConsts.ProjectPartnerType.COLLABORATOR;
+	private Integer type;
+
+	private List<String> userIds;
+
+	private List<String> userNames;
+
+	private MultipartFile file;
 
 }

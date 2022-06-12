@@ -37,6 +37,6 @@ public class BaseModel {
 	@TableLogic
 	@JsonIgnore
 	@TableField(value = AppConsts.COLUMN_IS_DELETED, select = false)
-	private boolean deleted = false;
+	private Boolean deleted = false;
 
 }

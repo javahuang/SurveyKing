@@ -163,20 +163,6 @@ public class AppConsts {
 
 	}
 
-	public interface ProjectPartnerType {
-
-		/**
-		 * 所有者
-		 */
-		Integer OWNER = 1;
-
-		/**
-		 * 协作者
-		 */
-		Integer COLLABORATOR = 2;
-
-	}
-
 	public interface PermType {
 
 		String PROJECT = "project";

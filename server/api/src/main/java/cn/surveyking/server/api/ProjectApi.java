@@ -66,9 +66,9 @@ public class ProjectApi {
 	}
 
 	@GetMapping("/listPartner")
-	@EnableDataPerm(key = "#projectId")
-	public List<ProjectPartnerView> listProjectPartner(String projectId) {
-		return projectPartnerService.listProjectPartner(projectId);
+	@EnableDataPerm(key = "#query.projectId")
+	public List<ProjectPartnerView> listProjectPartner(ProjectPartnerQuery query) {
+		return projectPartnerService.listProjectPartner(query);
 	}
 
 	@PostMapping("/addPartner")
@@ -77,10 +77,10 @@ public class ProjectApi {
 		projectPartnerService.addProjectPartner(request);
 	}
 
-	@DeleteMapping("/deletePartner")
-	@EnableDataPerm(key = "#projectId")
-	public void deleteProjectPartner(String projectId, String id) {
-		projectPartnerService.deleteProjectPartner(projectId, id);
+	@PostMapping("/deletePartner")
+	@EnableDataPerm(key = "#request.projectId")
+	public void deleteProjectPartner(@RequestBody ProjectPartnerRequest request) {
+		projectPartnerService.deleteProjectPartner(request);
 	}
 
 }

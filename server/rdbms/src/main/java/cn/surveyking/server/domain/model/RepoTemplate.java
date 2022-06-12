@@ -1,5 +1,7 @@
 package cn.surveyking.server.domain.model;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
@@ -33,11 +35,13 @@ public class RepoTemplate implements Serializable {
 	/**
 	 * 创建时间
 	 */
+	@TableField(fill = FieldFill.INSERT, select = false)
 	private Date createAt;
 
 	/**
 	 *
 	 */
+	@TableField(fill = FieldFill.INSERT, select = false)
 	private String createBy;
 
 	private static final long serialVersionUID = 1L;

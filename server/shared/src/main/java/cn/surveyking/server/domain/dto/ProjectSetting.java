@@ -2,6 +2,7 @@ package cn.surveyking.server.domain.dto;
 
 import cn.surveyking.server.core.constant.AnswerFreqEnum;
 import cn.surveyking.server.core.constant.ProjectModeEnum;
+import cn.surveyking.server.core.constant.ProjectPartnerTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -107,6 +108,12 @@ public class ProjectSetting {
 		 */
 		private Boolean answerSheetVisible;
 
+		/**
+		 * 白名单类型，支持系统用户和外部导入用户
+		 * @see ProjectPartnerTypeEnum
+		 */
+		private Integer whitelistType;
+
 	}
 
 	@Data
@@ -131,6 +138,21 @@ public class ProjectSetting {
 		 * 公开查询
 		 */
 		private List<PublicQuery> publicQuery;
+
+		/**
+		 * 查询正确答案和解析
+		 */
+		private Boolean answerAnalysis;
+
+		/**
+		 * 是否显示成绩单
+		 */
+		private Boolean transcriptVisible;
+
+		/**
+		 * 显示排行榜
+		 */
+		private Boolean rankVisible;
 
 	}
 

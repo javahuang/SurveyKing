@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static cn.surveyking.server.core.uitls.SchemaParser.openidColumnName;
+import static cn.surveyking.server.core.uitls.SchemaHelper.openidColumnName;
 
 /**
  * 轻量级 excel 导出工具，换成 poi 打的包会多出十几 M，不能接受，-_-||
@@ -123,13 +123,13 @@ public class ExcelExporter {
 				excelExporter = new ExcelExporter();
 			}
 			// 如果答案中不存在 openid，则删除该列
-			if (!Boolean.TRUE.equals(SchemaParser.localOpenId.get())) {
+			if (!Boolean.TRUE.equals(SchemaHelper.localOpenId.get())) {
 				int openidColumnIndex = this.columns.indexOf(openidColumnName);
 				this.columns.remove(openidColumnIndex);
 				this.rows.forEach(row -> {
 					row.remove(openidColumnIndex);
 				});
-				SchemaParser.localOpenId.remove();
+				SchemaHelper.localOpenId.remove();
 			}
 			excelExporter.createSheet(this.sheetName);
 			excelExporter.createRow(this.rows);

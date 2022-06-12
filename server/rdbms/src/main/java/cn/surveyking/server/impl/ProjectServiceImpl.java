@@ -1,8 +1,8 @@
 package cn.surveyking.server.impl;
 
 import cn.surveyking.server.core.common.PaginationResponse;
-import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.constant.ProjectModeEnum;
+import cn.surveyking.server.core.constant.ProjectPartnerTypeEnum;
 import cn.surveyking.server.core.uitls.NanoIdUtils;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.*;
@@ -95,7 +95,7 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 		save(project);
 
 		ProjectPartnerRequest partnerRequest = new ProjectPartnerRequest();
-		partnerRequest.setType(AppConsts.ProjectPartnerType.OWNER);
+		partnerRequest.setType(ProjectPartnerTypeEnum.OWNER.getType());
 		partnerRequest.setProjectId(project.getId());
 		partnerRequest.setUserIds(Collections.singletonList(SecurityContextUtils.getUserId()));
 		projectPartnerService.addProjectPartner(partnerRequest);

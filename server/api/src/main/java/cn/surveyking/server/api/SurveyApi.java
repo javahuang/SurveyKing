@@ -1,6 +1,5 @@
 package cn.surveyking.server.api;
 
-import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.service.FileService;
 import cn.surveyking.server.service.SurveyService;
@@ -31,10 +30,7 @@ public class SurveyApi {
 
 	@PostMapping("/loadProject")
 	public PublicProjectView loadProject(@RequestBody ProjectQuery query) {
-		PublicProjectView projectView = surveyService.loadProject(query.getId());
-		if (projectView.getSurvey() != null) {
-		}
-		return projectView;
+		return surveyService.loadProject(query.getId());
 	}
 
 	@PostMapping("/loadAnswer")
@@ -42,10 +38,9 @@ public class SurveyApi {
 		return surveyService.loadAnswer(query);
 	}
 
-	@PostMapping("/verifyPassword")
-	public PublicProjectView verifyPassword(@RequestBody ProjectQuery query) {
-		PublicProjectView projectView = surveyService.verifyPassword(query);
-		return projectView;
+	@PostMapping("/validateProject")
+	public PublicProjectView validateProject(@RequestBody ProjectQuery query) {
+		return surveyService.validateProject(query);
 	}
 
 	@PostMapping("/statistics")

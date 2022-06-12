@@ -34,4 +34,6 @@ public class AnswerRequest {
 
 	private List<String> ids;
 
+	private String whitelistName;
+
 }

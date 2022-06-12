@@ -1,12 +1,10 @@
 package cn.surveyking.server.domain.model;
 
+import cn.surveyking.server.core.model.BaseModel;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-
-import java.io.Serializable;
-import java.util.Date;
+import lombok.EqualsAndHashCode;
 
 /**
  * 项目参与者
@@ -15,13 +13,8 @@ import java.util.Date;
  */
 @TableName(value = "t_project_partner")
 @Data
-public class ProjectPartner implements Serializable {
-
-	/**
-	 *
-	 */
-	@TableId(value = "id")
-	private String id;
+@EqualsAndHashCode(callSuper = false)
+public class ProjectPartner extends BaseModel {
 
 	/**
 	 * 项目id
@@ -36,10 +29,22 @@ public class ProjectPartner implements Serializable {
 	private Integer type;
 
 	/**
+	 * 回答状态 0未访问 1已访问 2已答题
+	 */
+	@TableField(value = "status")
+	private Integer status;
+
+	/**
 	 * 参与者id
 	 */
 	@TableField(value = "user_id")
 	private String userId;
+
+	/**
+	 * 参与者姓名
+	 */
+	@TableField(value = "user_name")
+	private String userName;
 
 	/**
 	 * 参与组id
@@ -53,31 +58,10 @@ public class ProjectPartner implements Serializable {
 	@TableField(value = "data_permission")
 	private String dataPermission;
 
-	/**
-	 * 创建时间
-	 */
-	@TableField(value = "create_at")
-	private Date createAt;
-
-	/**
-	 *
-	 */
-	@TableField(value = "create_by")
-	private String createBy;
-
-	/**
-	 * 更新时间
-	 */
-	@TableField(value = "update_at")
-	private Date updateAt;
-
-	/**
-	 *
-	 */
-	@TableField(value = "update_by")
-	private String updateBy;
-
 	@TableField(exist = false)
 	private static final long serialVersionUID = 1L;
+
+	@TableField(exist = false)
+	private Boolean deleted = false;
 
 }

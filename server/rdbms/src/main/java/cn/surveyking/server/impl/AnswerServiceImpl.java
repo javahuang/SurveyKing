@@ -77,7 +77,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
 	private FlatSurveySchemaByType parseSurveySchemaByType(SurveySchema schema) {
 		FlatSurveySchemaByType schemaByType = new FlatSurveySchemaByType();
-		List<SurveySchema> schemaDataTypes = SchemaParser.flatSurveySchema(schema);
+		List<SurveySchema> schemaDataTypes = SchemaHelper.flatSurveySchema(schema);
 		schemaByType.setSchemaDataTypes(schemaDataTypes);
 		schemaByType.setUserQuestions(parseSurveySchemaByType(schemaDataTypes, SurveySchema.QuestionType.User));
 		schemaByType.setDeptQuestions(parseSurveySchemaByType(schemaDataTypes, SurveySchema.QuestionType.Dept));
@@ -413,14 +413,14 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	}
 
 	private void export(Project project, List<AnswerView> answerViews, OutputStream outputStream) {
-		List<SurveySchema> schemaDataTypes = SchemaParser.flatSurveySchema(project.getSurvey());
+		List<SurveySchema> schemaDataTypes = SchemaHelper.flatSurveySchema(project.getSurvey());
 		int[] indexArr = { 0 };
 		new ExcelExporter.Builder().setSheetName(project.getName()).setOutputStream(outputStream)
 				.setRows(answerViews.stream().map(answer -> {
 					indexArr[0] = indexArr[0] += 1;
-					return SchemaParser.parseRowData(answer, schemaDataTypes, indexArr[0], project.getMode());
+					return SchemaHelper.parseRowData(answer, schemaDataTypes, indexArr[0], project.getMode());
 				}).collect(Collectors.toList()))
-				.setColumns(SchemaParser.parseColumns(schemaDataTypes, project.getMode())).build().exportToStream();
+				.setColumns(SchemaHelper.parseColumns(schemaDataTypes, project.getMode())).build().exportToStream();
 	}
 
 	/**

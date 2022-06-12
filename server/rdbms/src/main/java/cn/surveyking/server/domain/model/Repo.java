@@ -1,13 +1,13 @@
 package cn.surveyking.server.domain.model;
 
+import cn.surveyking.server.core.model.BaseModel;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.apache.ibatis.type.JdbcType;
-
-import java.io.Serializable;
-import java.util.Date;
 
 /**
  * 模板组
@@ -16,12 +16,8 @@ import java.util.Date;
  */
 @Data
 @TableName(value = "t_repo", autoResultMap = true)
-public class Repo implements Serializable {
-
-	/**
-	 *
-	 */
-	private String id;
+@EqualsAndHashCode(callSuper = false)
+public class Repo extends BaseModel {
 
 	/**
 	 * 标题
@@ -49,26 +45,8 @@ public class Repo implements Serializable {
 	 */
 	private String setting;
 
-	/**
-	 * 创建时间
-	 */
-	private Date createAt;
-
-	/**
-	 *
-	 */
-	private String createBy;
-
-	/**
-	 * 更新时间
-	 */
-	private Date updateAt;
-
-	/**
-	 *
-	 */
-	private String updateBy;
-
-	private static final long serialVersionUID = 1L;
+	@JsonIgnore
+	@TableField(exist = false)
+	private boolean deleted = false;
 
 }

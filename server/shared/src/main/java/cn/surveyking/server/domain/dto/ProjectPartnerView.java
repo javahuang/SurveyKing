@@ -15,4 +15,8 @@ public class ProjectPartnerView {
 
 	private UserInfo user;
 
+	private String userName;
+
+	private Integer status;
+
 }

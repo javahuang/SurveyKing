@@ -4,6 +4,8 @@ import cn.surveyking.server.core.constant.ProjectModeEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.LinkedHashMap;
+
 /**
  * @author javahuang
  * @date 2021/8/31
@@ -21,5 +23,7 @@ public class ProjectQuery extends PageQuery {
 	private String parentId;
 
 	private ProjectModeEnum mode;
+
+	private LinkedHashMap<String, Object> answer;
 
 }

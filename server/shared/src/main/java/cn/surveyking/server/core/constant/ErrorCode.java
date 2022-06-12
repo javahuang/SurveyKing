@@ -14,8 +14,10 @@ public enum ErrorCode {
 	SurveySuspend(4000, "问卷已暂停回收"),
 	/** 页面不存在 */
 	ProjectNotFound(4004, "对不起，你访问的页面不存在"),
-	/** 密码验证失败 */
-	ValidationError(4005, "密码验证失败"),
+	/** 验证失败 */
+	ValidationError(4005, "验证失败"),
+	/** 权限校验失败 */
+	PermVerifyFailed(4006, "没有权限访问本问卷"),
 	/** 停止收集 */
 	ExceededMaxAnswers(4010, "已达到回收上限，问卷停止收集"),
 	/** 停止收集 */

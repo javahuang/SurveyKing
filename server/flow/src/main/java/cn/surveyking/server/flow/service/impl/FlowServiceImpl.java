@@ -2,7 +2,7 @@ package cn.surveyking.server.flow.service.impl;
 
 import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.uitls.ContextHelper;
-import cn.surveyking.server.core.uitls.SchemaParser;
+import cn.surveyking.server.core.uitls.SchemaHelper;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.flow.constant.*;
@@ -101,7 +101,7 @@ public class FlowServiceImpl implements FlowService {
 		}
 		// 流程申请人为空
 		if (node.getIdentity() == null) {
-			SchemaParser.updateSchemaByPermission(node.getFieldPermission(), schema);
+			SchemaHelper.updateSchemaByPermission(node.getFieldPermission(), schema);
 			return;
 		}
 		// 需要登录，如开启了工作流或者设置了成员/部门题都需要登录才能答卷
@@ -114,7 +114,7 @@ public class FlowServiceImpl implements FlowService {
 		Set<String> userGroups = userService.getUserGroups(userId);
 		for (String identity : node.getIdentity()) {
 			if (userGroups.contains(identity)) {
-				SchemaParser.updateSchemaByPermission(node.getFieldPermission(), schema);
+				SchemaHelper.updateSchemaByPermission(node.getFieldPermission(), schema);
 				return;
 			}
 		}
@@ -309,7 +309,7 @@ public class FlowServiceImpl implements FlowService {
 		if (element == null) {
 			return schema;
 		}
-		SchemaParser.updateSchemaByPermission(element.getFieldPermission(), schema);
+		SchemaHelper.updateSchemaByPermission(element.getFieldPermission(), schema);
 		return schema;
 	}
 

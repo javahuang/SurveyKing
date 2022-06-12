@@ -12,8 +12,6 @@ public interface SurveyService {
 
 	PublicProjectView loadProject(String projectId);
 
-	PublicProjectView verifyPassword(ProjectQuery query);
-
 	PublicStatisticsView statProject(ProjectQuery query);
 
 	PublicAnswerView saveAnswer(AnswerRequest answer, HttpServletRequest request);
@@ -23,5 +21,7 @@ public interface SurveyService {
 	PublicQueryVerifyView loadQuery(PublicQueryRequest request);
 
 	PublicQueryView getQueryResult(PublicQueryRequest request);
+
+	PublicProjectView validateProject(ProjectQuery query);
 
 }
