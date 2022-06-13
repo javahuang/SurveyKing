@@ -4,6 +4,7 @@ import cn.surveyking.server.core.constant.ProjectModeEnum;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.LinkedHashMap;
 
 /**
  * 答卷页面
@@ -14,6 +15,8 @@ import java.util.Date;
 @Data
 public class PublicProjectView {
 
+	private String id;
+	
 	private SurveySchema survey;
 
 	private Integer status;
@@ -34,4 +37,5 @@ public class PublicProjectView {
 
 	private String answerId;
 
+	LinkedHashMap<String, Object> answer;
 }

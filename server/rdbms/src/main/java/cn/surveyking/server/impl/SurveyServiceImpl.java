@@ -13,6 +13,7 @@ import cn.surveyking.server.mapper.ProjectPartnerMapper;
 import cn.surveyking.server.service.AnswerService;
 import cn.surveyking.server.service.ProjectService;
 import cn.surveyking.server.service.SurveyService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
@@ -75,26 +76,18 @@ public class SurveyServiceImpl implements SurveyService {
 		ProjectView project = projectService.getProject(projectId);
 		// 校验问卷
 		validateProject(project);
+		// 登录验证
 		SurveySchema loginFormSchema = convertAndValidateLoginFormIfNeeded(project, null);
-
+		// 如果需要登录，将问卷 schema 替换成登录表单的 schema
 		PublicProjectView projectView = projectViewMapper.toPublicProjectView(project);
 		if (loginFormSchema != null) {
 			projectView.setSurvey(loginFormSchema);
 			projectView.setLoginRequired(true);
 		}
-
-		// // 允许修改答案
-		// if
-		// (Boolean.TRUE.equals(projectView.getSetting().getSubmittedSetting().getEnableUpdate())
-		// && SecurityContextUtils.isAuthenticated()) {
-		// AnswerQuery answerQuery = new AnswerQuery();
-		// answerQuery.setProjectId(projectId);
-		// answerQuery.setLatest(true);
-		// AnswerView latestAnswer = answerService.getAnswer(answerQuery);
-		// if (latestAnswer != null) {
-		// projectView.setAnswerId(latestAnswer.getId());
-		// }
-		// }
+		else {
+			// 允许修改答案
+			projectView.setAnswer(getLatestAnswer(projectView, null));
+		}
 
 		return projectView;
 	}
@@ -112,6 +105,8 @@ public class SurveyServiceImpl implements SurveyService {
 		validateProject(project);
 		convertAndValidateLoginFormIfNeeded(project, query.getAnswer());
 		PublicProjectView projectView = projectViewMapper.toPublicProjectView(project);
+		projectView.setAnswer(getLatestAnswer(projectView, (String) SchemaHelper.getLoginFormAnswer(query.getAnswer(),
+				SchemaHelper.LoginFormFieldEnum.whitelistName)));
 		return projectView;
 	}
 
@@ -126,38 +121,43 @@ public class SurveyServiceImpl implements SurveyService {
 	}
 
 	@Override
-	public PublicAnswerView saveAnswer(AnswerRequest answer, HttpServletRequest request) {
-		String projectId = answer.getProjectId();
+	public PublicAnswerView saveAnswer(AnswerRequest request, HttpServletRequest httpRequest) {
+		String projectId = request.getProjectId();
 
 		PublicAnswerView result = new PublicAnswerView();
 		ProjectView project = projectService.getProject(projectId);
 		ProjectSetting setting = project.getSetting();
 
-		String answerId;
-		if (isNotBlank(answer.getQueryId())) {
+		String answerId = null;
+		if (isNotBlank(request.getQueryId())) {
 			// 公开查询修改答案
-			answerId = answer.getId();
-			validateAndMergeAnswer(project, answer);
+			answerId = request.getId();
+			validateAndMergeAnswer(project, request);
 		}
 		else {
 			// 问卷允许修改答案 开关修改答案
-			answerId = validateAndGetLatestAnswer(project);
+			AnswerView latestAnswer = validateAndGetLatestAnswer(project);
+			if (latestAnswer != null) {
+				answerId = latestAnswer.getId();
+			}
 		}
-		answer.setId(answerId);
-		AnswerView answerView = answerService.saveAnswer(answer, request);
 
+		// 保存答案
+		request.setId(answerId);
+		AnswerView answerView = answerService.saveAnswer(request, httpRequest);
 		// 登录用户无需显示修改答案的二维码
 		if (Boolean.TRUE.equals(setting.getSubmittedSetting().getEnableUpdate())
 				&& !SecurityContextUtils.isAuthenticated()) {
 			result.setAnswerId(answerView.getId());
 		}
+		// 考试模式，计算分值传给前端
 		if (ProjectModeEnum.exam.equals(project.getMode())) {
 			result.setExamScore(answerView.getExamScore());
 			result.setQuestionScore(answerView.getExamInfo().getQuestionScore());
 		}
-
 		// 白名单更新答题信息
-		updateProjectPartnerByAnswer(answer, project);
+		request.setId(answerView.getId());
+		updateProjectPartnerByAnswer(request, project);
 		return result;
 	}
 
@@ -166,7 +166,8 @@ public class SurveyServiceImpl implements SurveyService {
 		ProjectSetting setting = null;
 		try {
 			ProjectView project = projectService.getProject(query.getProjectId());
-			setting = validateProject(project);
+			setting = project.getSetting();
+			validateProject(project);
 		}
 		catch (ErrorCodeException e) {
 			// 401 开头的是校验问卷限制，修改答案的时候无需校验
@@ -288,9 +289,9 @@ public class SurveyServiceImpl implements SurveyService {
 	/**
 	 * 校验问卷并且判断是否要更新最近一次的答案
 	 * @param project
-	 * @return
+	 * @return 最近一次的答案
 	 */
-	private String validateAndGetLatestAnswer(ProjectView project) {
+	private AnswerView validateAndGetLatestAnswer(ProjectView project) {
 		ProjectSetting setting = project.getSetting();
 		boolean needGetLatest = false;
 		try {
@@ -319,8 +320,38 @@ public class SurveyServiceImpl implements SurveyService {
 			answerQuery.setLatest(true);
 			AnswerView latestAnswer = answerService.getAnswer(answerQuery);
 			if (latestAnswer != null) {
-				return answerQuery.getId();
+				return latestAnswer;
 			}
+		}
+		return null;
+	}
+
+	/**
+	 * 获取最近一次的答案
+	 * @param projectView
+	 * @return
+	 */
+	private LinkedHashMap<String, Object> getLatestAnswer(PublicProjectView projectView, String whitelistName) {
+		// 必须打开了答案允许修改开关
+		ProjectSetting projectSetting = projectView.getSetting();
+		if (projectSetting == null || projectSetting.getSubmittedSetting() == null
+				|| !Boolean.TRUE.equals(projectSetting.getSubmittedSetting().getEnableUpdate())) {
+			return null;
+		}
+		AnswerQuery answerQuery = new AnswerQuery();
+		answerQuery.setProjectId(projectView.getId());
+		answerQuery.setLatest(true);
+		if (whitelistName != null) {
+			ProjectPartner partner = projectPartnerMapper.selectOne(
+					Wrappers.<ProjectPartner>lambdaQuery().eq(ProjectPartner::getProjectId, projectView.getId())
+							.eq(ProjectPartner::getUserName, whitelistName));
+			if (partner != null) {
+				answerQuery.setCreateBy(partner.getId());
+			}
+		}
+		// 通过白名单或者答卷人来获取最近一次的答卷记录
+		if (SecurityContextUtils.isAuthenticated() || answerQuery.getCreateBy() != null) {
+			return Optional.ofNullable(answerService.getAnswer(answerQuery)).map(x -> x.getAnswer()).orElse(null);
 		}
 		return null;
 	}
@@ -362,11 +393,10 @@ public class SurveyServiceImpl implements SurveyService {
 			log.info("user is empty");
 			return;
 		}
-		ProjectSetting.UniqueLimitSetting loginLimitSetting = setting.getAnswerSetting().getLoginLimit();
 		AnswerQuery query = new AnswerQuery();
 		query.setProjectId(projectId);
 		query.setCreateBy(userId);
-		doValidate(loginLimitSetting, query);
+		doValidate(setting, query);
 	}
 
 	private void validateCookieLimit(String projectId, ProjectSetting setting) {
@@ -385,11 +415,10 @@ public class SurveyServiceImpl implements SurveyService {
 			response.addCookie(cookie);
 			return;
 		}
-		ProjectSetting.UniqueLimitSetting uniqueLimitSetting = setting.getAnswerSetting().getCookieLimit();
 		AnswerQuery query = new AnswerQuery();
 		query.setProjectId(projectId);
 		query.setCookie(limitCookie.getValue());
-		doValidate(uniqueLimitSetting, query);
+		doValidate(setting, query);
 	}
 
 	private void validateIpLimit(String projectId, ProjectSetting setting) {
@@ -399,23 +428,27 @@ public class SurveyServiceImpl implements SurveyService {
 			log.info("ip is empty");
 			return;
 		}
-		ProjectSetting.UniqueLimitSetting ipLimitSetting = setting.getAnswerSetting().getIpLimit();
 		AnswerQuery query = new AnswerQuery();
 		query.setProjectId(projectId);
 		query.setIp(ip);
-		doValidate(ipLimitSetting, query);
+		doValidate(setting, query);
 	}
 
-	private void doValidate(ProjectSetting.UniqueLimitSetting setting, AnswerQuery query) {
+	private void doValidate(ProjectSetting setting, AnswerQuery query) {
+		ProjectSetting.UniqueLimitSetting limitSetting = setting.getAnswerSetting().getIpLimit();
+
 		// 通过 cron 计算时间窗
-		CronHelper helper = new CronHelper(setting.getLimitFreq().getCron());
+		CronHelper helper = new CronHelper(limitSetting.getLimitFreq().getCron());
 		Tuple2<LocalDateTime, LocalDateTime> currentWindow = helper.currentWindow();
 		if (currentWindow != null) {
 			query.setStartTime(Date.from(currentWindow.getFirst().atZone(ZoneId.systemDefault()).toInstant()));
 			query.setEndTime(Date.from(currentWindow.getSecond().atZone(ZoneId.systemDefault()).toInstant()));
 		}
 		long total = answerService.count(query);
-		if (setting.getLimitNum() != null && total >= setting.getLimitNum()) {
+		// 允许修改答案的话就获取最近一次的答案，不抛出异常
+		if (limitSetting.getLimitNum() != null && total >= limitSetting.getLimitNum()
+				&& (setting.getSubmittedSetting() == null
+						|| !Boolean.TRUE.equals(setting.getSubmittedSetting().getEnableUpdate()))) {
 			throw new ErrorCodeException(ErrorCode.SurveySubmitted);
 		}
 	}
@@ -606,16 +639,21 @@ public class SurveyServiceImpl implements SurveyService {
 
 	/**
 	 * 如果问卷需要登录、需要密码答卷、需要白名单答卷进入问卷之前需要弹出验证表单
-	 * @param project
-	 * @param answer
+	 * @param project 当前项目
+	 * @param answer 查询表单的答案
 	 * @return 返回查询表单的 schema，如果未空，则会直接进入到答卷页面
 	 */
 	private SurveySchema convertAndValidateLoginFormIfNeeded(ProjectView project,
 			LinkedHashMap<String, Object> answer) {
 		boolean loginRequired = false;
+		// 需要更新答题者为已访问的状态
+		boolean updatePartnerVisited = false;
+		LambdaUpdateWrapper<ProjectPartner> projectPartnerUpdater = Wrappers.<ProjectPartner>lambdaUpdate()
+				.eq(ProjectPartner::getProjectId, project.getId());
 		Authentication authentication = null;
 		List<SurveySchema> queryConditions = new ArrayList<>();
-		SurveySchema loginFormSchema = SurveySchema.builder().id(project.getId()).children(queryConditions).build();
+		SurveySchema loginFormSchema = SurveySchema.builder().id(project.getId()).children(queryConditions)
+				.title(project.getName()).build();
 
 		if (project != null && project.getSetting() != null && project.getSetting().getAnswerSetting() != null) {
 			ProjectSetting.AnswerSetting answerSetting = project.getSetting().getAnswerSetting();
@@ -655,6 +693,8 @@ public class SurveyServiceImpl implements SurveyService {
 					if (!currentHasPerm) {
 						throw new ErrorCodeException(ErrorCode.PermVerifyFailed);
 					}
+					updatePartnerVisited = true;
+					projectPartnerUpdater.eq(ProjectPartner::getUserId, SecurityContextUtils.getUserId());
 				}
 				else {
 					// 需要执行登录操作
@@ -677,6 +717,9 @@ public class SurveyServiceImpl implements SurveyService {
 						if (!currentHasPerm) {
 							throw new ErrorCodeException(ErrorCode.PermVerifyFailed);
 						}
+
+						updatePartnerVisited = true;
+						projectPartnerUpdater.eq(ProjectPartner::getUserId, user.getUserId());
 					}
 				}
 			}
@@ -700,6 +743,9 @@ public class SurveyServiceImpl implements SurveyService {
 					if (!currentHasPerm) {
 						throw new ErrorCodeException(ErrorCode.PermVerifyFailed);
 					}
+
+					updatePartnerVisited = true;
+					projectPartnerUpdater.eq(ProjectPartner::getUserName, whitelistName);
 				}
 			}
 
@@ -713,6 +759,13 @@ public class SurveyServiceImpl implements SurveyService {
 							jwtTokenUtil.generateAccessToken(new UserTokenView(user.getUserId())))
 					.path("/").httpOnly(true).build();
 			ContextHelper.getCurrentHttpResponse().setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+		}
+
+		// 更新问卷状态为已访问
+		if (updatePartnerVisited) {
+			ProjectPartner projectPartner = new ProjectPartner();
+			projectPartner.setStatus(AppConsts.ProjectPartnerStatus.VISITED);
+			projectPartnerMapper.update(projectPartner, projectPartnerUpdater);
 		}
 
 		if (loginRequired) {
@@ -738,32 +791,41 @@ public class SurveyServiceImpl implements SurveyService {
 		}
 	}
 
-	private void updateProjectPartnerByAnswer(AnswerRequest answer, ProjectView project) {
+	/**
+	 * 如果存在白名单，答卷完更新白名单为已访问的状态，由于导入用户白名单没有系统用户id，需要将答案的创建人更新为答题参与表的id。
+	 * @param request
+	 * @param project
+	 */
+	private void updateProjectPartnerByAnswer(AnswerRequest request, ProjectView project) {
 		if (project.getSetting() != null && project.getSetting().getAnswerSetting() != null) {
 			Integer whitelistType = project.getSetting().getAnswerSetting().getWhitelistType();
 			if (whitelistType == null) {
 				return;
 			}
-			ProjectPartner projectPartner = new ProjectPartner();
-			projectPartner.setStatus(2);
-			LambdaUpdateWrapper<ProjectPartner> updateWrapper = Wrappers.lambdaUpdate();
+
+			LambdaQueryWrapper<ProjectPartner> queryWrapper = Wrappers.<ProjectPartner>lambdaQuery()
+					.eq(ProjectPartner::getProjectId, project.getId());
 			if (ProjectPartnerTypeEnum.RESPONDENT_SYS_USER.getType() == whitelistType) {
-				updateWrapper.eq(ProjectPartner::getProjectId, project.getId()).eq(ProjectPartner::getUserId,
-						SecurityContextUtils.getUserId());
+				queryWrapper.eq(ProjectPartner::getUserId, SecurityContextUtils.getUserId());
 			}
 			else if (ProjectPartnerTypeEnum.RESPONDENT_IMP_USER.getType() == whitelistType) {
-				updateWrapper.eq(ProjectPartner::getProjectId, project.getId()).eq(ProjectPartner::getUserName,
-						answer.getWhitelistName());
+				queryWrapper.eq(ProjectPartner::getUserName, request.getWhitelistName());
 			}
 
-			projectPartnerMapper.update(projectPartner, updateWrapper);
+			ProjectPartner projectPartner = projectPartnerMapper.selectOne(queryWrapper);
+			projectPartner.setStatus(AppConsts.ProjectPartnerStatus.ANSWERED);
+			projectPartnerMapper.updateById(projectPartner);
+
+			// 白名单答题需要更新答案表的 createBy 为 partner 的 id
+			if (ProjectPartnerTypeEnum.RESPONDENT_IMP_USER.getType() == whitelistType
+					&& !SecurityContextUtils.isAuthenticated()) {
+				AnswerRequest answerUpdateRequest = new AnswerRequest();
+				answerUpdateRequest.setId(request.getId());
+				answerUpdateRequest.setCreateBy(projectPartner.getId());
+				answerService.updateAnswer(answerUpdateRequest);
+			}
+
 		}
-	}
-
-	public static void main(String[] args) {
-		Integer a = 1;
-
-		System.out.println(a.equals(1));
 	}
 
 }

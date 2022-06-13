@@ -58,15 +58,16 @@ public interface ProjectViewMapper {
 		schema.getAttribute().setExamCorrectAnswer(null);
 		schema.getAttribute().setExamScore(null);
 		schema.getAttribute().setExamMatchRule(null);
+		
 		if (schema.getChildren() != null) {
-			schema.getChildren().forEach(sub -> trimExamAnswerInfo(sub));
+			randomSchemaOrder(schema);
 		}
 	}
 
 	default void randomSchemaOrder(SurveySchema schema) {
 		if (schema.getChildren() != null) {
 			Collections.shuffle(schema.getChildren());
-			schema.getChildren().forEach(child -> randomSchemaOrder(schema));
+			schema.getChildren().forEach(child -> randomSchemaOrder(child));
 		}
 	}
 

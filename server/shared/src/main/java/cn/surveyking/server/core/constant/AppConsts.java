@@ -169,4 +169,26 @@ public class AppConsts {
 
 	}
 
+	/**
+	 * 项目参与者状态
+	 */
+	public interface ProjectPartnerStatus {
+
+		/**
+		 * 未访问
+		 */
+		int UNVISITED = 0;
+
+		/**
+		 * 已访问
+		 */
+		int VISITED = 1;
+
+		/**
+		 * 已答题
+		 */
+		int ANSWERED = 2;
+
+	}
+
 }

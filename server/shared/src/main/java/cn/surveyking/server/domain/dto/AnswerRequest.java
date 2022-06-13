@@ -36,4 +36,14 @@ public class AnswerRequest {
 
 	private String whitelistName;
 
+	/**
+	 * 创建人
+	 */
+	private String createBy;
+
+	/**
+	 * 修改人
+	 */
+	private String updateBy;
+
 }

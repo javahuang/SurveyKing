@@ -155,11 +155,11 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 			answerView = answerViewMapper.toAnswerView(getById(query.getId()));
 		}
 		else if (query.getProjectId() != null && Boolean.TRUE.equals(query.getLatest())) {
-			answerView = answerViewMapper
-					.toAnswerView(list(Wrappers.<Answer>lambdaQuery().eq(Answer::getProjectId, query.getProjectId())
-							.eq(SecurityContextUtils.isAuthenticated(), Answer::getCreateBy,
-									SecurityContextUtils.getUserId())
-							.orderByDesc(Answer::getCreateAt)).stream().findFirst().orElse(null));
+			answerView = answerViewMapper.toAnswerView(list(Wrappers.<Answer>lambdaQuery()
+					.eq(Answer::getProjectId, query.getProjectId())
+					.eq(SecurityContextUtils.isAuthenticated(), Answer::getCreateBy, SecurityContextUtils.getUserId())
+					.eq(query.getCreateBy() != null, Answer::getCreateBy, query.getCreateBy())
+					.orderByDesc(Answer::getCreateAt)).stream().findFirst().orElse(null));
 		}
 		if (answerView == null) {
 			return null;
@@ -497,10 +497,6 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		}
 	}
 
-	private void replaceWithVariable(String variableName) {
-
-	}
-
 	/**
 	 * 获取文件后缀
 	 * @param fileName 文件名称
@@ -526,7 +522,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
 	private Answer beforeSaveAnswer(Answer answer) {
 		Project project = projectMapper.selectById(answer.getProjectId());
-		if (ProjectModeEnum.exam.equals(project.getMode())) {
+		if (ProjectModeEnum.exam.equals(project.getMode()) && answer.getAnswer() != null) {
 			AnswerScoreEvaluator evaluator = new AnswerScoreEvaluator(project.getSurvey(), answer.getAnswer());
 			answer.setExamScore(evaluator.eval());
 			AnswerExamInfo examInfo = new AnswerExamInfo();
