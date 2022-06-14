@@ -1,10 +1,13 @@
 package cn.surveyking.server.impl;
 
 import cn.surveyking.server.core.constant.AppConsts;
+import cn.surveyking.server.core.constant.ErrorCode;
 import cn.surveyking.server.core.constant.LocalStorageNameStrategyEnum;
 import cn.surveyking.server.core.constant.LocalStoragePathStrategyEnum;
-import cn.surveyking.server.core.uitls.HTTPUtils;
+import cn.surveyking.server.core.exception.ErrorCodeException;
 import cn.surveyking.server.core.uitls.BarcodeReader;
+import cn.surveyking.server.core.uitls.HTTPUtils;
+import cn.surveyking.server.core.uitls.NanoIdUtils;
 import cn.surveyking.server.domain.dto.FileQuery;
 import cn.surveyking.server.domain.dto.FileView;
 import cn.surveyking.server.domain.dto.UploadFileRequest;
@@ -19,11 +22,13 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,14 +36,15 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
+
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * @author javahuang
@@ -69,6 +75,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 		MultipartFile uploadFile = request.getFile();
 		String filePath = getFileNameByStrategy(Objects.requireNonNull(uploadFile.getOriginalFilename()));
 		File file = new File();
+		file.setId(NanoIdUtils.randomNanoId());
 		file.setStorageType(request.getFileType());
 		file.setOriginalName(uploadFile.getOriginalFilename());
 		file.setFileName(filePath);
@@ -157,16 +164,11 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 		File file = getById(fileId);
 		if (file == null) {
 			log.error("未找到对应的文件 {}", fileId);
-			return null;
+			throw new ErrorCodeException(ErrorCode.FileNotExists);
 		}
-		MediaType mediaType;
-		try {
-			mediaType = MediaType.parseMediaType(Files.probeContentType(Paths.get(file.getFilePath())));
-		}
-		catch (Exception e) {
-			mediaType = MediaType.APPLICATION_OCTET_STREAM;
-		}
-		return ResponseEntity.ok().contentType(mediaType).headers(query.getHeaders())
+		Optional<MediaType> mediaType = MediaTypeFactory.getMediaType(file.getOriginalName());
+		return ResponseEntity.ok().contentType(mediaType.orElse(MediaType.APPLICATION_OCTET_STREAM))
+				.headers(query.getHeaders())
 				.header(HttpHeaders.CONTENT_DISPOSITION,
 						query.getDispositionType() == AppConsts.DispositionTypeEnum.inline
 								? AppConsts.DispositionTypeEnum.inline.name()
@@ -182,6 +184,19 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 				.header(HttpHeaders.CONTENT_DISPOSITION, HTTPUtils.getContentDispositionValue(templateName))
 				.contentType(MediaType.parseMediaType("application/vnd.ms-excel"))
 				.body(new ClassPathResource("template/" + templateName));
+	}
+
+	/**
+	 * 生成带文件后缀的id，由于配置了 STATIC_RESOURCES ，会导致单jar部署请求 /preview/xxx.xlsx 的时候报 404
+	 * @param originalName
+	 * @return
+	 */
+	private String getFileId(String originalName) {
+		String suffix = StringUtils.substringAfterLast(originalName, ".");
+		if (isEmpty(suffix)) {
+			return NanoIdUtils.randomNanoId();
+		}
+		return NanoIdUtils.randomNanoId() + "." + suffix;
 	}
 
 }

@@ -25,14 +25,12 @@ public class FileApi {
 	private final FileService fileService;
 
 	@GetMapping("/{id}")
-	@PreAuthorize("hasAuthority('file:detail')")
 	public ResponseEntity<Resource> getFile(@NotEmpty @PathVariable String id, FileQuery query) {
 		query.setId(id);
 		return fileService.loadFile(query);
 	}
 
 	@GetMapping
-	@PreAuthorize("hasAuthority('file:list')")
 	public List<FileView> listImages(FileQuery query) {
 		return fileService.listFiles(query);
 	}

@@ -4,6 +4,7 @@ import cn.surveyking.server.core.security.JwtTokenFilter;
 import cn.surveyking.server.core.security.RestAuthenticationEntryPoint;
 import cn.surveyking.server.service.UserService;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -56,7 +57,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		http = http.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint).and();
 		// 所有请求都放行，目的是单 jar 部署，输入任意路由也能跳转到对应的页面，权限拦截通过注解配置
 		http.authorizeRequests().antMatchers("/api/public/**").permitAll().antMatchers("/api/system").permitAll()
-				.antMatchers("/api/**").authenticated().antMatchers("/").permitAll();
+				.antMatchers(HttpMethod.GET, "/api/files").permitAll().antMatchers("/api/**").authenticated()
+				.antMatchers("/").permitAll();
 
 		http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 	}

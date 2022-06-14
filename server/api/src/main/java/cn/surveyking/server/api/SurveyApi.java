@@ -56,10 +56,11 @@ public class SurveyApi {
 	}
 
 	@GetMapping("/preview/{attachmentId}")
-	public ResponseEntity<Resource> preview(@PathVariable String attachmentId) {
+	public ResponseEntity<Resource> preview(@PathVariable("attachmentId") String attachmentId) {
 		FileQuery query = new FileQuery(attachmentId);
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(HttpHeaders.CACHE_CONTROL, CacheControl.maxAge(Duration.ofDays(30)).getHeaderValue());
+		query.setDispositionType(AppConsts.DispositionTypeEnum.inline);
 		query.setHeaders(headers);
 		return fileService.loadFile(query);
 	}
