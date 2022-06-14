@@ -26,4 +26,11 @@ public class ProjectQuery extends PageQuery {
 
 	private LinkedHashMap<String, Object> answer;
 
+	private String answerId;
+
+	public void setAnswer(LinkedHashMap<String, Object> answer) {
+		this.answer = answer;
+
+	}
+
 }

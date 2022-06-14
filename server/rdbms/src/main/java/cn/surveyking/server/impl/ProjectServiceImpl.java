@@ -103,7 +103,7 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 	}
 
 	private String generateProjectId() {
-		String projectId = NanoIdUtils.randomNanoId();
+		String projectId = NanoIdUtils.randomNanoId(6);
 		// 不要以数字开头，否则工作流 xml 保存会报错
 		if (Character.isDigit(projectId.charAt(0))) {
 			return generateProjectId();

@@ -1,5 +1,6 @@
 package cn.surveyking.server.api;
 
+import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.service.FileService;
 import cn.surveyking.server.service.SurveyService;
@@ -30,12 +31,7 @@ public class SurveyApi {
 
 	@PostMapping("/loadProject")
 	public PublicProjectView loadProject(@RequestBody ProjectQuery query) {
-		return surveyService.loadProject(query.getId());
-	}
-
-	@PostMapping("/loadAnswer")
-	public PublicAnswerView loadAnswer(@RequestBody AnswerQuery query) {
-		return surveyService.loadAnswer(query);
+		return surveyService.loadProject(query);
 	}
 
 	@PostMapping("/validateProject")

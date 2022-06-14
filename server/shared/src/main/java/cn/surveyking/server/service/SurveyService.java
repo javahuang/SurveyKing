@@ -10,13 +10,11 @@ import javax.servlet.http.HttpServletRequest;
  */
 public interface SurveyService {
 
-	PublicProjectView loadProject(String projectId);
+	PublicProjectView loadProject(ProjectQuery projectQuery);
 
 	PublicStatisticsView statProject(ProjectQuery query);
 
 	PublicAnswerView saveAnswer(AnswerRequest answer, HttpServletRequest request);
-
-	PublicAnswerView loadAnswer(AnswerQuery query);
 
 	PublicQueryVerifyView loadQuery(PublicQueryRequest request);
 

@@ -62,7 +62,7 @@ public final class NanoIdUtils {
 	 * The default size used by this class. Creates NanoId Strings with slightly more
 	 * unique values than UUID v4.
 	 */
-	public static final int DEFAULT_SIZE = 6;
+	public static final int DEFAULT_SIZE = 21;
 
 	/**
 	 * Static factory to retrieve a url-friendly, pseudo randomly generated, NanoId
@@ -90,7 +90,7 @@ public final class NanoIdUtils {
 	 * @return A randomly generated NanoId String.
 	 */
 	public static String randomNanoId(int size) {
-		return randomNanoId(DEFAULT_NUMBER_GENERATOR, DEFAULT_ALPHABET, DEFAULT_SIZE);
+		return randomNanoId(DEFAULT_NUMBER_GENERATOR, DEFAULT_ALPHABET, size);
 	}
 
 	/**
@@ -159,12 +159,6 @@ public final class NanoIdUtils {
 
 			}
 
-		}
-	}
-
-	public static void main(String[] args) {
-		for (int i = 0; i < 10; i++) {
-			System.out.println(randomNanoId());
 		}
 	}
 

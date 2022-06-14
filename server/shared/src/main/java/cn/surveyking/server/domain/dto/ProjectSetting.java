@@ -114,6 +114,11 @@ public class ProjectSetting {
 		 */
 		private Integer whitelistType;
 
+		/**
+		 * 白名单答题限制
+		 */
+		private UniqueLimitSetting whitelistLimit;
+
 	}
 
 	@Data

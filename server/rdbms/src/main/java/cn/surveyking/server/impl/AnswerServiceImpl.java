@@ -522,7 +522,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
 	private Answer beforeSaveAnswer(Answer answer) {
 		Project project = projectMapper.selectById(answer.getProjectId());
-		if (ProjectModeEnum.exam.equals(project.getMode()) && answer.getAnswer() != null) {
+		if (project != null && ProjectModeEnum.exam.equals(project.getMode()) && answer != null
+				&& answer.getAnswer() != null) {
 			AnswerScoreEvaluator evaluator = new AnswerScoreEvaluator(project.getSurvey(), answer.getAnswer());
 			answer.setExamScore(evaluator.eval());
 			AnswerExamInfo examInfo = new AnswerExamInfo();

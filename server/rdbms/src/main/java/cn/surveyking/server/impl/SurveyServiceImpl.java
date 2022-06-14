@@ -14,12 +14,10 @@ import cn.surveyking.server.service.AnswerService;
 import cn.surveyking.server.service.ProjectService;
 import cn.surveyking.server.service.SurveyService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -68,16 +66,16 @@ public class SurveyServiceImpl implements SurveyService {
 
 	/**
 	 * answerService 如果需要验证密码，则只有密码输入正确之后才开始加载 schema
-	 * @param projectId
+	 * @param query
 	 * @return
 	 */
 	@Override
-	public PublicProjectView loadProject(String projectId) {
-		ProjectView project = projectService.getProject(projectId);
+	public PublicProjectView loadProject(ProjectQuery query) {
+		ProjectView project = projectService.getProject(query.getId());
+		// 获取登录验证 schema
+		SurveySchema loginFormSchema = convertAndValidateLoginFormIfNeeded(project, null);
 		// 校验问卷
 		validateProject(project);
-		// 登录验证
-		SurveySchema loginFormSchema = convertAndValidateLoginFormIfNeeded(project, null);
 		// 如果需要登录，将问卷 schema 替换成登录表单的 schema
 		PublicProjectView projectView = projectViewMapper.toPublicProjectView(project);
 		if (loginFormSchema != null) {
@@ -101,9 +99,10 @@ public class SurveyServiceImpl implements SurveyService {
 	public PublicProjectView validateProject(ProjectQuery query) {
 		String projectId = query.getId();
 		ProjectView project = projectService.getProject(projectId);
+		// 登录验证
+		convertAndValidateLoginFormIfNeeded(project, query.getAnswer());
 		// 校验问卷
 		validateProject(project);
-		convertAndValidateLoginFormIfNeeded(project, query.getAnswer());
 		PublicProjectView projectView = projectViewMapper.toPublicProjectView(project);
 		projectView.setAnswer(getLatestAnswer(projectView, (String) SchemaHelper.getLoginFormAnswer(query.getAnswer(),
 				SchemaHelper.LoginFormFieldEnum.whitelistName)));
@@ -159,28 +158,6 @@ public class SurveyServiceImpl implements SurveyService {
 		request.setId(answerView.getId());
 		updateProjectPartnerByAnswer(request, project);
 		return result;
-	}
-
-	@Override
-	public PublicAnswerView loadAnswer(AnswerQuery query) {
-		ProjectSetting setting = null;
-		try {
-			ProjectView project = projectService.getProject(query.getProjectId());
-			setting = project.getSetting();
-			validateProject(project);
-		}
-		catch (ErrorCodeException e) {
-			// 401 开头的是校验问卷限制，修改答案的时候无需校验
-			if (!(e.getErrorCode().code + "").startsWith("401")) {
-				throw e;
-			}
-		}
-		if (!Boolean.TRUE.equals(setting.getSubmittedSetting().getEnableUpdate())) {
-			throw new ErrorCodeException(ErrorCode.AnswerChangeDisabled);
-		}
-		PublicAnswerView answerView = new PublicAnswerView();
-		BeanUtils.copyProperties(answerService.getAnswer(query), answerView);
-		return answerView;
 	}
 
 	/**
@@ -267,6 +244,10 @@ public class SurveyServiceImpl implements SurveyService {
 		if (setting.getAnswerSetting().getIpLimit() != null) {
 			validateIpLimit(projectId, setting);
 		}
+		// 白名单限制
+		if (setting.getAnswerSetting().getWhitelistLimit() != null) {
+			validateWhitelistLimit(projectId, setting);
+		}
 		validateExamSetting(project);
 		return setting;
 	}
@@ -345,7 +326,7 @@ public class SurveyServiceImpl implements SurveyService {
 			ProjectPartner partner = projectPartnerMapper.selectOne(
 					Wrappers.<ProjectPartner>lambdaQuery().eq(ProjectPartner::getProjectId, projectView.getId())
 							.eq(ProjectPartner::getUserName, whitelistName));
-			if (partner != null) {
+			if (partner != null && !SecurityContextUtils.isAuthenticated()) {
 				answerQuery.setCreateBy(partner.getId());
 			}
 		}
@@ -396,7 +377,7 @@ public class SurveyServiceImpl implements SurveyService {
 		AnswerQuery query = new AnswerQuery();
 		query.setProjectId(projectId);
 		query.setCreateBy(userId);
-		doValidate(setting, query);
+		doValidate(setting, query, setting.getAnswerSetting().getLoginLimit());
 	}
 
 	private void validateCookieLimit(String projectId, ProjectSetting setting) {
@@ -418,7 +399,7 @@ public class SurveyServiceImpl implements SurveyService {
 		AnswerQuery query = new AnswerQuery();
 		query.setProjectId(projectId);
 		query.setCookie(limitCookie.getValue());
-		doValidate(setting, query);
+		doValidate(setting, query, setting.getAnswerSetting().getCookieLimit());
 	}
 
 	private void validateIpLimit(String projectId, ProjectSetting setting) {
@@ -431,12 +412,21 @@ public class SurveyServiceImpl implements SurveyService {
 		AnswerQuery query = new AnswerQuery();
 		query.setProjectId(projectId);
 		query.setIp(ip);
-		doValidate(setting, query);
+		doValidate(setting, query, setting.getAnswerSetting().getIpLimit());
 	}
 
-	private void doValidate(ProjectSetting setting, AnswerQuery query) {
-		ProjectSetting.UniqueLimitSetting limitSetting = setting.getAnswerSetting().getIpLimit();
+	private void validateWhitelistLimit(String projectId, ProjectSetting setting) {
+		AnswerQuery query = new AnswerQuery();
+		query.setProjectId(projectId);
+		// 如果白名单校验成功，导入用户获取partner表的id，系统用户是当前登录用户 id
+		String createBy = (String) ContextHelper.getCurrentHttpRequest().getAttribute("createBy");
+		if (createBy != null) {
+			query.setCreateBy(createBy);
+			doValidate(setting, query, setting.getAnswerSetting().getWhitelistLimit());
+		}
+	}
 
+	private void doValidate(ProjectSetting setting, AnswerQuery query, ProjectSetting.UniqueLimitSetting limitSetting) {
 		// 通过 cron 计算时间窗
 		CronHelper helper = new CronHelper(limitSetting.getLimitFreq().getCron());
 		Tuple2<LocalDateTime, LocalDateTime> currentWindow = helper.currentWindow();
@@ -648,7 +638,7 @@ public class SurveyServiceImpl implements SurveyService {
 		boolean loginRequired = false;
 		// 需要更新答题者为已访问的状态
 		boolean updatePartnerVisited = false;
-		LambdaUpdateWrapper<ProjectPartner> projectPartnerUpdater = Wrappers.<ProjectPartner>lambdaUpdate()
+		LambdaQueryWrapper<ProjectPartner> projectPartnerQuery = Wrappers.<ProjectPartner>lambdaQuery()
 				.eq(ProjectPartner::getProjectId, project.getId());
 		Authentication authentication = null;
 		List<SurveySchema> queryConditions = new ArrayList<>();
@@ -694,7 +684,7 @@ public class SurveyServiceImpl implements SurveyService {
 						throw new ErrorCodeException(ErrorCode.PermVerifyFailed);
 					}
 					updatePartnerVisited = true;
-					projectPartnerUpdater.eq(ProjectPartner::getUserId, SecurityContextUtils.getUserId());
+					projectPartnerQuery.eq(ProjectPartner::getUserId, SecurityContextUtils.getUserId());
 				}
 				else {
 					// 需要执行登录操作
@@ -719,7 +709,7 @@ public class SurveyServiceImpl implements SurveyService {
 						}
 
 						updatePartnerVisited = true;
-						projectPartnerUpdater.eq(ProjectPartner::getUserId, user.getUserId());
+						projectPartnerQuery.eq(ProjectPartner::getUserId, user.getUserId());
 					}
 				}
 			}
@@ -745,7 +735,7 @@ public class SurveyServiceImpl implements SurveyService {
 					}
 
 					updatePartnerVisited = true;
-					projectPartnerUpdater.eq(ProjectPartner::getUserName, whitelistName);
+					projectPartnerQuery.eq(ProjectPartner::getUserName, whitelistName);
 				}
 			}
 
@@ -763,9 +753,12 @@ public class SurveyServiceImpl implements SurveyService {
 
 		// 更新问卷状态为已访问
 		if (updatePartnerVisited) {
-			ProjectPartner projectPartner = new ProjectPartner();
-			projectPartner.setStatus(AppConsts.ProjectPartnerStatus.VISITED);
-			projectPartnerMapper.update(projectPartner, projectPartnerUpdater);
+			ProjectPartner projectPartner = projectPartnerMapper.selectOne(projectPartnerQuery);
+			if (projectPartner != null) {
+				projectPartner.setStatus(AppConsts.ProjectPartnerStatus.VISITED);
+				ContextHelper.getCurrentHttpRequest().setAttribute("createBy", SecurityContextUtils.isAuthenticated()
+						? SecurityContextUtils.getUserId() : projectPartner.getId());
+			}
 		}
 
 		if (loginRequired) {

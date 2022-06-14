@@ -58,7 +58,7 @@ public interface ProjectViewMapper {
 		schema.getAttribute().setExamCorrectAnswer(null);
 		schema.getAttribute().setExamScore(null);
 		schema.getAttribute().setExamMatchRule(null);
-		
+
 		if (schema.getChildren() != null) {
 			randomSchemaOrder(schema);
 		}

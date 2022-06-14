@@ -16,7 +16,7 @@ import java.util.LinkedHashMap;
 public class PublicProjectView {
 
 	private String id;
-	
+
 	private SurveySchema survey;
 
 	private Integer status;
@@ -38,4 +38,5 @@ public class PublicProjectView {
 	private String answerId;
 
 	LinkedHashMap<String, Object> answer;
+
 }
