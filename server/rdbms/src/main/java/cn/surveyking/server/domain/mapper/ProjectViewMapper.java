@@ -36,6 +36,7 @@ public interface ProjectViewMapper {
 
 	@AfterMapping
 	default void calledWithSourceAndTargetType(ProjectView source, @MappingTarget PublicProjectView view) {
+		view.setSurvey(view.getSurvey().deepCopy());
 		// 非练习模式需要去掉 schema 里面的答案信息
 		if (ProjectModeEnum.exam.equals(source.getMode())
 				&& !((source.getSetting() != null && source.getSetting().getExamSetting() != null
@@ -44,7 +45,7 @@ public interface ProjectViewMapper {
 		}
 		// 考试模式，随机问题顺序
 		if (ProjectModeEnum.exam.equals(source.getMode())
-				&& !((source.getSetting() != null && source.getSetting().getExamSetting() != null
+				&& ((source.getSetting() != null && source.getSetting().getExamSetting() != null
 						&& Boolean.TRUE.equals(source.getSetting().getExamSetting().getRandomOrder())))) {
 			randomSchemaOrder(view.getSurvey());
 		}
@@ -58,10 +59,6 @@ public interface ProjectViewMapper {
 		schema.getAttribute().setExamCorrectAnswer(null);
 		schema.getAttribute().setExamScore(null);
 		schema.getAttribute().setExamMatchRule(null);
-
-		if (schema.getChildren() != null) {
-			randomSchemaOrder(schema);
-		}
 	}
 
 	default void randomSchemaOrder(SurveySchema schema) {

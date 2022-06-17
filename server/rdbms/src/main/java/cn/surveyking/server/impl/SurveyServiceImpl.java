@@ -181,18 +181,22 @@ public class SurveyServiceImpl implements SurveyService {
 		PublicQueryView view = new PublicQueryView();
 		view.setSchema(schema);
 		List<Answer> answers = findAnswerByQuery(request, projectAndQuery);
-		answers.forEach(answer -> {
-			filterAnswerByFieldPermission(answer.getAnswer(), projectAndQuery.getSecond().getFieldPermission());
-		});
-
-		view.setAnswers(answers.stream().map(x -> {
+		// 根据配置的权限信息过滤答案
+		LinkedHashMap<String, Integer> fieldPermission = projectAndQuery.getSecond().getFieldPermission();
+		view.setFieldPermission(fieldPermission);
+		view.setAnswers(answers.stream().map(answer -> {
+			filterAnswerByFieldPermission(answer.getAnswer(), fieldPermission);
 			PublicAnswerView answerView = new PublicAnswerView();
-			answerView.setAnswerId(x.getId());
-			answerView.setAnswer(x.getAnswer());
-			answerView.setCreateAt(x.getCreateAt());
+			answerView.setAnswerId(answer.getId());
+			answerView.setAnswer(answer.getAnswer());
+			if (FieldPermissionType.visible.equals(fieldPermission.get("examScore"))
+					|| FieldPermissionType.editable.equals(fieldPermission.get("examScore"))) {
+				// 公开查询允许查询分值
+				answer.getAnswer().put("examScore", Collections.singletonMap("examScore", answer.getExamScore()));
+			}
+			answerView.setCreateAt(answer.getCreateAt());
 			return answerView;
 		}).collect(Collectors.toList()));
-		view.setFieldPermission(projectAndQuery.getSecond().getFieldPermission());
 		return view;
 	}
 
@@ -537,6 +541,13 @@ public class SurveyServiceImpl implements SurveyService {
 		}
 		else {
 			schema.setAttribute(null);
+		}
+		if (ProjectModeEnum.exam.equals(project.getMode())) {
+			schema.getChildren()
+					.add(SurveySchema.builder().id("examScore").title("分数").type(SurveySchema.QuestionType.FillBlank)
+							.attribute(SurveySchema.Attribute.builder().readOnly(true).build())
+							.children(Collections.singletonList(SurveySchema.builder().id("examScore").build()))
+							.build());
 		}
 		return schema;
 	}

@@ -322,10 +322,17 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 				// 第一行作为行头
 				rows.forEach(r -> {
 					int rowNum = r.getRowNum();
-					if (rowNum == 1 && Boolean.TRUE.equals(request.getAutoSchema())) {
-						ProjectView projectView = parseRow2Schema(r, name, request.getParentId());
-						view.setProjectId(projectView.getId());
-						view.setSchema(projectView.getSurvey());
+					if (rowNum == 1) {
+						if (request.getProjectId() != null) {
+							ProjectView projectView = projectService.getProject(request.getProjectId());
+							view.setProjectId(projectView.getId());
+							view.setSchema(filterSchemaByRow(r, projectView.getSurvey()));
+						}
+						else if (Boolean.TRUE.equals(request.getAutoSchema())) {
+							ProjectView projectView = parseRow2Schema(r, name, request.getParentId());
+							view.setProjectId(projectView.getId());
+							view.setSchema(projectView.getSurvey());
+						}
 					}
 					else {
 						// 处理答案
@@ -560,6 +567,15 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		return schema;
 	}
 
+	private SurveySchema filterSchemaByRow(Row row, SurveySchema schema) {
+		List<SurveySchema> flatSurveySchema = SchemaHelper.flatSurveySchema(schema);
+		return SurveySchema.builder().id(schema.getId()).children(row.stream().map(cell -> {
+			String title = cell.getText();
+			return flatSurveySchema.stream().filter(x -> x.getTitle().equals(title)).findFirst()
+					.orElse(SurveySchema.builder().build());
+		}).collect(Collectors.toList())).build();
+	}
+
 	private Answer parseRow2Answer(AnswerUploadView view, Row r) {
 		Answer answer = new Answer();
 		answer.setProjectId(view.getProjectId());
@@ -568,6 +584,9 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		for (SurveySchema questionSchema : view.getSchema().getChildren()) {
 			String cellValue = r.getCellText(i);
 			String questionId = questionSchema.getId();
+			if (questionSchema.getChildren() == null || questionSchema.getChildren().size() == 0) {
+				continue;
+			}
 			String optionId = questionSchema.getChildren().get(0).getId();
 			if (cellValue != null) {
 				Map<String, String> optionValue = new LinkedHashMap<>();
