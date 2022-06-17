@@ -690,12 +690,14 @@ public class SurveyServiceImpl implements SurveyService {
 				if (SecurityContextUtils.isAuthenticated()) {
 					boolean currentHasPerm = projectPartnerMapper.selectCount(
 							Wrappers.<ProjectPartner>lambdaQuery().eq(ProjectPartner::getProjectId, project.getId())
+									.eq(ProjectPartner::getType, ProjectPartnerTypeEnum.RESPONDENT_SYS_USER.getType())
 									.eq(ProjectPartner::getUserId, SecurityContextUtils.getUserId())) == 1;
 					if (!currentHasPerm) {
 						throw new ErrorCodeException(ErrorCode.PermVerifyFailed);
 					}
 					updatePartnerVisited = true;
-					projectPartnerQuery.eq(ProjectPartner::getUserId, SecurityContextUtils.getUserId());
+					projectPartnerQuery.eq(ProjectPartner::getUserId, SecurityContextUtils.getUserId())
+							.eq(ProjectPartner::getType, ProjectPartnerTypeEnum.RESPONDENT_SYS_USER.getType());
 				}
 				else {
 					// 需要执行登录操作
@@ -720,7 +722,8 @@ public class SurveyServiceImpl implements SurveyService {
 						}
 
 						updatePartnerVisited = true;
-						projectPartnerQuery.eq(ProjectPartner::getUserId, user.getUserId());
+						projectPartnerQuery.eq(ProjectPartner::getUserId, user.getUserId()).eq(ProjectPartner::getType,
+								ProjectPartnerTypeEnum.RESPONDENT_SYS_USER.getType());
 					}
 				}
 			}
@@ -746,7 +749,8 @@ public class SurveyServiceImpl implements SurveyService {
 					}
 
 					updatePartnerVisited = true;
-					projectPartnerQuery.eq(ProjectPartner::getUserName, whitelistName);
+					projectPartnerQuery.eq(ProjectPartner::getUserName, whitelistName).eq(ProjectPartner::getType,
+							ProjectPartnerTypeEnum.RESPONDENT_IMP_USER.getType());
 				}
 			}
 
@@ -767,8 +771,14 @@ public class SurveyServiceImpl implements SurveyService {
 			ProjectPartner projectPartner = projectPartnerMapper.selectOne(projectPartnerQuery);
 			if (projectPartner != null) {
 				projectPartner.setStatus(AppConsts.ProjectPartnerStatus.VISITED);
-				ContextHelper.getCurrentHttpRequest().setAttribute("createBy", SecurityContextUtils.isAuthenticated()
-						? SecurityContextUtils.getUserId() : projectPartner.getId());
+				projectPartnerMapper.updateById(projectPartner);
+				// 如果配置的外部用户，则 createBy 为 partner 的 id，如果是内部用户则是用户 id
+				if (projectPartner.getUserName() != null) {
+					ContextHelper.getCurrentHttpRequest().setAttribute("createBy", projectPartner.getId());
+				}
+				else if (projectPartner.getUserId() != null) {
+					ContextHelper.getCurrentHttpRequest().setAttribute("createBy", SecurityContextUtils.getUserId());
+				}
 			}
 		}
 
@@ -810,19 +820,20 @@ public class SurveyServiceImpl implements SurveyService {
 			LambdaQueryWrapper<ProjectPartner> queryWrapper = Wrappers.<ProjectPartner>lambdaQuery()
 					.eq(ProjectPartner::getProjectId, project.getId());
 			if (ProjectPartnerTypeEnum.RESPONDENT_SYS_USER.getType() == whitelistType) {
-				queryWrapper.eq(ProjectPartner::getUserId, SecurityContextUtils.getUserId());
+				queryWrapper.eq(ProjectPartner::getUserId, SecurityContextUtils.getUserId()).eq(ProjectPartner::getType,
+						ProjectPartnerTypeEnum.RESPONDENT_SYS_USER.getType());
 			}
 			else if (ProjectPartnerTypeEnum.RESPONDENT_IMP_USER.getType() == whitelistType) {
-				queryWrapper.eq(ProjectPartner::getUserName, request.getWhitelistName());
+				queryWrapper.eq(ProjectPartner::getUserName, request.getWhitelistName()).eq(ProjectPartner::getType,
+						ProjectPartnerTypeEnum.RESPONDENT_IMP_USER.getType());
 			}
 
 			ProjectPartner projectPartner = projectPartnerMapper.selectOne(queryWrapper);
 			projectPartner.setStatus(AppConsts.ProjectPartnerStatus.ANSWERED);
 			projectPartnerMapper.updateById(projectPartner);
 
-			// 白名单答题需要更新答案表的 createBy 为 partner 的 id
-			if (ProjectPartnerTypeEnum.RESPONDENT_IMP_USER.getType() == whitelistType
-					&& !SecurityContextUtils.isAuthenticated()) {
+			// 白名单导入用户答题需要更新答案表的 createBy 为 partner 的 id
+			if (ProjectPartnerTypeEnum.RESPONDENT_IMP_USER.getType() == whitelistType) {
 				AnswerRequest answerUpdateRequest = new AnswerRequest();
 				answerUpdateRequest.setId(request.getId());
 				answerUpdateRequest.setCreateBy(projectPartner.getId());

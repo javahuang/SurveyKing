@@ -35,13 +35,13 @@ public class ProjectPartner extends BaseModel {
 	private Integer status;
 
 	/**
-	 * 参与者id
+	 * 参与者id，内部用户白名单使用
 	 */
 	@TableField(value = "user_id")
 	private String userId;
 
 	/**
-	 * 参与者姓名
+	 * 参与者姓名，导入白名单使用
 	 */
 	@TableField(value = "user_name")
 	private String userName;
