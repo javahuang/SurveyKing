@@ -10,8 +10,10 @@ import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.domain.mapper.AnswerViewMapper;
 import cn.surveyking.server.domain.model.Answer;
 import cn.surveyking.server.domain.model.Project;
+import cn.surveyking.server.domain.model.ProjectPartner;
 import cn.surveyking.server.mapper.AnswerMapper;
 import cn.surveyking.server.mapper.ProjectMapper;
+import cn.surveyking.server.mapper.ProjectPartnerMapper;
 import cn.surveyking.server.service.*;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -59,6 +61,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	private final DeptService deptService;
 
 	private final ProjectService projectService;
+
+	private final ProjectPartnerMapper projectPartnerMapper;
 
 	@Override
 	public PaginationResponse<AnswerView> listAnswer(AnswerQuery query) {
@@ -144,6 +148,12 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 			UserInfo userInfo = userService.loadUserById(answerView.getCreateBy());
 			if (userInfo != null) {
 				answerView.setCreateByName(userInfo.getName());
+				return;
+			}
+			ProjectPartner projectPartner = projectPartnerMapper.selectById(answerView.getCreateBy());
+			if (projectPartner != null) {
+				answerView.setCreateByName(projectPartner.getUserName());
+				return;
 			}
 		}
 	}
