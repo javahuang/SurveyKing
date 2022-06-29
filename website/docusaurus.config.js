@@ -43,7 +43,7 @@ module.exports = {
     announcementBar: {
       id: "new_version_rc.2",
       content:
-        '版本 v0.3.0-rc.3 已发布! 🎉 点击 <a target="_blank" rel="noopener noreferrer" href="/docs/quickstart">quickstart</a> 开始吧!  Q群(338461197)',
+        '版本 v0.3.2 已发布! 🎉 点击 <a target="_blank" rel="noopener noreferrer" href="/docs/quickstart">quickstart</a> 开始吧!  Q群(338461197)',
       backgroundColor: "#FF5B79",
       textColor: "black",
       isCloseable: true,
