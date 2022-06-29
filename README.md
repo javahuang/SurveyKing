@@ -2,13 +2,56 @@
 
 简体中文 | [English](./README.en-us.md)
 
-## [一文了解开源考试系统天花板-卷王](https://zhuanlan.zhihu.com/p/509950590)
+功能更强大的调查问卷、考试系统，很多功能体验超过问卷网、问卷星。
 
-## [一文了解开源调查问卷天花板-卷王](https://zhuanlan.zhihu.com/p/505131248)
+需要您的 star ⭐️⭐️⭐️ 支持鼓励 🙏🙏🙏，**右上角点 Star (非强制)加QQ群([338461197](https://qm.qq.com/cgi-bin/qm/qr?k=yJ8K8BUR0XxDi-KX3r2CBjDpMEuRHbG9&authKey=a518l1HYfk2Nte1WVAMl97+H96zOW5iNveohr15Vj1av8OQewJOFRDbTjDpyHcdR&noverify=0))获取最新的数据库脚本**。
 
-## [一文了解开源公开查询系统天花板-卷王](https://zhuanlan.zhihu.com/p/518342894)
+ [在线预览 点击试一试无需注册登录](https://s.surveyking.cn)
 
-需要您的 star ⭐️⭐️⭐️ 支持鼓励 🙏🙏🙏，**点 star 加群(338461197)获取最新的数据库脚本**。
+## 🚀 1 分钟快速体验调查问卷系统(无需安装数据库)
+
+1. 下载 [卷王快速体验安装包](https://pan.baidu.com/s/1G6A1V2V4WjGJXopPXpRLNA?pwd=1234)
+2. 解压，双击运行 start.bat
+3. 打开浏览器访问 [http://localhost:1991](http://localhost:1991)，输入账号密码： *admin*/*123456*
+
+## 特性
+
+- 🥇 支持 20 多种题型，如填空、选择、下拉、级联、矩阵、分页、签名、题组、上传等
+- 🎉 多种创建问卷方式，Excel导入问卷、文本导入问卷、在线编辑器编辑问卷
+- 💪 多种问卷设置，支持白名单答卷、公开查询、答卷限制等
+- 🎇 数据，支持问卷数据新增、编辑、标记、导出、预览和打包下载附件
+- 🎨 报表，支持对问题实时统计分析并以图形（条形图、柱形图、扇形图）、表格的形式展示输出
+- 🚀 安装部署简单（**最快 1 分钟部署**），支持 nginx 部署和一键启动的方式
+- 🥊 响应式布局，所有页面在 PC 和手机端都有良好的操作体验，支持手机端编辑问卷
+- 👬 支持多人协作管理问卷
+- 🎁 后端支持多种数据库，可支持所有带有 jdbc 驱动的关系型数据库
+- 🐯 安全、可靠、稳定、高性能的后端 API 服务
+- 🙆 支持完善的 RBAC 权限控制
+- 😊 支持**工作流**，工作流代码已全部开源
+- 🦋 可计算，分为**逻辑计算**、**值计算**、**文本替换计算**、**必填计算**，[点击体验](https://s.surveyking.cn/s/logic8)
+- ...
+
+
+## 问卷产品对比
+
+|            | [问卷网](https://www.wenjuan.com/) | [腾讯问卷](https://wj.qq.com) | [问卷星](https://www.wjx.cn/) | [金数据](https://jinshuju.net/) | [卷王](https://surveyking.cn/) |      | [卷王](https://surveyking.cn/) |
+| ---------- | ------------------------------- | -------------------------- | -------------------------- | ---------------------------- | --------------------------- | ---- | --------------------------- |
+| 问卷调查   | ✔️                            | ✔️                       | ✔️                       | ✔️                         | ✔️                        | ✔️ | ✔️                        |
+| 在线考试   | ✔️                            | ❌                         | ✔️                       | ✔️                         | ✔️                        | ❌   | ✔️                        |
+| 投票       | ✔️                            | ✔️                       | ✔️                       | ✔️                         | ✔️                        | ❌   | ✔️                        |
+| 支持题型   | 🥇                              | 🥉                         | 🥇                         | 🥈                           | 🥈                          | 🥉   | 🥈                          |
+| 题型设置   | 🥇                              | 🥉                         | 🥇                         | 🥇                           | 🥇                          | 🥉   | 🥇                          |
+| 工作流     | ❌                              | ❌                         | ❌                         | ❌                           | ✔️                        | ❌   | ✔️                        |
+| 自动计算   | ❌                              | ❌                         | 🥉                         | 🥈                           | 🥇                          | ❌   | 🥇                          |
+| 逻辑设置   | 🥈                              | 🥈                         | 🥈                         | 🥈                           | 🥇                          | 🥉   | 🥇                          |
+| 自定义校验 | ❌                              | ❌                         | ❌                         | ❌                           | ✔️                        | ❌   | ✔️                        |
+| 自定义导出 | 🥈                              | ❌                         | ❌                         | 🥉                           | 🥇                          | ❌   | 🥇                          |
+| 手机端编辑 | ✔️                            | ✔️                       | ✔️                       | ✔️                         | ✔️                        | ❌   | ✔️                        |
+| 私有部署   | 💰💰💰                          | 💰💰💰                     | 💰💰💰                     | 💰💰💰                       | 💰                          | 💰💰 | 🆓                          |
+
+注: 上表与卷王对比的全部是商业问卷产品，他们有很多地方值得卷王学习，仅列出部分主要功能供大家参考，如果对结果有疑问，可以点击对应产品的链接自行对比体验。
+
+🥇强  🥈中 🥉弱
 
 ## 考试预览
 
@@ -66,67 +109,6 @@
     </tr>
 </table>
 
-## 问卷产品对比
-
-|            | [问卷网](https://www.wenjuan.com/) | [腾讯问卷](https://wj.qq.com) | [问卷星](https://www.wjx.cn/) | [金数据](https://jinshuju.net/) | [填鸭企业版](https://www.tduckcloud.com/) | [调问企业版](https://www.diaowen.net/) | [卷王](https://surveyking.cn/) | 演示                                 |
-| ---------- | ------------------------------- | -------------------------- | -------------------------- | ---------------------------- | -------------------------------------- | ----------------------------------- | --------------------------- | ------------------------------------ |
-| 问卷调查   | ✔️                            | ✔️                       | ✔️                       | ✔️                         | ✔️                                   | ✔️                                | ✔️                        | [Go](https://wj.surveyking.cn/s/j02tex) |
-| 在线考试   | ✔️                            | ❌                         | ✔️                       | ✔️                         | ❌                                     | ❌                                  | ✔️                        | [Go](https://wj.surveyking.cn/s/QYHDWT) |
-| 投票       | ✔️                            | ✔️                       | ✔️                       | ✔️                         | ❌                                     | ❌                                  | ✔️                        | [Go](https://wj.surveyking.cn/s/ELt5zm) |
-| 支持题型   | 🥇                              | 🥉                         | 🥇                         | 🥈                           | 🥈                                     | 🥉                                  | 🥈                          | [Go](https://wj.surveyking.cn/s/VK6vc4) |
-| 题型设置   | 🥇                              | 🥉                         | 🥇                         | 🥇                           | 🥉                                     | 🥉                                  | 🥇                          |                                      |
-| 工作流     | ❌                              | ❌                         | ❌                         | ❌                           | ✔️                                   | ❌                                  | ✔️                        |                                      |
-| 自动计算   | ❌                              | ❌                         | 🥉                         | 🥈                           | ❌                                     | ❌                                  | 🥇                          | [Go](https://wj.surveyking.cn/s/v16HuM) |
-| 逻辑设置   | 🥈                              | 🥈                         | 🥈                         | 🥈                           | 🥉                                     | 🥉                                  | 🥇                          | [Go](https://wj.surveyking.cn/s/ke6vOv) |
-| 自定义校验 | ❌                              | ❌                         | ❌                         | ❌                           | ❌                                     | ❌                                  | ✔️                        | [Go](https://wj.surveyking.cn/s/E1qiBC) |
-| 自定义导出 | 🥈                              | ❌                         | ❌                         | 🥉                           | ❌                                     | ❌                                  | 🥇                          |                                      |
-| 手机端编辑 | ✔️                            | ✔️                       | ✔️                       | ✔️                         | ❌                                     | ❌                                  | ✔️                        |                                      |
-| 私有部署   | 💰💰💰                          | 💰💰💰                     | 💰💰💰                     | 💰💰💰                       | 💰                                     | 💰💰                                | 🆓                          |                                      |
-
-注: 上表与卷王对比的全部是商业问卷产品，他们有很多地方值得卷王学习，仅列出部分主要功能供大家参考，如果对结果有疑问，可以点击对应产品的链接自行对比体验。
-
-🥇强  🥈中 🥉弱
-
-## 预览
-
-问卷编辑
-
-<img src="./docs/preview.jpg" width = "100%" alt="" align=center />
-
-考试编辑
-
-<img src="./docs/exam.jpg" width = "100%" alt="" align=center />
-
-<details>
-  <summary>预览</summary>
-
-  ![preview-surveyking](./docs/preview.gif)
-
-</details>
-
-## 🚀 1 分钟快速体验调查问卷系统(无需安装数据库)
-
-1. 安装 [Java 运行环境](https://www.java.com/zh-CN/download/manual.jsp)（如果本机已有 Java 环境可以忽略）
-2. 下载 [卷王安装包](https://gitee.com/surveyking/surveyking/attach_files/1002654/download/surveyking-v0.3.0-beta.10-h2.zip)
-3. 解压，双击运行 surveyking-v0.3.0-beta.10.jar
-4. 打开浏览器访问 [http://localhost:1991](http://localhost:1991)，输入账号密码： *admin*/*123456*
-
-## 特性
-
-- 🥇 支持多种题型，如填空、选择、下拉、级联、矩阵、分页、签名、题组等
-- 🎉 可计算，分为**逻辑计算**、**值计算**、**文本替换计算**、**必填计算**，[点击体验](https://s.surveyking.cn/s/logic8)
-- 🦋 问题、选项支持快速富文本编辑
-- 🥊 响应式布局，所有页面在 PC 和手机端都有良好的操作体验
-- 🥂 多种问卷设置，如支持**问卷默认值**、**暂存**、**问卷修改**、**设置密码**、背景图、页眉图、**提交后图文展示**等
-- 🎇 数据，支持问卷数据新增、编辑、标记、导出、预览和打包下载附件
-- 🎨 报表，支持对问题实时统计分析并以图形（条形图、柱形图、扇形图）、表格的形式展示输出
-- 🚀 安装部署简单（**最快 1 分钟部署**），支持 nginx 部署和一键启动的方式
-- 👬 支持多人协作管理问卷
-- 🎁 后端支持多种数据库，可支持所有带有 jdbc 驱动的关系型数据库，未来计划支持 elasticsearch
-- 🐯 安全、可靠、稳定、高性能的后端 API 服务
-- 🙆 支持完善的 RBAC 权限控制
-- 😊 支持**工作流**，工作流代码已全部开源
-- ...
 
 ## 安装
 
@@ -134,9 +116,7 @@
 
 目前已适配 mysql 数据库
 
-<!-- 点击[下载 surveyking-h2 版本](https://gitee.com/surveyking/surveyking/attach_files/948414/download/surveyking-h2-v0.2.1.jar)到本地 -->
-
-点击[下载 surveyking-mysql 版本](https://gitee.com/surveyking/surveyking/attach_files/1044180/download/surveyking-v0.3.0-beta.18.jar)到本地
+加 Q群(**[338461197](https://qm.qq.com/cgi-bin/qm/qr?k=yJ8K8BUR0XxDi-KX3r2CBjDpMEuRHbG9&authKey=a518l1HYfk2Nte1WVAMl97+H96zOW5iNveohr15Vj1av8OQewJOFRDbTjDpyHcdR&noverify=0)**)群下载最新版安装文件(`/正式版目录/surveyking-v0.x.x.jar`)到本地
 
 ### 使用源码编译安装
 
@@ -167,7 +147,7 @@ mvn clean package -DskipTests -Ppro
 # 生成的 jar 包位于 ./api/target/surveyking-v0.x.x.jar
 ```
 
-### 使用 docker 快速启动
+### 使用 docker 快速启动(非最新版本)
 
 启动 SurveyKing 镜像时，你可以指定 SurveyKing 挂载参数，将日志文件和内置数据库保存到你本地。(docker 版本目前还有点问题，待解决）
 
