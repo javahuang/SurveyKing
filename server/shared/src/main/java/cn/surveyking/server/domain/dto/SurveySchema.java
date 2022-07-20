@@ -281,6 +281,11 @@ public class SurveySchema implements Serializable {
 		 */
 		private String examAnalysis;
 
+
+		/**
+		 * 矩阵里面独立的题
+		 */
+		private Boolean exclusiveFillBlankInMatrix;
 	}
 
 	/**
