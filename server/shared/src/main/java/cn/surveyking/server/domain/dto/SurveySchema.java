@@ -286,6 +286,16 @@ public class SurveySchema implements Serializable {
 		 * 矩阵里面独立的题
 		 */
 		private Boolean exclusiveFillBlankInMatrix;
+
+		/**
+		 * 级联层级
+		 */
+		private Integer cascaderLevel;
+
+		/**
+		 * 下拉字典
+		 */
+		private String dictCode;
 	}
 
 	/**
