@@ -286,6 +286,10 @@ public class SurveySchema implements Serializable {
 		 */
 		private String dateTimeFormat;
 
+		/**
+		 * 将标题上的 ___ 解析成填空
+		 */
+		private Boolean fieldInTitle;
 
 		/**
 		 * 矩阵题左上角显示的标题
