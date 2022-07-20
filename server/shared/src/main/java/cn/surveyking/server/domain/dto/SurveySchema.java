@@ -281,6 +281,11 @@ public class SurveySchema implements Serializable {
 		 */
 		private String examAnalysis;
 
+		/**
+		 * 日期时间格式 YYYYMMDD HH:mm:ss
+		 */
+		private String dateTimeFormat;
+
 
 		/**
 		 * 矩阵里面独立的题
