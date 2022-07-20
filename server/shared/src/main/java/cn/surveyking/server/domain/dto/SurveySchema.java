@@ -288,6 +288,11 @@ public class SurveySchema implements Serializable {
 
 
 		/**
+		 * 矩阵题左上角显示的标题
+		 */
+		private String cornerText;
+
+		/**
 		 * 矩阵里面独立的题
 		 */
 		private Boolean exclusiveFillBlankInMatrix;
