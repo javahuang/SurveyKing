@@ -22,4 +22,5 @@ public interface SurveyService {
 
 	PublicProjectView validateProject(ProjectQuery query);
 
+	List<PublicDictView> loadDict(PublicDictRequest request);
 }
