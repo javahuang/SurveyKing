@@ -33,4 +33,6 @@ public class AnswerQuery extends PageQuery {
 	/** 获取最近一份答案 */
 	private Boolean latest;
 
+	private boolean rankEnabled;
+
 }

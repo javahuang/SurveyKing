@@ -8,6 +8,7 @@ import cn.surveyking.server.core.uitls.*;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.domain.mapper.ProjectViewMapper;
 import cn.surveyking.server.domain.model.Answer;
+import cn.surveyking.server.domain.model.CommDictItem;
 import cn.surveyking.server.domain.model.ProjectPartner;
 import cn.surveyking.server.mapper.ProjectPartnerMapper;
 import cn.surveyking.server.service.AnswerService;
@@ -63,6 +64,8 @@ public class SurveyServiceImpl implements SurveyService {
 	private final AuthenticationManager authenticationManager;
 
 	private final JwtTokenUtil jwtTokenUtil;
+
+	private final DictItemServiceImpl dictItemService;
 
 	/**
 	 * answerService 如果需要验证密码，则只有密码输入正确之后才开始加载 schema
@@ -144,11 +147,7 @@ public class SurveyServiceImpl implements SurveyService {
 		// 保存答案
 		request.setId(answerId);
 		AnswerView answerView = answerService.saveAnswer(request, httpRequest);
-		// 登录用户无需显示修改答案的二维码
-		if (Boolean.TRUE.equals(setting.getSubmittedSetting().getEnableUpdate())
-				&& !SecurityContextUtils.isAuthenticated()) {
-			result.setAnswerId(answerView.getId());
-		}
+		result.setAnswerId(answerView.getId());
 		// 考试模式，计算分值传给前端
 		if (ProjectModeEnum.exam.equals(project.getMode())) {
 			result.setExamScore(answerView.getExamScore());
@@ -198,6 +197,60 @@ public class SurveyServiceImpl implements SurveyService {
 			return answerView;
 		}).collect(Collectors.toList()));
 		return view;
+	}
+
+	@Override
+	public List<PublicDictView> loadDict(PublicDictRequest request) {
+		return dictItemService
+				.list(Wrappers.<CommDictItem>lambdaQuery().eq(CommDictItem::getDictCode, request.getDictCode())
+						.eq(request.getCascaderLevel() != null, CommDictItem::getLevel, request.getCascaderLevel())
+						.eq(request.getParentValue() != null, CommDictItem::getParentItemValue,
+								request.getParentValue())
+						.and(isNotBlank(request.getSearch()),
+								i -> i.like(CommDictItem::getItemName, request.getSearch()).or()
+										.like(CommDictItem::getItemValue, request.getSearch()))
+						.last(String.format("limit %d", request.getLimit() != null ? request.getLimit() : 50)))
+				.stream().map(x -> {
+					PublicDictView view = new PublicDictView();
+					view.setLabel(x.getItemName());
+					view.setValue(x.getItemValue());
+					return view;
+				}).collect(Collectors.toList());
+	}
+
+	/**
+	 * 成绩查询页面获取成绩信息
+	 * @param request
+	 * @return
+	 */
+	@Override
+	public PublicExamResult loadExamResult(PublicExamRequest request) {
+		ProjectView project = projectService.getProject(request.getId());
+		AnswerQuery answerQuery = new AnswerQuery();
+		answerQuery.setId(request.getAnswerId());
+		if (Boolean.TRUE.equals(project.getSetting().getSubmittedSetting().getRankVisible())) {
+			answerQuery.setRankEnabled(true);
+		}
+		AnswerView answerView = answerService.getAnswer(answerQuery);
+		ProjectSetting.SubmittedSetting submittedSetting = project.getSetting().getSubmittedSetting();
+		PublicExamResult result = new PublicExamResult();
+		result.setName(project.getName());
+		// 可以查看正确答案和解析
+		if (Boolean.TRUE.equals(submittedSetting.getAnswerAnalysis())) {
+			result.setAnswer(answerView.getAnswer());
+			result.setSchema(project.getSurvey());
+			result.setExamInfo(answerView.getExamInfo());
+		}
+		// 显示成绩单
+		if (Boolean.TRUE.equals(submittedSetting.getTranscriptVisible())) {
+			result.setExamScore(answerView.getExamScore());
+		}
+		// 显示排名 TODO:显示排行榜
+		if (Boolean.TRUE.equals(submittedSetting.getRankVisible())) {
+			result.setRank(answerView.getRank());
+		}
+		result.setMetaInfo(answerView.getMetaInfo());
+		return result;
 	}
 
 	/**

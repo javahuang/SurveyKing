@@ -31,6 +31,11 @@ public class AnswerView {
 	private Double examScore;
 
 	/**
+	 * 考试排名信息
+	 */
+	private Integer rank;
+
+	/**
 	 * 考试信息
 	 */
 	private AnswerExamInfo examInfo;

@@ -3,6 +3,7 @@ package cn.surveyking.server.service;
 import cn.surveyking.server.domain.dto.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @author javahuang
@@ -23,4 +24,7 @@ public interface SurveyService {
 	PublicProjectView validateProject(ProjectQuery query);
 
 	List<PublicDictView> loadDict(PublicDictRequest request);
+
+	PublicExamResult loadExamResult(PublicExamRequest request);
+
 }

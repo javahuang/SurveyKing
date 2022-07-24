@@ -174,6 +174,14 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		if (answerView == null) {
 			return null;
 		}
+		// 获取考试排名信息
+		if (query.isRankEnabled()) {
+			List<Double> scores = list(Wrappers.<Answer>lambdaQuery().select(Answer::getExamScore, Answer::getId)
+					.eq(Answer::getProjectId, answerView.getProjectId())).stream().map(x -> x.getExamScore())
+							.collect(Collectors.toList());
+			Collections.sort(scores);
+			answerView.setRank(scores.indexOf(answerView.getExamScore()) + 1);
+		}
 		String projectId = answerView.getProjectId();
 		FlatSurveySchemaByType schemaByType = parseSurveySchemaByType(projectMapper.selectById(projectId).getSurvey());
 		setAnswerExtraInfo(answerView, schemaByType);
@@ -191,6 +199,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		}
 		else {
 			Answer answer = answerViewMapper.fromRequest(request);
+			// 使用 uuid 作为外部公开查询引用，防暴力破解
+			answer.setId(UUID.randomUUID().toString());
 			answer.setCreateAt(new Date());
 			save(beforeSaveAnswer(answer));
 			return answerViewMapper.toAnswerView(answer);
