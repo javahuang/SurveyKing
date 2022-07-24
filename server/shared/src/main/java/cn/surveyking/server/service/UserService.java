@@ -41,4 +41,6 @@ public interface UserService extends UserDetailsService {
 
 	void importUser(UserRequest request);
 
+	PaginationResponse<MyTaskView> queryTask(MyTaskQuery query);
+
 }

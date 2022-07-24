@@ -23,7 +23,7 @@ public class ProjectPartner extends BaseModel {
 	private String projectId;
 
 	/**
-	 * 参与者类型
+	 * 参与者类型 {@link cn.surveyking.server.core.constant.ProjectPartnerTypeEnum}
 	 */
 	@TableField(value = "type")
 	private Integer type;

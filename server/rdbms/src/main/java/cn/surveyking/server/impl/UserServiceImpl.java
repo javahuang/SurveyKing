@@ -4,11 +4,13 @@ import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.constant.ErrorCode;
 import cn.surveyking.server.core.constant.ProjectModeEnum;
+import cn.surveyking.server.core.constant.ProjectPartnerTypeEnum;
 import cn.surveyking.server.core.exception.ErrorCodeException;
 import cn.surveyking.server.core.exception.InternalServerError;
 import cn.surveyking.server.core.security.PasswordEncoder;
 import cn.surveyking.server.core.uitls.ContextHelper;
 import cn.surveyking.server.core.uitls.PinyinUtils;
+import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.domain.mapper.RoleViewMapper;
 import cn.surveyking.server.domain.mapper.UserPositionDtoMapper;
@@ -438,6 +440,38 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 				}
 			});
 		}
+	}
+
+	@Override
+	public PaginationResponse<MyTaskView> queryTask(MyTaskQuery query) {
+		Page<ProjectPartner> page = ContextHelper.getBean(ProjectPartnerServiceImpl.class).pageByQuery(query,
+				Wrappers.<ProjectPartner>lambdaQuery().eq(ProjectPartner::getUserId, SecurityContextUtils.getUserId())
+						.eq(ProjectPartner::getType, ProjectPartnerTypeEnum.RESPONDENT_SYS_USER.getType())
+						.exists(String.format(
+								"SELECT 1 FROM t_project t WHERE t.mode = '%s' AND t.id = t_project_partner.project_id",
+								query.getType()))
+						.orderByAsc(ProjectPartner::getStatus).orderByDesc(ProjectPartner::getCreateAt));
+		PaginationResponse<MyTaskView> result = new PaginationResponse<>(page.getTotal(),
+				page.getRecords().stream().map(projectPartner -> {
+					MyTaskView taskView = new MyTaskView();
+					Project project = projectMapper.selectById(projectPartner.getProjectId());
+					taskView.setProjectId(projectPartner.getProjectId());
+					taskView.setName(project.getName());
+					taskView.setStatus(projectPartner.getStatus());
+					taskView.setExamStartTime(project.getSetting().getExamSetting().getStartTime());
+					if (AppConsts.ProjectPartnerStatus.ANSWERED == projectPartner.getStatus()) {
+						// 获取最近一次的答题记录
+						List<Answer> answers = ContextHelper.getBean(AnswerServiceImpl.class)
+								.list(Wrappers.<Answer>lambdaQuery().select(Answer::getId)
+										.eq(Answer::getCreateBy, SecurityContextUtils.getUserId())
+										.orderByDesc(Answer::getCreateAt));
+						if (answers.size() > 0) {
+							taskView.setAnswerId(answers.get(0).getId());
+						}
+					}
+					return taskView;
+				}).collect(Collectors.toList()));
+		return result;
 	}
 
 	private Optional<String> getCellValue(Row row, int cellIndex) {
