@@ -459,6 +459,8 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 					taskView.setName(project.getName());
 					taskView.setStatus(projectPartner.getStatus());
 					taskView.setExamStartTime(project.getSetting().getExamSetting().getStartTime());
+					taskView.setExamEndTime(project.getSetting().getExamSetting().getEndTime());
+					taskView.setEndTime(project.getSetting().getAnswerSetting().getEndTime());
 					if (AppConsts.ProjectPartnerStatus.ANSWERED == projectPartner.getStatus()) {
 						// 获取最近一次的答题记录
 						List<Answer> answers = ContextHelper.getBean(AnswerServiceImpl.class)

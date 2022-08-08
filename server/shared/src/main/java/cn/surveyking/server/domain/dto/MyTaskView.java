@@ -30,6 +30,16 @@ public class MyTaskView {
 	private Long examStartTime;
 
 	/**
+	 * 考试结束时间
+	 */
+	private Long examEndTime;
+
+	/**
+	 * 截止回收时间
+	 */
+	private Long endTime;
+
+	/**
 	 * 回答状态 0未访问 1已访问 2已答题
 	 */
 	private Integer status;

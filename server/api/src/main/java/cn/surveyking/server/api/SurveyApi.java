@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.Duration;
+import java.util.List;
 
 /**
  * 答卷页面
@@ -81,6 +82,16 @@ public class SurveyApi {
 	@PostMapping("/getQueryResult")
 	public PublicQueryView getQueryResult(@RequestBody PublicQueryRequest request) {
 		return surveyService.getQueryResult(request);
+	}
+
+	@PostMapping("/loadDict")
+	public List<PublicDictView> loadDict(@RequestBody PublicDictRequest request) {
+		return surveyService.loadDict(request);
+	}
+
+	@PostMapping("/loadExamResult")
+	public PublicExamResult loadExamResult(@RequestBody PublicExamRequest request) {
+		return surveyService.loadExamResult(request);
 	}
 
 }

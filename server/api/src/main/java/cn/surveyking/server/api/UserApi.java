@@ -1,5 +1,6 @@
 package cn.surveyking.server.api;
 
+import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.constant.ErrorCode;
 import cn.surveyking.server.core.exception.ErrorCodeException;
@@ -109,6 +110,16 @@ public class UserApi {
 	@PostMapping("/users/import")
 	public void importUser(UserRequest request) {
 		userService.importUser(request);
+	}
+
+	/**
+	 * 查询用户任务
+	 * @param query
+	 * @return
+	 */
+	@GetMapping("/user/tasks")
+	public PaginationResponse<MyTaskView> myTask(MyTaskQuery query) {
+		return userService.queryTask(query);
 	}
 
 }

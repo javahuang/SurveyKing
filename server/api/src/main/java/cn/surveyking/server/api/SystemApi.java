@@ -29,6 +29,8 @@ public class SystemApi {
 
 	private final RoleService roleService;
 
+	private final DictService dictService;
+
 	@GetMapping
 	public SystemInfo getSystemInfo() {
 		return systemService.getSystemInfo();
@@ -188,6 +190,54 @@ public class SystemApi {
 	@PostMapping("/selectPositions")
 	public List<PositionView> selectPositions(@RequestBody SelectPositionRequest request) {
 		return positionService.selectPositions(request);
+	}
+
+	@GetMapping("/dicts")
+	@PreAuthorize("hasAuthority('system:dict:list')")
+	public PaginationResponse<CommDictView> listDict(CommDictQuery query) {
+		return dictService.listDict(query);
+	}
+
+	@PostMapping("/dicts")
+	@PreAuthorize("hasAuthority('system:dict:create')")
+	public void addDict(@RequestBody CommDictRequest request) {
+		dictService.addDict(request);
+	}
+
+	@PatchMapping("/dicts")
+	@PreAuthorize("hasAuthority('system:dict:update')")
+	public void updateDict(@RequestBody CommDictRequest request) {
+		dictService.updateDict(request);
+	}
+
+	@DeleteMapping("/dicts/{id}")
+	@PreAuthorize("hasAuthority('system:dict:delete')")
+	public void deleteDict(@PathVariable String id) {
+		dictService.deleteDict(id);
+	}
+
+	@GetMapping("/dictItems")
+	@PreAuthorize("hasAuthority('system:dictItem:list')")
+	public PaginationResponse<CommDictItemView> listDictItem(CommDictItemQuery query) {
+		return dictService.listDictItem(query);
+	}
+
+	@PostMapping("/dictItems")
+	@PreAuthorize("hasAuthority('system:dictItem:create')")
+	public void saveOrUpdateDictItem(@RequestBody CommDictItemRequest request) {
+		dictService.saveOrUpdateDictItem(request);
+	}
+
+	@PostMapping("/dictItems/import")
+	@PreAuthorize("hasAuthority('system:dictItem:import')")
+	public void importDictItem(CommDictItemRequest request) {
+		dictService.importDictItem(request);
+	}
+
+	@DeleteMapping("/dictItems/{id}")
+	@PreAuthorize("hasAuthority('system:dictItem:delete')")
+	public void deleteDictItem(@PathVariable String id) {
+		dictService.deleteDictItem(id);
 	}
 
 }
