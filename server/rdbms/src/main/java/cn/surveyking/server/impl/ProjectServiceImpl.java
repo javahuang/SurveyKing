@@ -23,7 +23,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static com.baomidou.mybatisplus.core.toolkit.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -139,6 +141,28 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 	@Override
 	public ProjectSetting getSetting(ProjectQuery query) {
 		return null;
+	}
+
+	@Override
+	public List<ProjectView> getDeleted(ProjectQuery query) {
+		List<ProjectView> list = projectViewMapper.toProjectView(getBaseMapper().selectLogicDeleted());
+		list.forEach(view -> {
+			if (!ProjectModeEnum.folder.equals(view.getMode())) {
+				view.setTotal(answerMapper
+						.selectCount(Wrappers.<Answer>lambdaQuery().eq(Answer::getProjectId, view.getId())));
+			}
+		});
+		return list;
+	}
+
+	@Override
+	public void batchDestroyProject(String[] ids) {
+		getBaseMapper().batchDestroy(Arrays.asList(ids));
+	}
+
+	@Override
+	public void restoreProject(ProjectRequest request) {
+		getBaseMapper().restoreProject(request.getIds());
 	}
 
 	private <T> T merge(T local, T remote) throws IllegalAccessException, InstantiationException {

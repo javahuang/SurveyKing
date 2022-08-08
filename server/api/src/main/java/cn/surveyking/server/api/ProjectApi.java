@@ -83,4 +83,22 @@ public class ProjectApi {
 		projectPartnerService.deleteProjectPartner(request);
 	}
 
+	@GetMapping("/getDeleted")
+	@PreAuthorize("hasAuthority('project:list')")
+	public List<ProjectView> getDeleted(ProjectQuery query) {
+		return projectService.getDeleted(query);
+	}
+
+	@DeleteMapping("/destroy")
+	@PreAuthorize("hasAuthority('project:create')")
+	public void batchDestroyProject(String[] ids) {
+		projectService.batchDestroyProject(ids);
+	}
+
+	@PostMapping("/restore")
+	@PreAuthorize("hasAuthority('project:create')")
+	public void restoreProject(@RequestBody ProjectRequest request) {
+		projectService.restoreProject(request);
+	}
+	
 }

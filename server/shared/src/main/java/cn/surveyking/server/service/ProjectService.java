@@ -9,6 +9,8 @@ import cn.surveyking.server.domain.dto.ProjectView;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 
+import java.util.List;
+
 /**
  * @author javahuang
  * @date 2021/8/2
@@ -30,4 +32,9 @@ public interface ProjectService {
 
 	ProjectSetting getSetting(ProjectQuery filter);
 
+    List<ProjectView> getDeleted(ProjectQuery query);
+
+	void batchDestroyProject(String[] ids);
+
+	void restoreProject(ProjectRequest request);
 }

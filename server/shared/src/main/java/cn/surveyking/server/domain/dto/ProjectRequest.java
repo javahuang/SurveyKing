@@ -3,6 +3,8 @@ package cn.surveyking.server.domain.dto;
 import cn.surveyking.server.core.constant.ProjectModeEnum;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @author javahuang
  * @date 2021/10/6
@@ -31,4 +33,5 @@ public class ProjectRequest {
 
 	private String parentId;
 
+	private List<String> ids;
 }
