@@ -100,5 +100,5 @@ public class ProjectApi {
 	public void restoreProject(@RequestBody ProjectRequest request) {
 		projectService.restoreProject(request);
 	}
-	
+
 }

@@ -32,9 +32,10 @@ public interface ProjectService {
 
 	ProjectSetting getSetting(ProjectQuery filter);
 
-    List<ProjectView> getDeleted(ProjectQuery query);
+	List<ProjectView> getDeleted(ProjectQuery query);
 
 	void batchDestroyProject(String[] ids);
 
 	void restoreProject(ProjectRequest request);
+
 }

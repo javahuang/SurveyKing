@@ -15,17 +15,18 @@ import java.util.List;
  */
 public interface ProjectMapper extends BaseMapper<Project> {
 
-    @Select("select * from t_project where is_deleted = 1")
-    @ResultMap("mybatis-plus_Project")
-    List<Project> selectLogicDeleted();
+	@Select("select * from t_project where is_deleted = 1")
+	@ResultMap("mybatis-plus_Project")
+	List<Project> selectLogicDeleted();
 
-    @Delete({ "<script>", "delete", "FROM t_project", "WHERE id IN",
-            "<foreach item='item' index='index' collection='ids'", "open='(' separator=',' close=')'>", "#{item}",
-            "</foreach>", "</script>" })
-    void batchDestroy(List<String> ids);
+	@Delete({ "<script>", "delete", "FROM t_project", "WHERE id IN",
+			"<foreach item='item' index='index' collection='ids'", "open='(' separator=',' close=')'>", "#{item}",
+			"</foreach>", "</script>" })
+	void batchDestroy(List<String> ids);
 
-    @Update({ "<script>", "update", "t_project set is_deleted = 0", "WHERE id IN",
-            "<foreach item='item' index='index' collection='ids'", "open='(' separator=',' close=')'>", "#{item}",
-            "</foreach>", "</script>" })
-    void restoreProject(List<String> ids);
+	@Update({ "<script>", "update", "t_project set is_deleted = 0", "WHERE id IN",
+			"<foreach item='item' index='index' collection='ids'", "open='(' separator=',' close=')'>", "#{item}",
+			"</foreach>", "</script>" })
+	void restoreProject(List<String> ids);
+
 }
