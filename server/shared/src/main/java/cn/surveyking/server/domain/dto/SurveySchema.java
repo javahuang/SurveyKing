@@ -28,6 +28,7 @@ public class SurveySchema implements Serializable {
 
 	private QuestionType type;
 
+	@Builder.Default
 	private Attribute attribute = new Attribute();
 
 	private List<DataSource> dataSource;
