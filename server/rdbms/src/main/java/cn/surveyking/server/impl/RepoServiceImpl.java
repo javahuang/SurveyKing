@@ -138,7 +138,7 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 		if (templatesUpdate.size() > 0) {
 			templateService.batchUpdateTemplate(templatesUpdate);
 			// 更新模板时需要删除之前的标签
-			tagService.remove(Wrappers.<Tag>lambdaUpdate().eq(Tag::getEntityId,
+			tagService.remove(Wrappers.<Tag>lambdaUpdate().in(Tag::getEntityId,
 					templatesUpdate.stream().map(x -> x.getId()).collect(Collectors.toList())));
 		}
 
