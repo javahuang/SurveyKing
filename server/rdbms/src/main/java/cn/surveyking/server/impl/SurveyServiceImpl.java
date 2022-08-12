@@ -233,10 +233,12 @@ public class SurveyServiceImpl implements SurveyService {
 		}
 		AnswerView answerView = answerService.getAnswer(answerQuery);
 		ProjectSetting.SubmittedSetting submittedSetting = project.getSetting().getSubmittedSetting();
+		ProjectSetting.ExamSetting examSetting = project.getSetting().getExamSetting();
 		PublicExamResult result = new PublicExamResult();
 		result.setName(project.getName());
-		// 可以查看正确答案和解析
-		if (Boolean.TRUE.equals(submittedSetting.getAnswerAnalysis())) {
+		// 可以查看正确答案和解析;
+		// 考试结束之后才可以查看正确答案和解析
+		if (Boolean.TRUE.equals(submittedSetting.getAnswerAnalysis()) && examFinished(examSetting)) {
 			result.setAnswer(answerView.getAnswer());
 			result.setSchema(project.getSurvey());
 			result.setExamInfo(answerView.getExamInfo());
@@ -251,6 +253,18 @@ public class SurveyServiceImpl implements SurveyService {
 		}
 		result.setMetaInfo(answerView.getMetaInfo());
 		return result;
+	}
+
+	/**
+	 * 判断考试是否结束，未设置默认为已结束
+	 * @param examSetting
+	 * @return
+	 */
+	private boolean examFinished(ProjectSetting.ExamSetting examSetting) {
+		if (examSetting.getEndTime() == null || examSetting.getEndTime() < System.currentTimeMillis()) {
+			return true;
+		}
+		return false;
 	}
 
 	/**
