@@ -17,7 +17,8 @@ author: 大黄
 
 ```bash
 # 1. 启动后端服务
-nohup java -jar surveyking-v0.3.0.jar --server.port=1991 &
+nohup java -jar surveyking-v0.3.0-beta.10.jar --server.port=1991 &
+# 这里的surveyking-v0.3.0-beta.10.jar是你目录里的.jar的真实名字
 
 # 2. 将前端文件放入 nginx 对应的目录
 # 前端文件的位置在 server/api/src/main/resources/static 目录下面
@@ -30,13 +31,13 @@ nginx -s reload
 
 ### nginx 配置
 
-下面是卷王线上环境 nginx 配置
+下面是卷王线上环境 nginx 配置，如果所使用的是nginx的虚拟主机请添加到对应的虚拟主机配置文件（vhost/域名.conf）
 
 ```nginx
    server {
         listen      443 ssl;
         server_name  www.surveyking.cn surveyking.cn;
-        ssl_certificate /usr/local/nginx/conf/ssl/surveyking.cn.pem; # ssl 配置
+        ssl_certificate /usr/local/nginx/conf/ssl/surveyking.cn.pem; # ssl 配置 
         ssl_certificate_key /usr/local/nginx/conf/ssl/surveyking.cn.key;
         ssl_session_timeout 5m;
         ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;
