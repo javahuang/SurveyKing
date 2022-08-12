@@ -12,7 +12,10 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author javahuang
@@ -63,8 +66,28 @@ public interface ProjectViewMapper {
 
 	default void randomSchemaOrder(SurveySchema schema) {
 		if (schema.getChildren() != null) {
-			Collections.shuffle(schema.getChildren());
-			schema.getChildren().forEach(child -> randomSchemaOrder(child));
+			// 非考试题的顺序需要保持不变
+			Map<SurveySchema, Integer> schemaShouldKeepOrder = new LinkedHashMap<>();
+			for (int i = 0; i < schema.getChildren().size(); i++) {
+				SurveySchema curr = schema.getChildren().get(i);
+				if (curr.getAttribute().getExamAnswerMode() == SurveySchema.ExamScoreMode.none) {
+					schemaShouldKeepOrder.put(curr, i);
+				}
+			}
+			List<SurveySchema> schemasShouldReorder = schema.getChildren().stream()
+					.filter(x -> !schemaShouldKeepOrder.containsKey(x)).collect(Collectors.toList());
+			Collections.shuffle(schemasShouldReorder);
+			schemaShouldKeepOrder.entrySet().stream().forEach(entry -> {
+				schemasShouldReorder.add(entry.getValue(), entry.getKey());
+			});
+			schema.setChildren(schemasShouldReorder);
+
+			schemasShouldReorder.forEach(child -> {
+				if (schema.getAttribute().getExamAnswerMode() != SurveySchema.ExamScoreMode.none) {
+					randomSchemaOrder(child);
+				}
+			});
+
 		}
 	}
 
