@@ -2,17 +2,37 @@
 id: faq
 title: 常见问题
 ---
+import faq1 from '../static/docs/faq/faq-1.png';
+import faq2 from '../static/docs/faq/faq-2.png';
+import faq3 from '../static/docs/faq/faq-fillblank-right-answer.png';
+
 下面列出卷王(SurveyKing)大家常问的一些问题。
+
+## 调查问卷问题
+
+### 如何添加省市县乡村五级级联题
+
+参考 [如何添加五级行政区划级联题](https://surveyking.cn/blog/region) 设置
+
+## 在线考试问题
+
+### 填空题如何设置多个正确答案
+
+每个正确答案一行
+<img src={faq3} alt="Example banner" width="300" />;
+
+## 其他问题
 
 ### 题目选项如何添加图片
 
 在问卷编辑器点击高级编辑
 
-![faq-1](../static/docs/faq/faq-1.png)
+<img src={faq1} alt="Example banner" width="450" />;
 
 点击图片或者直接快捷键复制粘贴图片到编辑区
 
-![faq-2](../static/docs/faq/faq-2.png)
+<img src={faq2} alt="Example banner" width="450" />;
+
 
 :::tip
 点击图片，可以放大缩小。
@@ -35,8 +55,3 @@ title: 常见问题
 此删除非删除当前问卷的背景和页眉图。
 
 :::
-
-### 如何添加省市县乡村五级级联题
-
-
-参考 [如何添加五级行政区划级联题](https://surveyking.cn/blog/region) 设置

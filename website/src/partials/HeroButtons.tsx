@@ -11,9 +11,12 @@ function HeroButtons() {
         className={
           "btn mb-4 sm:mb-0 font-bold py-4 bg-black text-white font-bold hover:bg-gray-900 hover:text-white uppercase border border-solid w-full sm:w-auto rounded"
         }
-        href={useBaseUrl("docs/")}
+        // href={useBaseUrl("docs/")}
+        href="https://wj.surveyking.cn/s/start"
+        rel="noopener noreferrer"
+        target="_blank"
       >
-        起步
+        快速开始
       </a>
       <a
         className={

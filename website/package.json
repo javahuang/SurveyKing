@@ -4,8 +4,8 @@
     "private": true,
     "scripts": {
         "docusaurus": "docusaurus",
-        "start": "yarn run copyChangelog && TYPEDOC_WATCH=true docusaurus start",
-        "build": "yarn run copyChangelog && TYPEDOC_WATCH=false docusaurus build",
+        "start": "TYPEDOC_WATCH=true docusaurus start",
+        "build": "TYPEDOC_WATCH=false docusaurus build",
         "copyChangelog": "echo '---' > ./docs/CHANGELOG.md && echo 'id: changelog' >> ./docs/CHANGELOG.md && echo 'title: Changelog' >> ./docs/CHANGELOG.md && echo '---' >> ./docs/CHANGELOG.md",
         "swizzle": "docusaurus swizzle --danger",
         "deploy": "npm run build && scp -r build/* root@124.223.64.137:~/website",
