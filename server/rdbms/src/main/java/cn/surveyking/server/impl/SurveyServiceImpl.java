@@ -616,6 +616,8 @@ public class SurveyServiceImpl implements SurveyService {
 							.children(Collections.singletonList(SurveySchema.builder().id("examScore").build()))
 							.build());
 		}
+		// 公开查询表单需要取消结束、显示隐藏、跳转规则
+		SchemaHelper.ignoreAttributes(schema, "finishRule", "visibleRule", "jumpRule");
 		return schema;
 	}
 

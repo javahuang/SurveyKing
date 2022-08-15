@@ -3,6 +3,8 @@ package cn.surveyking.server.core.uitls;
 import cn.surveyking.server.core.constant.FieldPermissionType;
 import cn.surveyking.server.core.constant.ProjectModeEnum;
 import cn.surveyking.server.domain.dto.*;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.PropertyAccessorFactory;
 
 import java.text.Format;
 import java.text.SimpleDateFormat;
@@ -285,6 +287,24 @@ public class SchemaHelper {
 			return false;
 		});
 		schema.getChildren().forEach(child -> updateSchemaByPermission(fieldPermission, child));
+	}
+
+	/**
+	 * 移除 schema 里面的指定属性值
+	 * @param schema
+	 * @param attributes
+	 */
+	public static void ignoreAttributes(SurveySchema schema, String... attributes) {
+		if (schema.getChildren() == null) {
+			return;
+		}
+		schema.getChildren().forEach(child -> {
+			for (String attributeName : attributes) {
+				BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(schema.getAttribute());
+				wrapper.setPropertyValue(attributeName, null);
+			}
+			ignoreAttributes(child, attributes);
+		});
 	}
 
 	/**
