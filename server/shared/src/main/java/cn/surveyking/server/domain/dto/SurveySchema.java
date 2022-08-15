@@ -248,6 +248,11 @@ public class SurveySchema implements Serializable {
 		private String validateRule;
 
 		/**
+		 * 跳转规则
+		 */
+		private String jumpRule;
+
+		/**
 		 * 计算规则
 		 */
 		private String calculate;
