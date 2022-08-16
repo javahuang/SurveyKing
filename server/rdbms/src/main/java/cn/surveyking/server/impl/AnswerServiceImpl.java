@@ -214,6 +214,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 				.lt(query.getEndTime() != null, Answer::getCreateAt, query.getEndTime())
 				.eq(query.getCreateBy() != null, Answer::getCreateBy, query.getCreateBy())
 				.like(query.getIp() != null, Answer::getMetaInfo, query.getIp())
+				.like(query.getValueQuery() != null, Answer::getAnswer, query.getValueQuery())
 				.like(query.getCookie() != null, Answer::getMetaInfo, query.getCookie()));
 	}
 

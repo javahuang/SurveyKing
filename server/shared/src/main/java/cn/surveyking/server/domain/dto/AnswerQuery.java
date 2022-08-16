@@ -35,4 +35,9 @@ public class AnswerQuery extends PageQuery {
 
 	private boolean rankEnabled;
 
+	/**
+	 * 根据选项答案查询
+	 */
+	private String valueQuery;
+
 }

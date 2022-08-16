@@ -316,6 +316,17 @@ public class SurveySchema implements Serializable {
 		 * 下拉字典
 		 */
 		private String dictCode;
+
+		/**
+		 * 字段值是否唯一
+		 */
+		private Boolean unique;
+
+		/**
+		 * 字段值唯一提示
+		 */
+		private String uniqueText;
+
 	}
 
 	/**

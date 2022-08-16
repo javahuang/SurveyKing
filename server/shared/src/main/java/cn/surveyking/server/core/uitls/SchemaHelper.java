@@ -308,6 +308,27 @@ public class SchemaHelper {
 	}
 
 	/**
+	 * 根据属性名和属性值找到所有满足条件的子 schema 列表
+	 * @param schema
+	 * @param attributeName
+	 * @param attributeValue
+	 */
+	public static List<SurveySchema> findSchemaListByAttribute(SurveySchema schema, String attributeName,
+			Object attributeValue) {
+		List<SurveySchema> result = new ArrayList<>();
+		BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(schema.getAttribute());
+		if (attributeValue.equals(wrapper.getPropertyValue(attributeName))) {
+			result.add(schema);
+		}
+		if (schema.getChildren() != null) {
+			schema.getChildren().forEach(child -> {
+				result.addAll(findSchemaListByAttribute(child, attributeName, attributeValue));
+			});
+		}
+		return result;
+	}
+
+	/**
 	 * 主要是用于构建 FillBlank 类型的查询表单
 	 * @param field
 	 * @return

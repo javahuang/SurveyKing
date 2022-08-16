@@ -32,6 +32,7 @@ import org.springframework.web.util.WebUtils;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ValidationException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -125,10 +126,8 @@ public class SurveyServiceImpl implements SurveyService {
 	@Override
 	public PublicAnswerView saveAnswer(AnswerRequest request, HttpServletRequest httpRequest) {
 		String projectId = request.getProjectId();
-
 		PublicAnswerView result = new PublicAnswerView();
 		ProjectView project = projectService.getProject(projectId);
-		ProjectSetting setting = project.getSetting();
 
 		String answerId = null;
 		if (isNotBlank(request.getQueryId())) {
@@ -138,7 +137,7 @@ public class SurveyServiceImpl implements SurveyService {
 		}
 		else {
 			// 问卷允许修改答案 开关修改答案
-			AnswerView latestAnswer = validateAndGetLatestAnswer(project);
+			AnswerView latestAnswer = validateAndGetLatestAnswer(project, request);
 			if (latestAnswer != null) {
 				answerId = latestAnswer.getId();
 			}
@@ -323,6 +322,38 @@ public class SurveyServiceImpl implements SurveyService {
 		return setting;
 	}
 
+	/**
+	 * 答案校验
+	 * @param project
+	 * @param request
+	 */
+	private void validateAnswer(ProjectView project, AnswerRequest request) {
+		List<SurveySchema> uniqueSchemaList = SchemaHelper.findSchemaListByAttribute(project.getSurvey(), "unique",
+				true);
+		SchemaHelper.TreeNode treeNode = SchemaHelper.SurveySchema2TreeNode(project.getSurvey());
+		uniqueSchemaList.forEach(optionSchema -> {
+			// 支持数值和字符串
+			String questionId = treeNode.getTreeNodeMap().get(optionSchema.getId()).getParent().getData().getId();
+			Object questionValue = request.getAnswer().get(questionId);
+			if (questionValue == null) {
+				return;
+			}
+			String uniqueQuery = String.format("\"%s\":", optionSchema.getId());
+			if (SurveySchema.DataType.number == optionSchema.getAttribute().getDataType()) {
+				uniqueQuery += ((Map) questionValue).get(optionSchema.getId());
+			}
+			else {
+				uniqueQuery += "\"" + ((Map) questionValue).get(optionSchema.getId()) + "\"";
+			}
+			AnswerQuery query = new AnswerQuery();
+			query.setProjectId(project.getId());
+			query.setValueQuery(uniqueQuery);
+			if (answerService.count(query) > 0) {
+				throw new ValidationException(optionSchema.getAttribute().getUniqueText());
+			}
+		});
+	}
+
 	private void validateExamSetting(ProjectView project) {
 		ProjectSetting.ExamSetting examSetting = project.getSetting().getExamSetting();
 		if (examSetting == null || !ProjectModeEnum.exam.equals(project.getMode())) {
@@ -341,13 +372,15 @@ public class SurveyServiceImpl implements SurveyService {
 	/**
 	 * 校验问卷并且判断是否要更新最近一次的答案
 	 * @param project
+	 * @param request
 	 * @return 最近一次的答案
 	 */
-	private AnswerView validateAndGetLatestAnswer(ProjectView project) {
+	private AnswerView validateAndGetLatestAnswer(ProjectView project, AnswerRequest request) {
 		ProjectSetting setting = project.getSetting();
 		boolean needGetLatest = false;
 		try {
 			validateProject(project);
+			validateAnswer(project, request);
 			// 未设时间限制&需要登录&可以修改，永远修改的是同一份
 			if (SecurityContextUtils.isAuthenticated() && setting != null
 					&& Boolean.TRUE.equals(setting.getSubmittedSetting().getEnableUpdate())) {
