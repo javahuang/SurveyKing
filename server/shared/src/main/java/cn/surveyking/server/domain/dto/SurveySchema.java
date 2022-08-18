@@ -44,13 +44,25 @@ public class SurveySchema implements Serializable {
 
 	public enum QuestionType {
 
-		FillBlank, Textarea, MultipleBlank, Signature, Score, Radio, Checkbox, Select, Cascader, Upload, MatrixAuto, MatrixRadio, MatrixCheckbox, MatrixFillBlank, MatrixScore, MatrixNps, Survey, QuestionSet, Pagination, Remark, SplitLine, Option, User, Dept, Nps, HorzBlank, Address, Barcode;
+		FillBlank, Textarea, MultipleBlank, Signature, Score, Radio, Checkbox, Select, Cascader, Upload, MatrixAuto,
+		/**
+		 * 矩阵单选
+		 */
+		MatrixRadio, MatrixCheckbox, MatrixFillBlank, MatrixScore, MatrixNps, Survey, QuestionSet,
+		/**
+		 * 富文本题
+		 */
+		RichText,
+		/**
+		 * 分页
+		 */
+		Pagination, Remark, SplitLine, Option, User, Dept, Nps, HorzBlank, Address, Barcode;
 
 		// 分为数据类型和空类型
 		public static EnumSet<QuestionType> dataType() {
 			return EnumSet.of(FillBlank, Textarea, MultipleBlank, Signature, Score, Radio, Checkbox, Select, Cascader,
 					Upload, MatrixAuto, MatrixRadio, MatrixCheckbox, MatrixFillBlank, MatrixScore, MatrixNps, User,
-					Dept, Nps, HorzBlank, Address, Barcode);
+					Dept, Nps, HorzBlank, Address, Barcode, RichText);
 		}
 
 		public static EnumSet<QuestionType> voidType() {

@@ -42,7 +42,7 @@ public class GlobalExceptionHandler {
 			ValidationException ex) {
 		log.error("ValidationException {}\n", request.getRequestURI(), ex);
 
-		return ResponseEntity.ok().body(new ApiResponse<>(ResponseCode.FAIL.code, "Validation exception"));
+		return ResponseEntity.ok().body(new ApiResponse<>(ResponseCode.FAIL.code, ex.getMessage()));
 	}
 
 	@ExceptionHandler(MissingServletRequestParameterException.class)
