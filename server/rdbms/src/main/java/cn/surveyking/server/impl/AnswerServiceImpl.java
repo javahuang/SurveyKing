@@ -11,6 +11,7 @@ import cn.surveyking.server.domain.mapper.AnswerViewMapper;
 import cn.surveyking.server.domain.model.Answer;
 import cn.surveyking.server.domain.model.Project;
 import cn.surveyking.server.domain.model.ProjectPartner;
+import cn.surveyking.server.domain.model.Template;
 import cn.surveyking.server.mapper.AnswerMapper;
 import cn.surveyking.server.mapper.ProjectMapper;
 import cn.surveyking.server.mapper.ProjectPartnerMapper;
@@ -63,6 +64,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	private final ProjectService projectService;
 
 	private final ProjectPartnerMapper projectPartnerMapper;
+
+	private final TemplateServiceImpl templateService;
 
 	@Override
 	public PaginationResponse<AnswerView> listAnswer(AnswerQuery query) {
@@ -548,17 +551,35 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		return fileNameWithoutSuffix;
 	}
 
+	/**
+	 * 答案保存之前计算考试分值、每题得分情况
+	 * @param answer
+	 * @return
+	 */
 	private Answer beforeSaveAnswer(Answer answer) {
 		Project project = projectMapper.selectById(answer.getProjectId());
+		computeExamScore(answer, project);
+		return answer;
+	}
+
+	private void computeExamScore(Answer answer, Project project) {
 		if (project != null && ProjectModeEnum.exam.equals(project.getMode()) && answer != null
 				&& answer.getAnswer() != null) {
-			AnswerScoreEvaluator evaluator = new AnswerScoreEvaluator(project.getSurvey(), answer.getAnswer());
+			SurveySchema srcSchema = project.getSurvey();
+			// 随机抽题需要根据答案反查出schema
+			if (project.getSetting().getExamSetting().getRandomSurvey() != null) {
+				srcSchema = SurveySchema.builder()
+						.children(templateService
+								.list(Wrappers.<Template>lambdaQuery().in(Template::getId, answer.getAnswer().keySet()))
+								.stream().map(t -> t.getTemplate()).collect(Collectors.toList()))
+						.build();
+			}
+			AnswerScoreEvaluator evaluator = new AnswerScoreEvaluator(srcSchema, answer.getAnswer());
 			answer.setExamScore(evaluator.eval());
 			AnswerExamInfo examInfo = new AnswerExamInfo();
 			examInfo.setQuestionScore(evaluator.getQuestionScore());
 			answer.setExamInfo(examInfo);
 		}
-		return answer;
 	}
 
 	private ProjectView parseRow2Schema(Row row, String name, String parentId) {

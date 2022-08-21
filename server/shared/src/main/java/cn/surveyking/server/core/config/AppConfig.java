@@ -1,6 +1,7 @@
 package cn.surveyking.server.core.config;
 
 import cn.surveyking.server.core.base.converter.PublicQueryConverter;
+import cn.surveyking.server.core.base.converter.RandomSurveyConverter;
 import cn.surveyking.server.core.base.converter.UniqueLimitSettingConverter;
 import cn.surveyking.server.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ public class AppConfig {
 				.getSharedInstance();
 		defaultConversionService.addConverter(new UniqueLimitSettingConverter());
 		defaultConversionService.addConverter(new PublicQueryConverter());
+		defaultConversionService.addConverter(new RandomSurveyConverter());
 	}
 
 }

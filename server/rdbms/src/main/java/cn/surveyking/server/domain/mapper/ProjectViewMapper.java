@@ -1,6 +1,7 @@
 package cn.surveyking.server.domain.mapper;
 
 import cn.surveyking.server.core.constant.ProjectModeEnum;
+import cn.surveyking.server.core.uitls.SchemaHelper;
 import cn.surveyking.server.domain.dto.ProjectRequest;
 import cn.surveyking.server.domain.dto.ProjectView;
 import cn.surveyking.server.domain.dto.PublicProjectView;
@@ -58,10 +59,7 @@ public interface ProjectViewMapper {
 		if (schema.getAttribute() == null) {
 			schema.setAttribute(SurveySchema.Attribute.builder().build());
 		}
-		schema.getAttribute().setExamAnswerMode(null);
-		schema.getAttribute().setExamCorrectAnswer(null);
-		schema.getAttribute().setExamScore(null);
-		schema.getAttribute().setExamMatchRule(null);
+		SchemaHelper.ignoreAttributes(schema, "examAnswerMode", "examCorrectAnswer", "examScore", "examMatchRule");
 	}
 
 	default void randomSchemaOrder(SurveySchema schema) {

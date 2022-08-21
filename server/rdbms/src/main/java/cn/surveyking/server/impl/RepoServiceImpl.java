@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -166,8 +167,13 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 		}
 	}
 
+	/**
+	 * 从题库里面挑选题目
+	 * @param repos
+	 * @return
+	 */
 	@Override
-	public List<SurveySchema> pickQuestionFromRepo(List<PickRepoQuestionRequest> repos) {
+	public List<SurveySchema> pickQuestionFromRepo(List<ProjectSetting.RandomSurveyCondition> repos) {
 		List<Template> templates = new ArrayList<>();
 		repos.forEach(repo -> {
 			List<Template> repoTemplates = templateService.list(Wrappers.<Template>lambdaQuery()
@@ -181,7 +187,9 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 			if (repo.getQuestionsNum() != null) {
 				// 随机从问题里面挑选指定数量的题
 				Collections.shuffle(repoTemplates);
-				repoTemplates = repoTemplates.subList(0, repo.getQuestionsNum());
+				if (repoTemplates.size() > repo.getQuestionsNum()) {
+					repoTemplates = repoTemplates.subList(0, repo.getQuestionsNum());
+				}
 			}
 
 			// 给问题添加分值
@@ -198,7 +206,9 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 				templates.add(template);
 			});
 		});
-		return templates.stream().map(x -> x.getTemplate()).collect(Collectors.toList());
+		// 相同类型的问题排放在一起
+		return templates.stream().map(x -> x.getTemplate()).sorted(Comparator.comparing(SurveySchema::getType))
+				.collect(Collectors.toList());
 	}
 
 	@Override

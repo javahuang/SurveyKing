@@ -13,6 +13,7 @@ import cn.surveyking.server.domain.model.ProjectPartner;
 import cn.surveyking.server.mapper.ProjectPartnerMapper;
 import cn.surveyking.server.service.AnswerService;
 import cn.surveyking.server.service.ProjectService;
+import cn.surveyking.server.service.RepoService;
 import cn.surveyking.server.service.SurveyService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -68,6 +69,8 @@ public class SurveyServiceImpl implements SurveyService {
 
 	private final DictItemServiceImpl dictItemService;
 
+	private final RepoService repoService;
+
 	/**
 	 * answerService 如果需要验证密码，则只有密码输入正确之后才开始加载 schema
 	 * @param query
@@ -78,6 +81,10 @@ public class SurveyServiceImpl implements SurveyService {
 		ProjectView project = projectService.getProject(query.getId());
 		// 获取登录验证 schema
 		SurveySchema loginFormSchema = convertAndValidateLoginFormIfNeeded(project, null);
+		// 随机问题
+		if (loginFormSchema == null) {
+			replaceSchemaIfRandomSchema(project);
+		}
 		// 校验问卷
 		validateProject(project);
 		// 如果需要登录，将问卷 schema 替换成登录表单的 schema
@@ -105,6 +112,8 @@ public class SurveyServiceImpl implements SurveyService {
 		ProjectView project = projectService.getProject(projectId);
 		// 登录验证
 		convertAndValidateLoginFormIfNeeded(project, query.getAnswer());
+		// 随机问题
+		replaceSchemaIfRandomSchema(project);
 		// 校验问卷
 		validateProject(project);
 		PublicProjectView projectView = projectViewMapper.toPublicProjectView(project);
@@ -349,7 +358,8 @@ public class SurveyServiceImpl implements SurveyService {
 			query.setProjectId(project.getId());
 			query.setValueQuery(uniqueQuery);
 			if (answerService.count(query) > 0) {
-				throw new ValidationException(optionSchema.getAttribute().getUniqueText());
+				String uniqueText = optionSchema.getAttribute().getUniqueText();
+				throw new ValidationException(isNotBlank(uniqueText) ? uniqueText : "问卷重复保存");
 			}
 		});
 	}
@@ -892,6 +902,27 @@ public class SurveyServiceImpl implements SurveyService {
 	}
 
 	/**
+	 * 随机问题
+	 * @param project
+	 * @return
+	 */
+	private SurveySchema randomSchemaIfNeeded(ProjectView project) {
+		if (ProjectModeEnum.exam != project.getMode()) {
+			return null;
+		}
+		List<ProjectSetting.RandomSurveyCondition> randomSurveyCondition = project.getSetting().getExamSetting()
+				.getRandomSurvey();
+		if (randomSurveyCondition == null || randomSurveyCondition.size() == 0) {
+			return null;
+		}
+		List<SurveySchema> questionSchemaList = repoService.pickQuestionFromRepo(randomSurveyCondition);
+		SurveySchema source = project.getSurvey();
+		SurveySchema randomSchema = SurveySchema.builder().id(source.getId()).children(questionSchemaList)
+				.title(source.getTitle()).attribute(source.getAttribute()).description(source.getDescription()).build();
+		return randomSchema;
+	}
+
+	/**
 	 * 答卷前登录校验用户名和密码
 	 * @param answer
 	 * @return
@@ -942,6 +973,13 @@ public class SurveyServiceImpl implements SurveyService {
 				answerService.updateAnswer(answerUpdateRequest);
 			}
 
+		}
+	}
+
+	private void replaceSchemaIfRandomSchema(ProjectView project) {
+		SurveySchema randomSchema = randomSchemaIfNeeded(project);
+		if (randomSchema != null) {
+			project.setSurvey(randomSchema);
 		}
 	}
 

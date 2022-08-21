@@ -2,8 +2,6 @@ package cn.surveyking.server.service;
 
 import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.domain.dto.*;
-import org.springframework.core.io.Resource;
-import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -61,7 +59,7 @@ public interface RepoService {
 	 * @param repos
 	 * @return
 	 */
-	List<SurveySchema> pickQuestionFromRepo(List<PickRepoQuestionRequest> repos);
+	List<SurveySchema> pickQuestionFromRepo(List<ProjectSetting.RandomSurveyCondition> repos);
 
 	void importFromTemplate(RepoTemplateRequest request);
 

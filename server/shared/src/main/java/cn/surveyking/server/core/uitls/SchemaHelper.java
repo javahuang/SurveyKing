@@ -295,14 +295,16 @@ public class SchemaHelper {
 	 * @param attributes
 	 */
 	public static void ignoreAttributes(SurveySchema schema, String... attributes) {
-		if (schema.getChildren() == null) {
-			return;
-		}
-		schema.getChildren().forEach(child -> {
+		if (schema.getAttribute() != null) {
 			for (String attributeName : attributes) {
 				BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(schema.getAttribute());
 				wrapper.setPropertyValue(attributeName, null);
 			}
+		}
+		if (schema.getChildren() == null) {
+			return;
+		}
+		schema.getChildren().forEach(child -> {
 			ignoreAttributes(child, attributes);
 		});
 	}

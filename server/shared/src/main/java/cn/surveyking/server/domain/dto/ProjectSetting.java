@@ -247,6 +247,11 @@ public class ProjectSetting {
 		 */
 		private Boolean randomOrder;
 
+		/**
+		 * 随机问题
+		 */
+		private List<RandomSurveyCondition> randomSurvey;
+
 	}
 
 	/**
@@ -299,6 +304,41 @@ public class ProjectSetting {
 		 * 链接有效时间段
 		 */
 		private List<String> linkValidityPeriod;
+
+	}
+
+	/**
+	 * 随机问题条件
+	 */
+	@Data
+	public static class RandomSurveyCondition {
+
+		private String id;
+
+		/**
+		 * 题库ID
+		 */
+		private String repoId;
+
+		/**
+		 * 题库选择题数
+		 */
+		private Integer questionsNum;
+
+		/**
+		 * 每题分数
+		 */
+		private Double examScore;
+
+		/**
+		 * 标签
+		 */
+		private List<String> tags;
+
+		/**
+		 * 题型
+		 */
+		private List<String> types;
 
 	}
 

@@ -4,8 +4,6 @@ import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.service.RepoService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.Resource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -68,7 +66,7 @@ public class RepoApi {
 	 * @return
 	 */
 	@PostMapping("/pick")
-	public List<SurveySchema> pickQuestionFromRepo(@RequestBody List<PickRepoQuestionRequest> repos) {
+	public List<SurveySchema> pickQuestionFromRepo(@RequestBody List<ProjectSetting.RandomSurveyCondition> repos) {
 		return repoService.pickQuestionFromRepo(repos);
 	}
 
