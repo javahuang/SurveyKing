@@ -403,6 +403,9 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 			new Thread(() -> {
 				try (ZipOutputStream zout = new ZipOutputStream(outputStream);) {
 					int[] serialNum = { 0, 0 };
+					List<SurveySchema> uploadQuestions = SchemaHelper.flatSurveySchema(project.getSurvey()).stream()
+							.filter(qSchema -> SurveySchema.QuestionType.Upload.equals(qSchema.getType()))
+							.collect(Collectors.toList());
 					answers.forEach(answer -> {
 						serialNum[1] = 0;
 						answer.getAttachment().forEach(attachment -> {
@@ -410,8 +413,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 							serialNum[1] += 1;
 							ByteArrayResource resource = (ByteArrayResource) fileService
 									.loadFile(new FileQuery(attachment.getId())).getBody();
-							String parsedFileName = parseAttachmentNameByExp(answer, query.getNameExp(),
-									attachment.getOriginalName(), serialNum);
+							String parsedFileName = parseAttachmentNameByExp(answer, query.getNameExp(), attachment,
+									serialNum, uploadQuestions);
 							ZipEntry entry = new ZipEntry(parsedFileName);
 							try {
 								zout.putNextEntry(entry);
@@ -457,12 +460,13 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	/**
 	 * @param answerView 当前答案
 	 * @param nameExp 附件名称表达式
-	 * @param nameExp 附件名称表达式
+	 * @param file 当前附件
 	 * @param serialNum 序号
+	 * @param uploadQuestions 问卷上传题 schema
 	 * @return 新的附件名称
 	 */
-	private String parseAttachmentNameByExp(AnswerView answerView, String nameExp, String originalFileName,
-			int[] serialNum) {
+	private String parseAttachmentNameByExp(AnswerView answerView, String nameExp, FileView file, int[] serialNum,
+			List<SurveySchema> uploadQuestions) {
 		if (StringUtils.hasText(nameExp)) {
 			String fileName = nameExp;
 			LinkedHashMap<String, Object> answerMap = answerView.getAnswer();
@@ -495,7 +499,21 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 					expValue = sdf.format(answerView.getCreateAt());
 				}
 				else if (AttachmentNameVariableEnum.sourceName.name().equals(questionId)) {
-					expValue = getFileNameWithoutSuffix(originalFileName);
+					expValue = getFileNameWithoutSuffix(file.getOriginalName());
+				}
+				else if (AttachmentNameVariableEnum.questionTitle.name().equals(questionId)) {
+					for (SurveySchema uploadQuestion : uploadQuestions) {
+						Object qValue = answerView.getAnswer().get(uploadQuestion.getId());
+						if (qValue != null) {
+							boolean fileInCurrentSchema = ((Map<String, List<String>>) qValue)
+									.get(uploadQuestion.getChildren().get(0).getId()).stream()
+									.filter(x -> x.equals(file.getId())).findFirst().isPresent();
+							if (fileInCurrentSchema) {
+								expValue = uploadQuestion.getTitle();
+								break;
+							}
+						}
+					}
 				}
 				else {
 					// 问题变量
@@ -515,7 +533,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
 				fileName = StringUtils.replace(fileName, exp, expValue);
 			}
-			String suffix = getFileExtension(originalFileName);
+			String suffix = getFileExtension(file.getOriginalName());
 			// 返回解析之后的文件名字
 			if (suffix != null) {
 				return fileName + "." + suffix;
@@ -524,7 +542,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		}
 		else {
 			// 返回原始文件名字
-			return originalFileName;
+			return file.getOriginalName();
 		}
 	}
 

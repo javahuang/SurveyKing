@@ -18,6 +18,8 @@ public enum AttachmentNameVariableEnum {
 	/** 上传日期时间 */
 	uploadDateTime,
 	/** 原始文件名 */
-	sourceName
+	sourceName,
+	/** 问题标题 */
+	questionTitle
 
 }
