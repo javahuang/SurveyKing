@@ -32,6 +32,9 @@ public class AnswerRequest {
 
 	private AnswerExamInfo examInfo;
 
+	/**
+	 * 答案 id 列表
+	 */
 	private List<String> ids;
 
 	private String whitelistName;

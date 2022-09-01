@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
 /**
@@ -18,33 +17,51 @@ import java.util.List;
  * @date 2021/9/10
  */
 @RestController
-@RequestMapping("${api.prefix}/files")
+@RequestMapping("${api.prefix}/file")
 @AllArgsConstructor
 public class FileApi {
 
 	private final FileService fileService;
 
-	@GetMapping("/{id}")
-	public ResponseEntity<Resource> getFile(@NotEmpty @PathVariable String id, FileQuery query) {
-		query.setId(id);
+	/**
+	 * 获取文件
+	 * @param query
+	 * @return
+	 */
+	@GetMapping
+	public ResponseEntity<Resource> getFile(FileQuery query) {
 		return fileService.loadFile(query);
 	}
 
-	@GetMapping
-	public List<FileView> listImages(FileQuery query) {
+	/**
+	 * 获取文件列表
+	 * @param query
+	 * @return
+	 */
+	@GetMapping("/list")
+	public List<FileView> listFiles(FileQuery query) {
 		return fileService.listFiles(query);
 	}
 
-	@PostMapping
+	/**
+	 * 添加文件
+	 * @param request
+	 * @return
+	 */
+	@PostMapping("/create")
 	@PreAuthorize("hasAuthority('file:import')")
 	public FileView upload(UploadFileRequest request) {
 		return fileService.upload(request);
 	}
 
-	@DeleteMapping("/{id}")
+	/**
+	 * 删除文件
+	 * @param request
+	 */
+	@PostMapping("/delete")
 	@PreAuthorize("hasAuthority('file:delete')")
-	public void deleteImage(@PathVariable() String id) {
-		fileService.deleteFile(id);
+	public void deleteImage(@RequestBody UploadFileRequest request) {
+		fileService.deleteFile(request.getId());
 	}
 
 	/**

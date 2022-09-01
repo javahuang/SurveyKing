@@ -27,14 +27,14 @@ public interface ProjectService {
 	@CacheEvict(value = CacheConsts.projectCache, key = "#request.id")
 	void updateProject(ProjectRequest request);
 
-	@CacheEvict(value = CacheConsts.projectCache, key = "#id")
-	void deleteProject(String id);
+	@CacheEvict(value = CacheConsts.projectCache, key = "#request.id")
+	void deleteProject(ProjectRequest id);
 
 	ProjectSetting getSetting(ProjectQuery filter);
 
 	List<ProjectView> getDeleted(ProjectQuery query);
 
-	void batchDestroyProject(String[] ids);
+	void batchDestroyProject(ProjectRequest request);
 
 	void restoreProject(ProjectRequest request);
 

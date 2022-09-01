@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -18,42 +17,42 @@ import java.util.Set;
  * @date 2021/9/23
  */
 @RestController
-@RequestMapping("${api.prefix}/templates")
+@RequestMapping("${api.prefix}/template")
 @RequiredArgsConstructor
 public class TemplateApi {
 
 	private final TemplateService templateService;
 
-	@GetMapping
+	@GetMapping("/list")
 	@PreAuthorize("hasAuthority('template:list')")
 	public PaginationResponse<TemplateView> listQuestionTemplate(TemplateQuery query) {
 		return templateService.listTemplate(query);
 	}
 
-	@PostMapping
+	@PostMapping("/create")
 	@PreAuthorize("hasAuthority('template:create')")
 	public String addTemplate(@RequestBody TemplateRequest template) {
 		return templateService.addTemplate(template);
 	}
 
-	@PatchMapping
+	@PostMapping("/update")
 	@PreAuthorize("hasAuthority('template:update')")
 	public void updateTemplate(@RequestBody TemplateRequest template) {
 		templateService.updateTemplate(template);
 	}
 
-	@DeleteMapping
+	@PostMapping("/delete")
 	@PreAuthorize("hasAuthority('template:delete')")
-	public void deleteTemplate(String[] ids) {
-		templateService.deleteTemplate(Arrays.asList(ids));
+	public void deleteTemplate(TemplateRequest request) {
+		templateService.deleteTemplate(request);
 	}
 
-	@GetMapping("/getCategories")
+	@GetMapping("/listCategory")
 	public List<String> listTemplateCategories(CategoryQuery query) {
 		return templateService.listTemplateCategories(query);
 	}
 
-	@GetMapping("/getTags")
+	@GetMapping("/listTag")
 	public Set<String> getTags(TagQuery query) {
 		return templateService.getTags(query);
 	}

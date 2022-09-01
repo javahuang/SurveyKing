@@ -26,7 +26,7 @@ public interface SystemService {
 
 	void updateRole(RoleRequest request);
 
-	void deleteRole(String id);
+	void deleteRole(RoleRequest request);
 
 	List<PermissionView> getPermissions();
 

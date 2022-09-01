@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2021/8/6
  */
 @RestController
-@RequestMapping("${api.prefix}/reports")
+@RequestMapping("${api.prefix}/report")
 @RequiredArgsConstructor
 public class ReportApi {
 

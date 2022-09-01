@@ -229,8 +229,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	}
 
 	@Override
-	public void deleteAnswer(String[] ids) {
-		super.removeByIds(Arrays.asList(ids));
+	public void deleteAnswer(AnswerRequest request) {
+		super.removeByIds(request.getIds());
 	}
 
 	@Override
@@ -324,8 +324,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	}
 
 	@Override
-	public void batchDestroyAnswer(String[] ids) {
-		this.getBaseMapper().batchDestroy(Arrays.asList(ids));
+	public void batchDestroyAnswer(AnswerRequest request) {
+		this.getBaseMapper().batchDestroy(request.getIds());
 	}
 
 	@Override

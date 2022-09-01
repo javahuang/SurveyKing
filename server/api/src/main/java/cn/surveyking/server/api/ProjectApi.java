@@ -16,7 +16,7 @@ import java.util.List;
  * @date 2021/8/6
  */
 @RestController
-@RequestMapping("${api.prefix}/projects")
+@RequestMapping("${api.prefix}/project")
 @RequiredArgsConstructor
 public class ProjectApi {
 
@@ -24,77 +24,130 @@ public class ProjectApi {
 
 	private final ProjectPartnerService projectPartnerService;
 
-	@GetMapping
+	/**
+	 * 获取项目列表
+	 * @param query 分页查询参数
+	 * @return 项目列表分页结果
+	 */
+	@GetMapping("/list")
 	@PreAuthorize("hasAuthority('project:list')")
 	public PaginationResponse<ProjectView> listProject(ProjectQuery query) {
 		return projectService.listProject(query);
 	}
 
-	@GetMapping("/{id}")
+	/**
+	 * 获取项目信息
+	 * @param id 项目 id
+	 * @return
+	 */
+	@GetMapping
 	@PreAuthorize("hasAuthority('project:detail')")
 	@EnableDataPerm(key = "#id")
-	public ProjectView getProject(@PathVariable String id) {
+	public ProjectView getProject(String id) {
 		return projectService.getProject(id);
 	}
 
-	@GetMapping("/{id}/settings")
+	/**
+	 * 获取项目设置
+	 * @param query
+	 * @return
+	 */
+	@GetMapping("/setting")
 	@PreAuthorize("hasAuthority('project:detail')")
 	@EnableDataPerm(key = "#id")
-	public ProjectSetting getSetting(@PathVariable String id, ProjectQuery query) {
-		query.setId(id);
+	public ProjectSetting getSetting(ProjectQuery query) {
 		return projectService.getSetting(query);
 	}
 
-	@PostMapping
+	/**
+	 * 添加项目
+	 * @param project
+	 * @return
+	 */
+	@PostMapping("/create")
 	@PreAuthorize("hasAuthority('project:create')")
 	public ProjectView addProject(@RequestBody ProjectRequest project) {
 		return projectService.addProject(project);
 	}
 
-	@PatchMapping
+	/**
+	 * 更新项目
+	 * @param project
+	 */
+	@PostMapping("/update")
 	@PreAuthorize("hasAuthority('project:update')")
 	@EnableDataPerm(key = "#project.id")
 	public void updateProject(@RequestBody ProjectRequest project) {
 		projectService.updateProject(project);
 	}
 
-	@DeleteMapping("{id}")
+	/**
+	 * 删除项目
+	 * @param project
+	 */
+	@PostMapping("/delete")
 	@PreAuthorize("hasAuthority('project:delete')")
-	@EnableDataPerm(key = "#id")
-	public void deleteProject(@PathVariable String id) {
-		projectService.deleteProject(id);
+	@EnableDataPerm(key = "#project.id")
+	public void deleteProject(@RequestBody ProjectRequest project) {
+		projectService.deleteProject(project);
 	}
 
-	@GetMapping("/listPartner")
+	/**
+	 * 获取项目参与者列表
+	 * @param query
+	 * @return
+	 */
+	@GetMapping("/partner/list")
 	@EnableDataPerm(key = "#query.projectId")
 	public List<ProjectPartnerView> listProjectPartner(ProjectPartnerQuery query) {
 		return projectPartnerService.listProjectPartner(query);
 	}
 
-	@PostMapping("/addPartner")
+	/**
+	 * 添加项目参与者
+	 * @param request
+	 */
+	@PostMapping("/partner/create")
 	@EnableDataPerm(key = "#request.projectId")
 	public void addProjectPartner(@RequestBody ProjectPartnerRequest request) {
 		projectPartnerService.addProjectPartner(request);
 	}
 
-	@PostMapping("/deletePartner")
+	/**
+	 * 删除项目参与者
+	 * @param request
+	 */
+	@PostMapping("/partner/delete")
 	@EnableDataPerm(key = "#request.projectId")
 	public void deleteProjectPartner(@RequestBody ProjectPartnerRequest request) {
 		projectPartnerService.deleteProjectPartner(request);
 	}
 
-	@GetMapping("/getDeleted")
+	/**
+	 * 获取回收站里的项目列表
+	 * @param query
+	 * @return
+	 */
+	@GetMapping("/trash")
 	@PreAuthorize("hasAuthority('project:list')")
 	public List<ProjectView> getDeleted(ProjectQuery query) {
 		return projectService.getDeleted(query);
 	}
 
-	@DeleteMapping("/destroy")
+	/**
+	 * 从回收站彻底移除项目
+	 * @param request
+	 */
+	@PostMapping("/destroy")
 	@PreAuthorize("hasAuthority('project:create')")
-	public void batchDestroyProject(String[] ids) {
-		projectService.batchDestroyProject(ids);
+	public void batchDestroyProject(@RequestBody ProjectRequest request) {
+		projectService.batchDestroyProject(request);
 	}
 
+	/**
+	 * 从回收站里面恢复项目
+	 * @param request
+	 */
 	@PostMapping("/restore")
 	@PreAuthorize("hasAuthority('project:create')")
 	public void restoreProject(@RequestBody ProjectRequest request) {

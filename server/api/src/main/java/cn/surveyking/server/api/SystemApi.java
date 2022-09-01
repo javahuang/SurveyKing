@@ -31,43 +31,70 @@ public class SystemApi {
 
 	private final DictService dictService;
 
+	/**
+	 * @return 当前系统信息
+	 */
 	@GetMapping
 	public SystemInfo getSystemInfo() {
 		return systemService.getSystemInfo();
 	}
 
-	@PostMapping
+	/**
+	 * 更新系统信息
+	 * @param request 更新请求
+	 */
+	@PostMapping("/update")
 	@PreAuthorize("hasRole('admin')")
 	public void updateSystemInfo(@RequestBody SystemInfoRequest request) {
 		systemService.updateSystemInfo(request);
 	}
 
-	@RequestMapping("/roles")
+	/**
+	 * 获取系统角色列表
+	 * @param query 角色查询请求
+	 * @return
+	 */
+	@RequestMapping("/role/list")
 	@PreAuthorize("hasAuthority('system:role:list')")
 	public PaginationResponse<RoleView> roles(RoleQuery query) {
 		return systemService.getRoles(query);
 	}
 
-	@PostMapping("/roles")
+	/**
+	 * 添加系统角色
+	 * @param request 角色信息
+	 */
+	@PostMapping("/role/create")
 	@PreAuthorize("hasAuthority('system:role:create')")
 	public void createRole(@RequestBody RoleRequest request) {
 		systemService.createRole(request);
 	}
 
-	@PatchMapping("/roles/{id}")
+	/**
+	 * 更新系统角色
+	 * @param request 角色信息
+	 */
+	@PostMapping("/role/update")
 	@PreAuthorize("hasAuthority('system:role:update')")
-	public void updateRole(@PathVariable("id") String id, @RequestBody RoleRequest request) {
-		request.setId(id);
+	public void updateRole(@RequestBody RoleRequest request) {
 		systemService.updateRole(request);
 	}
 
-	@DeleteMapping("/roles/{id}")
+	/**
+	 * 删除系统角色
+	 * @param request 角色信息
+	 */
+	@PostMapping("/role/delete")
 	@PreAuthorize("hasAuthority('system:role:delete')")
-	public void deleteRole(@PathVariable("id") String id) {
-		systemService.deleteRole(id);
+	public void deleteRole(@RequestBody RoleRequest request) {
+		systemService.deleteRole(request);
 	}
 
-	@RequestMapping("/permissions")
+	/**
+	 * 获取系统权限列表
+	 * @return 权限列表
+	 */
+	@RequestMapping("/permission/list")
 	public List<PermissionView> permissions() {
 		return systemService.getPermissions();
 	}
@@ -75,169 +102,262 @@ public class SystemApi {
 	/**
 	 * 比对数据库和代码里面配置的权限
 	 */
-	@GetMapping("/permissions/diff")
+	@GetMapping("/permission/diff")
 	@PreAuthorize("hasRole('admin')")
 	public void extractCodeDiffDbPermissions() {
 		systemService.extractCodeDiffDbPermissions();
 	}
 
-	@RequestMapping("/users")
+	/**
+	 * 系统用户列表
+	 * @param query 查询用户信息
+	 * @return
+	 */
+	@RequestMapping("/user/list")
 	@PreAuthorize("hasAuthority('system:user:list')")
 	public PaginationResponse<UserView> roles(UserQuery query) {
 		return userService.getUsers(query);
 	}
 
-	@PostMapping("/users")
+	/**
+	 * 创建系统用户
+	 * @param request
+	 */
+	@PostMapping("/user/create")
 	@PreAuthorize("hasAuthority('system:user:create')")
 	public void createUser(@RequestBody @Valid UserRequest request) {
 		userService.createUser(request);
 	}
 
-	@PatchMapping("/users/{id}")
+	/**
+	 * 更新系统用户
+	 * @param request
+	 */
+	@PostMapping("/user/update")
 	@PreAuthorize("hasAuthority('system:user:update')")
-	public void updateUser(@PathVariable("id") String id, @RequestBody @Valid UserRequest request) {
-		request.setId(id);
+	public void updateUser(@RequestBody @Valid UserRequest request) {
 		userService.updateUser(request);
 	}
 
-	@PostMapping("/users/{id}/updateUserPosition")
+	/**
+	 * 更新用户岗位信息
+	 * @param request
+	 */
+	@PostMapping("/user/updatePosition")
 	@PreAuthorize("hasAuthority('system:user:updatePosition')")
-	public void updateUserPosition(@PathVariable("id") String id, @RequestBody @Valid UserRequest request) {
-		request.setId(id);
+	public void updateUserPosition(@RequestBody @Valid UserRequest request) {
 		userService.updateUserPosition(request);
 	}
 
-	@DeleteMapping("/users/{id}")
+	/**
+	 * 删除用户
+	 * @param request
+	 */
+	@PostMapping("/user/delete")
 	@PreAuthorize("hasAuthority('system:user:delete')")
-	public void deleteUser(@PathVariable("id") String id) {
-		userService.deleteUser(id);
+	public void deleteUser(@RequestBody UserRequest request) {
+		userService.deleteUser(request.getId());
 	}
 
+	/**
+	 * 检查登录名是否存在
+	 * @param username 登录用户名
+	 * @return
+	 */
 	@GetMapping("/checkUsernameExist")
 	public boolean checkUsernameExist(String username) {
 		return userService.checkUsernameExist(username);
 	}
 
-	@GetMapping("/positions")
+	/**
+	 * 查询岗位列表
+	 * @param query
+	 * @return
+	 */
+	@GetMapping("/position/list")
 	@PreAuthorize("hasAuthority('system:position:list')")
 	public PaginationResponse<PositionView> listPosition(PositionQuery query) {
 		return positionService.listPosition(query);
 	}
 
-	@PostMapping("/positions")
+	/**
+	 * 添加岗位
+	 * @param request
+	 */
+	@PostMapping("/position/create")
 	@PreAuthorize("hasAuthority('system:position:create')")
 	public void addPosition(@RequestBody PositionRequest request) {
 		positionService.addPosition(request);
 	}
 
-	@PatchMapping("/positions")
+	/**
+	 * 更新岗位信息
+	 * @param request
+	 */
+	@PostMapping("/position/update")
 	@PreAuthorize("hasAuthority('system:position:update')")
 	public void updatePosition(@RequestBody PositionRequest request) {
 		positionService.updatePosition(request);
 	}
 
-	@DeleteMapping("/positions/{id}")
+	/**
+	 * 删除岗位信息
+	 * @param request
+	 */
+	@PostMapping("/position/delete")
 	@PreAuthorize("hasAuthority('system:position:delete')")
-	public void deletePosition(@PathVariable String id) {
-		positionService.deletePosition(id);
+	public void deletePosition(@RequestBody PositionRequest request) {
+		positionService.deletePosition(request.getId());
 	}
 
-	@GetMapping("/depts")
+	/**
+	 * 获取部门列表
+	 * @return
+	 */
+	@GetMapping("/dept/list")
 	@PreAuthorize("hasAuthority('system:dept:list')")
-	public List<DeptView> listOrg() {
+	public List<DeptView> listDept() {
 		return deptService.listDept(null);
 	}
 
-	@PostMapping("/depts")
+	@PostMapping("/dept/create")
 	@PreAuthorize("hasAuthority('system:dept:create')")
 	public void addOrg(@RequestBody DeptRequest request) {
 		deptService.addDept(request);
 	}
 
-	@PatchMapping("/depts")
+	@PostMapping("/dept/update")
 	@PreAuthorize("hasAuthority('system:dept:update')")
 	public void updateOrg(@RequestBody DeptRequest request) {
 		deptService.updateDept(request);
 	}
 
-	@DeleteMapping("/depts/{id}")
+	@PostMapping("/dept/delete")
 	@PreAuthorize("hasAuthority('system:dept:delete')")
-	public void deleteOrg(@PathVariable String id) {
-		deptService.deleteDept(id);
+	public void deleteOrg(@RequestBody DeptRequest request) {
+		deptService.deleteDept(request.getId());
 	}
 
-	@PostMapping("/depts/sort")
+	@PostMapping("/dept/sort")
 	@PreAuthorize("hasAuthority('system:dept:create')")
 	public void sortOrg(@RequestBody DeptSortRequest request) {
 		deptService.sortDept(request);
 	}
 
-	@PostMapping("/selectUsers")
-	public List<UserInfo> selectUsers(@RequestBody SelectUserRequest request) {
-		return userService.selectUsers(request);
-	}
-
-	@PostMapping("/selectDepts")
-	public List<DeptView> selectDepts(@RequestBody SelectDeptRequest request) {
-		return deptService.listDept(request);
-	}
-
-	@PostMapping("/selectRoles")
-	public List<RoleView> selectRoles(@RequestBody SelectRoleRequest request) {
-		return roleService.selectRoles(request);
-	}
-
-	@PostMapping("/selectPositions")
-	public List<PositionView> selectPositions(@RequestBody SelectPositionRequest request) {
-		return positionService.selectPositions(request);
-	}
-
-	@GetMapping("/dicts")
+	/**
+	 * 获取字典项列表
+	 * @param query 字典项分页参数
+	 * @return
+	 */
+	@GetMapping("/dict/list")
 	@PreAuthorize("hasAuthority('system:dict:list')")
 	public PaginationResponse<CommDictView> listDict(CommDictQuery query) {
 		return dictService.listDict(query);
 	}
 
-	@PostMapping("/dicts")
+	/**
+	 * 创建字典项
+	 * @param request
+	 */
+	@PostMapping("/dict/create")
 	@PreAuthorize("hasAuthority('system:dict:create')")
 	public void addDict(@RequestBody CommDictRequest request) {
 		dictService.addDict(request);
 	}
 
-	@PatchMapping("/dicts")
+	/**
+	 * 更新字典项
+	 * @param request
+	 */
+	@PostMapping("/dict/update")
 	@PreAuthorize("hasAuthority('system:dict:update')")
 	public void updateDict(@RequestBody CommDictRequest request) {
 		dictService.updateDict(request);
 	}
 
-	@DeleteMapping("/dicts/{id}")
+	/**
+	 * 删除字典项
+	 * @param request
+	 */
+	@PostMapping("/dict/delete")
 	@PreAuthorize("hasAuthority('system:dict:delete')")
-	public void deleteDict(@PathVariable String id) {
-		dictService.deleteDict(id);
+	public void deleteDict(@RequestBody CommDictRequest request) {
+		dictService.deleteDict(request.getId());
 	}
 
-	@GetMapping("/dictItems")
+	/**
+	 * 获取字典条目列表
+	 * @param query
+	 * @return
+	 */
+	@GetMapping("/dictItem/list")
 	@PreAuthorize("hasAuthority('system:dictItem:list')")
 	public PaginationResponse<CommDictItemView> listDictItem(CommDictItemQuery query) {
 		return dictService.listDictItem(query);
 	}
 
-	@PostMapping("/dictItems")
+	/**
+	 * 添加或者修改字典条目
+	 * @param request
+	 */
+	@PostMapping("/dictItem/create")
 	@PreAuthorize("hasAuthority('system:dictItem:create')")
-	public void saveOrUpdateDictItem(@RequestBody CommDictItemRequest request) {
+	public void createDictItem(@RequestBody CommDictItemRequest request) {
 		dictService.saveOrUpdateDictItem(request);
 	}
 
-	@PostMapping("/dictItems/import")
+	/**
+	 * 添加或者修改字典条目
+	 * @param request
+	 */
+	@PostMapping("/dictItem/update")
+	@PreAuthorize("hasAuthority('system:dictItem:update')")
+	public void updateItem(@RequestBody CommDictItemRequest request) {
+		dictService.saveOrUpdateDictItem(request);
+	}
+
+	/**
+	 * 导入字典条目
+	 * @param request
+	 */
+	@PostMapping("/dictItem/import")
 	@PreAuthorize("hasAuthority('system:dictItem:import')")
 	public void importDictItem(CommDictItemRequest request) {
 		dictService.importDictItem(request);
 	}
 
-	@DeleteMapping("/dictItems/{id}")
+	/**
+	 * 删除字典条目
+	 * @param request
+	 */
+	@PostMapping("/dictItem/delete")
 	@PreAuthorize("hasAuthority('system:dictItem:delete')")
-	public void deleteDictItem(@PathVariable String id) {
-		dictService.deleteDictItem(id);
+	public void deleteDictItem(@RequestBody CommDictItemRequest request) {
+		dictService.deleteDictItem(request.getId());
+	}
+
+	@PostMapping("/selectUser")
+	public List<UserInfo> selectUsers(@RequestBody SelectUserRequest request) {
+		return userService.selectUsers(request);
+	}
+
+	@PostMapping("/selectDept")
+	public List<DeptView> selectDepts(@RequestBody SelectDeptRequest request) {
+		return deptService.listDept(request);
+	}
+
+	@PostMapping("/selectRole")
+	public List<RoleView> selectRoles(@RequestBody SelectRoleRequest request) {
+		return roleService.selectRoles(request);
+	}
+
+	/**
+	 * @param request
+	 * @return
+	 */
+	@PostMapping("/selectPosition")
+	public List<PositionView> selectPositions(@RequestBody SelectPositionRequest request) {
+		return positionService.selectPositions(request);
 	}
 
 }

@@ -20,9 +20,9 @@ public interface TemplateService {
 
 	void batchUpdateTemplate(List<TemplateRequest> templateRequests);
 
-	void updateTemplate(TemplateRequest template);
+	void updateTemplate(TemplateRequest request);
 
-	void deleteTemplate(List<String> ids);
+	void deleteTemplate(TemplateRequest request);
 
 	List<String> listTemplateCategories(CategoryQuery query);
 

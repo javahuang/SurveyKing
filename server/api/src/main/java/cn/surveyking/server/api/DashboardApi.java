@@ -21,7 +21,7 @@ public class DashboardApi {
 
 	private final DashboardService dashboardService;
 
-	@GetMapping
+	@GetMapping("/list")
 	public List<DashboardView> listDashboard(DashboardQuery query) {
 		return dashboardService.listDashboard(query);
 	}

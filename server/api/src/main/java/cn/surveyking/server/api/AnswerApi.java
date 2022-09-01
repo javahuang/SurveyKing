@@ -17,67 +17,112 @@ import java.util.List;
  * @date 2021/8/6
  */
 @RestController
-@RequestMapping("${api.prefix}/answers")
+@RequestMapping("${api.prefix}/answer")
 @RequiredArgsConstructor
 public class AnswerApi {
 
 	private final AnswerService answerService;
 
+	/**
+	 * 获取答案列表。
+	 * @param query 查询参数。
+	 * @return 当前答案。
+	 */
 	@PreAuthorize("hasAuthority('answer:list')")
-	@GetMapping
+	@GetMapping("/list")
 	public PaginationResponse<AnswerView> listAnswer(AnswerQuery query) {
 		return answerService.listAnswer(query);
 	}
 
+	/**
+	 * 获取删除的答案。
+	 * @param query 查询参数。
+	 * @return
+	 */
 	@PreAuthorize("hasAuthority('answer:list')")
-	@GetMapping("/getDeleted")
+	@GetMapping("/trash")
 	public List<AnswerView> listAnswerDeleted(AnswerQuery query) {
 		return answerService.listAnswerDeleted(query);
 	}
 
-	@GetMapping("/{id}")
+	/**
+	 * 获取答案
+	 * @param query 查询结果。
+	 * @return
+	 */
+	@GetMapping
 	@PreAuthorize("hasAuthority('answer:detail')")
-	public AnswerView getAnswer(@PathVariable String id, AnswerQuery query) {
-		query.setId(id);
+	public AnswerView getAnswer(AnswerQuery query) {
 		return answerService.getAnswer(query);
 	}
 
-	@PostMapping
+	/**
+	 * 数据表格保存答案。
+	 * @param request 保存的答案。
+	 * @param request
+	 */
+	@PostMapping("/create")
 	@PreAuthorize("hasAuthority('answer:create')")
-	public void saveAnswer(@RequestBody AnswerRequest answer, HttpServletRequest request) {
-		answerService.saveAnswer(answer, request);
+	public void saveAnswer(@RequestBody AnswerRequest request, HttpServletRequest httpRequest) {
+		answerService.saveAnswer(request, httpRequest);
 	}
 
-	@PatchMapping
+	/**
+	 * 更新答案
+	 * @param request
+	 */
+	@PostMapping("/update")
 	@PreAuthorize("hasAuthority('answer:update')")
-	public void updateAnswer(@RequestBody AnswerRequest answer) {
-		answerService.updateAnswer(answer);
+	public void updateAnswer(@RequestBody AnswerRequest request) {
+		answerService.updateAnswer(request);
 	}
 
-	@DeleteMapping
+	/**
+	 * 删除答案，答案放到回收站
+	 * @param request 请求参数
+	 */
+	@PostMapping("/delete")
 	@PreAuthorize("hasAuthority('answer:delete')")
-	public void deleteAnswer(String[] ids) {
-		answerService.deleteAnswer(ids);
+	public void deleteAnswer(@RequestBody AnswerRequest request) {
+		answerService.deleteAnswer(request);
 	}
 
+	/**
+	 * 从回收站里面清空答案
+	 * @param request
+	 */
 	@PreAuthorize("hasAuthority('answer:delete')")
-	@DeleteMapping("/destroy")
-	public void batchDestroyAnswer(String[] ids) {
-		answerService.batchDestroyAnswer(ids);
+	@PostMapping("/destroy")
+	public void batchDestroyAnswer(@RequestBody AnswerRequest request) {
+		answerService.batchDestroyAnswer(request);
 	}
 
+	/**
+	 * 从回收站里面恢复答案
+	 * @param request
+	 */
 	@PreAuthorize("hasAuthority('answer:update')")
 	@PostMapping("/restore")
 	public void restoreAnswer(@RequestBody AnswerRequest request) {
 		answerService.restoreAnswer(request);
 	}
 
-	@GetMapping("/download")
+	/**
+	 * 答案导出
+	 * @param query 答案导出查询请求
+	 * @return
+	 */
+	@PostMapping("/download")
 	@PreAuthorize("hasAuthority('answer:export')")
 	public ResponseEntity<Resource> download(DownloadQuery query) {
 		return answerService.download(query);
 	}
 
+	/**
+	 * 修改答案上传附件
+	 * @param request 附件
+	 * @return 项目 schema
+	 */
 	@PostMapping("/upload")
 	@PreAuthorize("hasAuthority('answer:upload')")
 	public AnswerUploadView upload(AnswerUploadRequest request) {

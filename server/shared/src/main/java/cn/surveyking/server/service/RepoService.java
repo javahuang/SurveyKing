@@ -38,9 +38,9 @@ public interface RepoService {
 
 	/**
 	 * 删除题库
-	 * @param id 题库
+	 * @param request 题库
 	 */
-	void deleteRepo(String id);
+	void deleteRepo(RepoRequest request);
 
 	/**
 	 * 批量添加题库模板

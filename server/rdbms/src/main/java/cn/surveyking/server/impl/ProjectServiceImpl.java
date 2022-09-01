@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -134,8 +133,8 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 	}
 
 	@Override
-	public void deleteProject(String id) {
-		removeById(id);
+	public void deleteProject(ProjectRequest request) {
+		removeById(request.getId());
 	}
 
 	@Override
@@ -156,8 +155,8 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 	}
 
 	@Override
-	public void batchDestroyProject(String[] ids) {
-		getBaseMapper().batchDestroy(Arrays.asList(ids));
+	public void batchDestroyProject(ProjectRequest request) {
+		getBaseMapper().batchDestroy(request.getIds());
 	}
 
 	@Override

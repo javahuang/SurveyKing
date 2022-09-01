@@ -85,8 +85,8 @@ public class TemplateServiceImpl extends BaseService<TemplateMapper, Template> i
 	}
 
 	@Override
-	public void deleteTemplate(List<String> ids) {
-		removeBatchByIds(ids);
+	public void deleteTemplate(TemplateRequest request) {
+		removeBatchByIds(request.getIds());
 	}
 
 	@Override

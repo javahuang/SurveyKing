@@ -31,7 +31,7 @@ public interface AnswerService {
 
 	AnswerView updateAnswer(AnswerRequest answer);
 
-	void deleteAnswer(String[] ids);
+	void deleteAnswer(AnswerRequest request);
 
 	DownloadData downloadAttachment(DownloadQuery query);
 
@@ -73,7 +73,7 @@ public interface AnswerService {
 
 	List<AnswerView> listAnswerDeleted(AnswerQuery query);
 
-	void batchDestroyAnswer(String[] ids);
+	void batchDestroyAnswer(AnswerRequest request);
 
 	void restoreAnswer(AnswerRequest request);
 

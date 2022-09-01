@@ -13,44 +13,47 @@ import java.util.List;
  * @author javahuang
  * @date 2022/4/27
  */
-@RequestMapping("${api.prefix}/repos")
+@RequestMapping("${api.prefix}/repo")
 @RequiredArgsConstructor
 @RestController
 public class RepoApi {
 
 	private final RepoService repoService;
 
-	@GetMapping
+	/**
+	 * @param query
+	 * @return
+	 */
+	@GetMapping("/list")
 	@PreAuthorize("hasAuthority('repo:list')")
 	public PaginationResponse<RepoView> listRepo(RepoQuery query) {
 		return repoService.listRepo(query);
 	}
 
-	@GetMapping("/{id}")
 	@PreAuthorize("hasAuthority('repo:detail')")
-	public RepoView getRpo(@PathVariable String id) {
+	public RepoView getRpo(String id) {
 		return repoService.getRpo(id);
 	}
 
-	@PostMapping
+	@PostMapping("/create")
 	@PreAuthorize("hasAuthority('repo:create')")
 	public void addRepo(@RequestBody RepoRequest request) {
 		repoService.addRepo(request);
 	}
 
-	@PatchMapping
+	@PostMapping("/update")
 	@PreAuthorize("hasAuthority('repo:update')")
 	public void updateRepo(@RequestBody RepoRequest request) {
 		repoService.updateRepo(request);
 	}
 
-	@DeleteMapping("{id}")
+	@PostMapping("/delete")
 	@PreAuthorize("hasAuthority('repo:delete')")
-	public void deleteRepo(@PathVariable String id) {
-		repoService.deleteRepo(id);
+	public void deleteRepo(RepoRequest request) {
+		repoService.deleteRepo(request);
 	}
 
-	@PostMapping("/batch")
+	@PostMapping("/batchCreate")
 	public void batchAddRepoTemplate(@RequestBody RepoTemplateRequest request) {
 		repoService.batchAddRepoTemplate(request);
 	}

@@ -22,10 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.baomidou.mybatisplus.core.toolkit.StringUtils.isNotBlank;
@@ -83,7 +80,8 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 	}
 
 	@Override
-	public void deleteRepo(String id) {
+	public void deleteRepo(RepoRequest request) {
+		String id = request.getId();
 		removeById(id);
 		// 解除题库与问题的绑定关系
 		repoTemplateService.remove(Wrappers.<RepoTemplate>lambdaUpdate().eq(RepoTemplate::getRepoId, id));
@@ -183,7 +181,8 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 					.in(!CollectionUtils.isEmpty(repo.getTypes()), Template::getQuestionType, repo.getTypes())
 					.exists(!CollectionUtils.isEmpty(repo.getTags()),
 							String.format("select 1 from t_tag t where t.entity_id = t_template.id and t.name in (%s)",
-									repo.getTags().stream().map(x -> "'" + x + "'").collect(Collectors.joining(",")))));
+									Optional.ofNullable(repo.getTags()).orElse(new ArrayList<>()).stream()
+											.map(x -> "'" + x + "'").collect(Collectors.joining(",")))));
 			if (repo.getQuestionsNum() != null) {
 				// 随机从问题里面挑选指定数量的题
 				Collections.shuffle(repoTemplates);

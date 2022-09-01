@@ -98,7 +98,7 @@ public class UserApi {
 		return userService.loadUserById(SecurityContextUtils.getUserId());
 	}
 
-	@GetMapping("/public/getRegisterRoles")
+	@GetMapping("/public/listRegisterRole")
 	public List<RegisterRoleView> getRegisterRoles() {
 		return userService.getRegisterRoles();
 	}
@@ -107,7 +107,7 @@ public class UserApi {
 	 * 导入用户
 	 * @param request
 	 */
-	@PostMapping("/users/import")
+	@PostMapping("/importUser")
 	public void importUser(UserRequest request) {
 		userService.importUser(request);
 	}
@@ -117,7 +117,7 @@ public class UserApi {
 	 * @param query
 	 * @return
 	 */
-	@GetMapping("/user/tasks")
+	@GetMapping("/listUserTask")
 	public PaginationResponse<MyTaskView> myTask(MyTaskQuery query) {
 		return userService.queryTask(query);
 	}
