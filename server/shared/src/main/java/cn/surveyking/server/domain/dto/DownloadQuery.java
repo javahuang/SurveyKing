@@ -2,8 +2,10 @@ package cn.surveyking.server.domain.dto;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -34,6 +36,12 @@ public class DownloadQuery extends PageQuery {
 	 * 答案ids
 	 */
 	private List<String> ids;
+	
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	private Date startTime;
+	
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	private Date endTime;
 
 	@NotNull
 	private DownloadType type;

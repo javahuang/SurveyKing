@@ -19,4 +19,6 @@ public class ProjectPartnerView {
 
 	private Integer status;
 
+	private String userId;
+
 }

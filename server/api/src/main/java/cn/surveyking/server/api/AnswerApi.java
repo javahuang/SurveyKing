@@ -112,7 +112,7 @@ public class AnswerApi {
 	 * @param query 答案导出查询请求
 	 * @return
 	 */
-	@PostMapping("/download")
+	@GetMapping("/download")
 	@PreAuthorize("hasAuthority('answer:export')")
 	public ResponseEntity<Resource> download(DownloadQuery query) {
 		return answerService.download(query);

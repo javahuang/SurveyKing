@@ -99,7 +99,7 @@ public class ProjectApi {
 	 */
 	@GetMapping("/partner/list")
 	@EnableDataPerm(key = "#query.projectId")
-	public List<ProjectPartnerView> listProjectPartner(ProjectPartnerQuery query) {
+	public PaginationResponse<ProjectPartnerView> listProjectPartner(ProjectPartnerQuery query) {
 		return projectPartnerService.listProjectPartner(query);
 	}
 
@@ -121,6 +121,16 @@ public class ProjectApi {
 	@EnableDataPerm(key = "#request.projectId")
 	public void deleteProjectPartner(@RequestBody ProjectPartnerRequest request) {
 		projectPartnerService.deleteProjectPartner(request);
+	}
+
+	/**
+	 * 下载项目参与者列表
+	 * @param query
+	 */
+	@GetMapping("/partner/download")
+	@EnableDataPerm(key = "#query.projectId")
+	public void downloadPartner(ProjectPartnerQuery query) {
+		projectPartnerService.downloadPartner(query);
 	}
 
 	/**

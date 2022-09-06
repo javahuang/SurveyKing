@@ -1,22 +1,31 @@
 package cn.surveyking.server.impl;
 
+import cn.surveyking.server.core.common.PaginationResponse;
+import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.constant.CacheConsts;
 import cn.surveyking.server.core.constant.ProjectPartnerTypeEnum;
+import cn.surveyking.server.core.uitls.ContextHelper;
+import cn.surveyking.server.core.uitls.ExcelExporter;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.ProjectPartnerQuery;
 import cn.surveyking.server.domain.dto.ProjectPartnerRequest;
 import cn.surveyking.server.domain.dto.ProjectPartnerView;
+import cn.surveyking.server.domain.mapper.ProjectPartnerViewMapper;
 import cn.surveyking.server.domain.model.ProjectPartner;
 import cn.surveyking.server.mapper.ProjectPartnerMapper;
 import cn.surveyking.server.service.BaseService;
 import cn.surveyking.server.service.ProjectPartnerService;
 import cn.surveyking.server.service.UserService;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,22 +43,33 @@ public class ProjectPartnerServiceImpl extends BaseService<ProjectPartnerMapper,
 
 	private final CacheManager cacheManager;
 
+	private final ProjectPartnerViewMapper projectPartnerViewMapper;
+
 	@Override
-	public List<ProjectPartnerView> listProjectPartner(ProjectPartnerQuery query) {
-		return list(Wrappers.<ProjectPartner>lambdaQuery().eq(ProjectPartner::getProjectId, query.getProjectId())
-				.in(query.getTypes() != null, ProjectPartner::getType, query.getTypes())
-				.eq(query.getStatus() != null, ProjectPartner::getStatus, query.getStatus())
-				.orderByAsc(ProjectPartner::getCreateAt)).stream().map(partner -> {
-					ProjectPartnerView view = new ProjectPartnerView();
-					if (partner.getUserId() != null) {
-						view.setUser(userService.loadUserById(partner.getUserId()));
-					}
-					view.setStatus(partner.getStatus());
-					view.setType(partner.getType());
-					view.setId(partner.getId());
-					view.setUserName(partner.getUserName());
-					return view;
-				}).collect(Collectors.toList());
+	public PaginationResponse<ProjectPartnerView> listProjectPartner(ProjectPartnerQuery query) {
+		Page<ProjectPartner> page = pageByQuery(query,
+				Wrappers.<ProjectPartner>lambdaQuery().eq(ProjectPartner::getProjectId, query.getProjectId())
+						.in(query.getTypes() != null, ProjectPartner::getType, query.getTypes())
+						.eq(query.getStatus() != null, ProjectPartner::getStatus, query.getStatus()).like(
+								query.getUserName() != null
+										&& query.getTypes() != null
+										&& query.getTypes()
+												.contains(ProjectPartnerTypeEnum.RESPONDENT_IMP_USER.getType()),
+								ProjectPartner::getUserName, query.getUserName())
+						.exists(query.getUserName() != null && query.getTypes() != null
+								&& query.getTypes().contains(ProjectPartnerTypeEnum.RESPONDENT_SYS_USER.getType()),
+								String.format(
+										"select 1 from t_user where t_user.name='%s' and t_user.id = t_project_partner.user_id",
+										query.getUserName()))
+						.orderByAsc(ProjectPartner::getCreateAt));
+		PaginationResponse<ProjectPartnerView> result = new PaginationResponse<>(page.getTotal(),
+				projectPartnerViewMapper.toView(page.getRecords()));
+		for (ProjectPartnerView view : result.getList()) {
+			if (view.getUserId() != null) {
+				view.setUser(userService.loadUserById(view.getUserId()));
+			}
+		}
+		return result;
 	}
 
 	@Override
@@ -104,6 +124,26 @@ public class ProjectPartnerServiceImpl extends BaseService<ProjectPartnerMapper,
 	@Override
 	public List<String> getProjectPerms() {
 		return getBaseMapper().getProjectPerms(SecurityContextUtils.getUserId());
+	}
+
+	@Override
+	@SneakyThrows
+	public void downloadPartner(ProjectPartnerQuery query) {
+		query.setPageSize(-1);
+		List<ProjectPartnerView> result = listProjectPartner(query).getList();
+		List<List<Object>> rows = result.stream().map(r -> {
+			List<Object> row = new ArrayList<>();
+			if (r.getType() == ProjectPartnerTypeEnum.RESPONDENT_SYS_USER.getType()) {
+				row.add(r.getUser().getName());
+			}
+			else {
+				row.add(r.getUserName());
+			}
+			row.add(AppConsts.ProjectPartnerStatus.getStatusStr(r.getStatus()));
+			return row;
+		}).collect(Collectors.toList());
+		new ExcelExporter.Builder().setOutputStream(ContextHelper.getCurrentHttpResponse().getOutputStream())
+				.setRows(rows).setColumns(Arrays.asList("名单", "状态")).build().exportToStream();
 	}
 
 }

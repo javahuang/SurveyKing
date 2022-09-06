@@ -189,6 +189,18 @@ public class AppConsts {
 		 */
 		int ANSWERED = 2;
 
+		static String getStatusStr(int status) {
+			if (status == VISITED) {
+				return "已访问";
+			}
+			else if (status == ANSWERED) {
+				return "已答题";
+			}
+			else {
+				return "未访问";
+			}
+		}
+
 	}
 
 }

@@ -106,7 +106,7 @@ public class ExcelExporter {
 	@Accessors(chain = true)
 	public static class Builder {
 
-		private String sheetName;
+		private String sheetName = "Sheet1";
 
 		private List<String> columns;
 
@@ -123,8 +123,8 @@ public class ExcelExporter {
 				excelExporter = new ExcelExporter();
 			}
 			// 如果答案中不存在 openid，则删除该列
-			if (!Boolean.TRUE.equals(SchemaHelper.localOpenId.get())) {
-				int openidColumnIndex = this.columns.indexOf(openidColumnName);
+			int openidColumnIndex = this.columns.indexOf(openidColumnName);
+			if (!Boolean.TRUE.equals(SchemaHelper.localOpenId.get()) && openidColumnIndex != -1) {
 				this.columns.remove(openidColumnIndex);
 				this.rows.forEach(row -> {
 					row.remove(openidColumnIndex);
