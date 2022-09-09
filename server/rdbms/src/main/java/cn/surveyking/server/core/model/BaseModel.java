@@ -22,13 +22,13 @@ public class BaseModel {
 	@TableField(fill = FieldFill.INSERT)
 	private Date createAt;
 
-	@TableField(fill = FieldFill.INSERT, select = false)
+	@TableField(fill = FieldFill.INSERT)
 	private String createBy;
 
-	@TableField(fill = FieldFill.UPDATE, select = false)
+	@TableField(fill = FieldFill.UPDATE)
 	private Date updateAt;
 
-	@TableField(fill = FieldFill.UPDATE, select = false)
+	@TableField(fill = FieldFill.UPDATE)
 	private String updateBy;
 
 	/**

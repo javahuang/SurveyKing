@@ -133,7 +133,7 @@ public class SurveyServiceImpl implements SurveyService {
 	}
 
 	@Override
-	public PublicAnswerView saveAnswer(AnswerRequest request, HttpServletRequest httpRequest) {
+	public PublicAnswerView saveAnswer(AnswerRequest request) {
 		String projectId = request.getProjectId();
 		PublicAnswerView result = new PublicAnswerView();
 		ProjectView project = projectService.getProject(projectId);
@@ -154,7 +154,7 @@ public class SurveyServiceImpl implements SurveyService {
 
 		// 保存答案
 		request.setId(answerId);
-		AnswerView answerView = answerService.saveAnswer(request, httpRequest);
+		AnswerView answerView = answerService.saveAnswer(request);
 		result.setAnswerId(answerView.getId());
 		// 考试模式，计算分值传给前端
 		if (ProjectModeEnum.exam.equals(project.getMode())) {
@@ -211,7 +211,7 @@ public class SurveyServiceImpl implements SurveyService {
 	public List<PublicDictView> loadDict(PublicDictRequest request) {
 		return dictItemService
 				.list(Wrappers.<CommDictItem>lambdaQuery().eq(CommDictItem::getDictCode, request.getDictCode())
-						.eq(request.getCascaderLevel() != null, CommDictItem::getLevel, request.getCascaderLevel())
+						.eq(request.getCascaderLevel() != null, CommDictItem::getItemLevel, request.getCascaderLevel())
 						.eq(request.getParentValue() != null, CommDictItem::getParentItemValue,
 								request.getParentValue())
 						.and(isNotBlank(request.getSearch()),
@@ -261,6 +261,27 @@ public class SurveyServiceImpl implements SurveyService {
 		}
 		result.setMetaInfo(answerView.getMetaInfo());
 		return result;
+	}
+
+	@Override
+	public void tempSaveAnswer(AnswerRequest request) {
+		String projectId = request.getProjectId();
+		if (!Integer.valueOf(0).equals(request.getTempSave()) || request.getTempAnswer() == null || projectId == null) {
+			return;
+		}
+		String answerId = ContextHelper.getCookie(AppConsts.COOKIE_RANDOM_PROJECT_PREFIX + projectId);
+		if (answerId == null) {
+			return;
+		}
+		if (!SecurityContextUtils.isAuthenticated()) {
+			// 目前仅支持登录用户后端暂存
+			return;
+		}
+		AnswerRequest answerRequest = new AnswerRequest();
+		answerRequest.setId(answerId);
+		answerRequest.setTempSave(0);
+		answerRequest.setTempAnswer(request.getTempAnswer());
+		answerService.updateAnswer(answerRequest);
 	}
 
 	/**
@@ -881,7 +902,7 @@ public class SurveyServiceImpl implements SurveyService {
 		// 更新问卷状态为已访问
 		if (updatePartnerVisited) {
 			ProjectPartner projectPartner = projectPartnerMapper.selectOne(projectPartnerQuery);
-			if (projectPartner != null) {
+			if (projectPartner != null && projectPartner.getStatus() == AppConsts.ProjectPartnerStatus.UNVISITED) {
 				projectPartner.setStatus(AppConsts.ProjectPartnerStatus.VISITED);
 				projectPartnerMapper.updateById(projectPartner);
 				// 如果配置的外部用户，则 createBy 为 partner 的 id，如果是内部用户则是用户 id
@@ -899,27 +920,6 @@ public class SurveyServiceImpl implements SurveyService {
 		}
 
 		return null;
-	}
-
-	/**
-	 * 随机问题
-	 * @param project
-	 * @return
-	 */
-	private SurveySchema randomSchemaIfNeeded(ProjectView project) {
-		if (ProjectModeEnum.exam != project.getMode()) {
-			return null;
-		}
-		List<ProjectSetting.RandomSurveyCondition> randomSurveyCondition = project.getSetting().getExamSetting()
-				.getRandomSurvey();
-		if (randomSurveyCondition == null || randomSurveyCondition.size() == 0) {
-			return null;
-		}
-		List<SurveySchema> questionSchemaList = repoService.pickQuestionFromRepo(randomSurveyCondition);
-		SurveySchema source = project.getSurvey();
-		SurveySchema randomSchema = SurveySchema.builder().id(source.getId()).children(questionSchemaList)
-				.title(source.getTitle()).attribute(source.getAttribute()).description(source.getDescription()).build();
-		return randomSchema;
 	}
 
 	/**
@@ -976,10 +976,45 @@ public class SurveyServiceImpl implements SurveyService {
 		}
 	}
 
+	/**
+	 * 随机问题
+	 * @param project
+	 */
 	private void replaceSchemaIfRandomSchema(ProjectView project) {
-		SurveySchema randomSchema = randomSchemaIfNeeded(project);
+		if (ProjectModeEnum.exam != project.getMode()) {
+			return;
+		}
+		List<ProjectSetting.RandomSurveyCondition> randomSurveyCondition = project.getSetting().getExamSetting()
+				.getRandomSurvey();
+		if (randomSurveyCondition == null || randomSurveyCondition.size() == 0) {
+			return;
+		}
+		// 从已有答案里面加载 schema
+		String cookieName = AppConsts.COOKIE_RANDOM_PROJECT_PREFIX + project.getId();
+		String answerId = ContextHelper.getCookie(cookieName);
+		if (answerId != null) {
+			AnswerQuery answerQuery = new AnswerQuery();
+			answerQuery.setId(answerId);
+			AnswerView answerView = answerService.getAnswer(answerQuery);
+			if (answerView != null && answerView.getSurvey() != null) {
+				project.setSurvey(answerView.getSurvey());
+				project.setTempAnswer(answerView.getTempAnswer());
+				return;
+			}
+		}
+		// 从题库里面挑题
+		List<SurveySchema> questionSchemaList = repoService.pickQuestionFromRepo(randomSurveyCondition);
+		SurveySchema source = project.getSurvey();
+		SurveySchema randomSchema = SurveySchema.builder().id(source.getId()).children(questionSchemaList)
+				.title(source.getTitle()).attribute(source.getAttribute()).description(source.getDescription()).build();
 		if (randomSchema != null) {
 			project.setSurvey(randomSchema);
+			AnswerRequest answerRequest = new AnswerRequest();
+			answerRequest.setSurvey(randomSchema);
+			AnswerView answerView = answerService.saveAnswer(answerRequest);
+			Cookie cookie = new Cookie(cookieName, answerView.getId());
+			cookie.setMaxAge(7 * 24 * 60 * 60);
+			ContextHelper.getCurrentHttpResponse().addCookie(cookie);
 		}
 	}
 

@@ -25,7 +25,9 @@ import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.util.WebUtils;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.annotation.Annotation;
@@ -140,6 +142,14 @@ public class ContextHelper implements ApplicationContextAware {
 			return response;
 		}
 		log.debug("Not called in the context of an HTTP request");
+		return null;
+	}
+
+	public static String getCookie(String cookieName) {
+		Cookie cookie = WebUtils.getCookie(getCurrentHttpRequest(), cookieName);
+		if (cookie != null) {
+			return cookie.getValue();
+		}
 		return null;
 	}
 

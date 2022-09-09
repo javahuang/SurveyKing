@@ -5,6 +5,7 @@ import cn.surveyking.server.core.constant.ResponseCode;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.ResourceRegionHttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -19,6 +20,9 @@ public class CustomResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
 	@Override
 	public boolean supports(MethodParameter returnType, Class converterType) {
+		if (converterType.equals(ResourceRegionHttpMessageConverter.class)) {
+			return false;
+		}
 		return true;
 	}
 

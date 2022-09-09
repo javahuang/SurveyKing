@@ -3,6 +3,7 @@ package cn.surveyking.server.domain.model;
 import cn.surveyking.server.core.model.BaseModel;
 import cn.surveyking.server.domain.dto.AnswerExamInfo;
 import cn.surveyking.server.domain.dto.AnswerMetaInfo;
+import cn.surveyking.server.domain.dto.SurveySchema;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -25,8 +26,23 @@ public class Answer extends BaseModel {
 
 	private String projectId;
 
+	/**
+	 * 暂存的答案
+	 */
+	@TableField(typeHandler = JacksonTypeHandler.class, jdbcType = JdbcType.LONGVARCHAR)
+	private LinkedHashMap tempAnswer;
+
+	/**
+	 * 最终答案
+	 */
 	@TableField(typeHandler = JacksonTypeHandler.class, jdbcType = JdbcType.LONGVARCHAR)
 	private LinkedHashMap answer;
+
+	/**
+	 * 问卷
+	 */
+	@TableField(typeHandler = JacksonTypeHandler.class, jdbcType = JdbcType.LONGVARCHAR)
+	private SurveySchema survey;
 
 	@TableField(typeHandler = JacksonTypeHandler.class, jdbcType = JdbcType.LONGVARCHAR)
 	private AnswerMetaInfo metaInfo;

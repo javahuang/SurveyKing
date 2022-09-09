@@ -2,7 +2,6 @@ package cn.surveyking.server.service;
 
 import cn.surveyking.server.domain.dto.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -15,7 +14,7 @@ public interface SurveyService {
 
 	PublicStatisticsView statProject(ProjectQuery query);
 
-	PublicAnswerView saveAnswer(AnswerRequest answer, HttpServletRequest request);
+	PublicAnswerView saveAnswer(AnswerRequest request);
 
 	PublicQueryVerifyView loadQuery(PublicQueryRequest request);
 
@@ -26,5 +25,7 @@ public interface SurveyService {
 	List<PublicDictView> loadDict(PublicDictRequest request);
 
 	PublicExamResult loadExamResult(PublicExamRequest request);
+
+	void tempSaveAnswer(AnswerRequest request);
 
 }

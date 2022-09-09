@@ -1,6 +1,7 @@
 package cn.surveyking.server.impl;
 
 import cn.surveyking.server.core.constant.TagCategoryEnum;
+import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.model.Tag;
 import cn.surveyking.server.mapper.TagMapper;
 import cn.surveyking.server.service.BaseService;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -33,6 +35,8 @@ public class TagServiceImpl extends BaseService<TagMapper, Tag> implements TagSe
 			tag.setName(tagName);
 			tag.setEntityId(entityId);
 			tag.setCategory(category.name());
+			tag.setCreateAt(new Date());
+			tag.setCreateBy(SecurityContextUtils.getUserId());
 			tagList.add(tag);
 		});
 		if (tagList.size() > 0) {

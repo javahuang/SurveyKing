@@ -36,4 +36,9 @@ public class RepoRequest {
 	 */
 	private String setting;
 
+	/**
+	 * 题库类型
+	 */
+	private String mode;
+
 }

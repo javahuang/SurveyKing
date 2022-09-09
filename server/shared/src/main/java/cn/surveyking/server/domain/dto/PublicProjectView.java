@@ -39,4 +39,6 @@ public class PublicProjectView {
 
 	LinkedHashMap<String, Object> answer;
 
+	LinkedHashMap<String, Object> tempAnswer;
+
 }

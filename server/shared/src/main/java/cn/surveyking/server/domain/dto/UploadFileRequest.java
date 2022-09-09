@@ -18,7 +18,7 @@ public class UploadFileRequest {
 	private MultipartFile file;
 
 	private int fileType;
-	
+
 	private String id;
 
 }

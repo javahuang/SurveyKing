@@ -31,7 +31,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -67,6 +66,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
 	private final TemplateServiceImpl templateService;
 
+	private final DictService dictService;
+
 	@Override
 	public PaginationResponse<AnswerView> listAnswer(AnswerQuery query) {
 		Page<Answer> page = new Page<>(query.getCurrent(), query.getPageSize());
@@ -74,6 +75,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 				Wrappers.<Answer>lambdaQuery()
 						.eq(query.getProjectId() != null, Answer::getProjectId, query.getProjectId())
 						.in(query.getIds() != null && query.getIds().size() > 0, Answer::getId, query.getIds())
+						.lt(query.getEndTime() != null, Answer::getCreateAt, query.getEndTime())
+						.gt(query.getStartTime() != null, Answer::getCreateAt, query.getStartTime())
 						.eq(query.getId() != null, Answer::getId, query.getId()).orderByDesc(Answer::getCreateAt));
 		List<AnswerView> list = answerViewMapper.toAnswerView(page.getRecords());
 		Project project = projectMapper.selectById(query.getProjectId());
@@ -186,16 +189,21 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 			answerView.setRank(scores.indexOf(answerView.getExamScore()) + 1);
 		}
 		String projectId = answerView.getProjectId();
-		FlatSurveySchemaByType schemaByType = parseSurveySchemaByType(projectMapper.selectById(projectId).getSurvey());
+		Project project = projectMapper.selectById(projectId);
+		if (project == null || project.getSurvey() == null) {
+			// 随机问题问卷没有 schema
+			return answerView;
+		}
+		FlatSurveySchemaByType schemaByType = parseSurveySchemaByType(project.getSurvey());
 		setAnswerExtraInfo(answerView, schemaByType);
 		return answerView;
 	}
 
 	@Override
-	public AnswerView saveAnswer(AnswerRequest request, HttpServletRequest httpRequest) {
+	public AnswerView saveAnswer(AnswerRequest request) {
 		// 公开查询修改答案时不会传元数据
 		if (request.getMetaInfo() != null) {
-			request.getMetaInfo().setClientInfo(parseClientInfo(httpRequest, request.getMetaInfo().getClientInfo()));
+			request.getMetaInfo().setClientInfo(parseClientInfo(request.getMetaInfo().getClientInfo()));
 		}
 		if (StringUtils.hasText(request.getId())) {
 			return updateAnswer(request);
@@ -240,6 +248,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		AnswerQuery answerQuery = new AnswerQuery();
 		answerQuery.setProjectId(query.getProjectId());
 		answerQuery.setIds(query.getIds());
+		answerQuery.setStartTime(query.getStartTime());
+		answerQuery.setEndTime(query.getEndTime());
 		if (query.getPageSize() != 0) {
 			answerQuery.setCurrent(query.getCurrent());
 			answerQuery.setPageSize(query.getPageSize());
@@ -292,6 +302,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		AnswerQuery answerQuery = new AnswerQuery();
 		answerQuery.setIds(query.getIds());
 		answerQuery.setProjectId(query.getProjectId());
+		answerQuery.setStartTime(query.getStartTime());
+		answerQuery.setEndTime(query.getEndTime());
 		if (query.getCurrent() != 0 && query.getPageSize() != 0) {
 			answerQuery.setCurrent(query.getCurrent());
 			answerQuery.setPageSize(query.getPageSize());

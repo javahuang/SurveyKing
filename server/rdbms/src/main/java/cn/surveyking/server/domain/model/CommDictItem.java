@@ -48,8 +48,8 @@ public class CommDictItem implements Serializable {
 	/**
 	 * 层级
 	 */
-	@TableField(value = "level")
-	private Integer level;
+	@TableField(value = "item_level")
+	private Integer itemLevel;
 
 	/**
 	 * 字典项顺序

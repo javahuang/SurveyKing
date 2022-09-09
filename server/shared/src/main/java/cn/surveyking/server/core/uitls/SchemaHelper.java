@@ -162,6 +162,28 @@ public class SchemaHelper {
 					if (optionValue == null) {
 						return null;
 					}
+					// 数据字典
+					if (SurveySchema.DataType.selectDict.equals(optionSchema.getAttribute().getDataType())) {
+						String[] dictValueAndLabel = optionValue.toString().split("\\|", 2);
+						if (dictValueAndLabel.length > 1) {
+							return dictValueAndLabel[1];
+						}
+						// 兼容历史版本
+						return dictValueAndLabel[0];
+					}
+					// 下拉题
+					if (SurveySchema.DataType.select.equals(optionSchema.getAttribute().getDataType())) {
+						Optional<SurveySchema.DataSource> findDataSource = optionSchema.getDataSource().stream()
+								.filter(x -> x.getValue().equals(optionValue)).findFirst();
+						if (findDataSource.isPresent()) {
+							return findDataSource.get().getLabel();
+						}
+						return optionValue.toString();
+					}
+					// 选项类型为横向填空
+					if (SurveySchema.DataType.horzBlank.equals(optionSchema.getAttribute().getDataType())) {
+						return getHorzBlankValue(optionSchema, (Map<String, String>) optionValue);
+					}
 					if (optionValue != null && optionValue instanceof Boolean) {
 						// 单选、多选题，选中的话，答案会是 true，需要转换成标题
 						return trimHtmlTag(optionSchema.getTitle());
@@ -250,6 +272,47 @@ public class SchemaHelper {
 
 		avoidFormulaInjection(rowData);
 		return rowData;
+	}
+
+	/**
+	 * @param optionSchema 选项 schema
+	 * @param optionValue
+	 * @return
+	 */
+	private static String getHorzBlankValue(SurveySchema optionSchema, Map<String, String> optionValue) {
+		if (!SurveySchema.DataType.horzBlank.equals(optionSchema.getAttribute().getDataType())) {
+			return "";
+		}
+		List<String> result = new ArrayList<>();
+		for (SurveySchema subOption : optionSchema.getChildren()) {
+			String subOptionValue = Optional.ofNullable(optionValue.get(subOption.getId())).orElse("");
+			// 数据字典
+			if (SurveySchema.DataType.selectDict.equals(subOption.getAttribute().getDataType())) {
+				String[] dictValueAndLabel = subOptionValue.split("\\|", 2);
+				if (dictValueAndLabel.length > 1) {
+					result.add(dictValueAndLabel[1]);
+				}
+				else {
+					// 兼容历史版本
+					result.add(dictValueAndLabel[0]);
+				}
+			}
+			// 下拉题
+			else if (SurveySchema.DataType.select.equals(subOption.getAttribute().getDataType())) {
+				Optional<SurveySchema.DataSource> findDataSource = subOption.getDataSource().stream()
+						.filter(x -> x.getValue().equals(subOptionValue)).findFirst();
+				if (findDataSource.isPresent()) {
+					result.add(findDataSource.get().getLabel());
+				}
+				else {
+					result.add(subOptionValue);
+				}
+			}
+			else {
+				result.add(subOptionValue);
+			}
+		}
+		return result.stream().collect(Collectors.joining(","));
 	}
 
 	/**

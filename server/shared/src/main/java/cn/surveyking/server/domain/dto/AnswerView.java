@@ -20,6 +20,10 @@ public class AnswerView {
 
 	private LinkedHashMap<String, Object> answer;
 
+	private LinkedHashMap<String, Object> tempAnswer;
+
+	private SurveySchema survey;
+
 	private List<FileView> attachment = new ArrayList<>();
 
 	private List<UserInfo> users;

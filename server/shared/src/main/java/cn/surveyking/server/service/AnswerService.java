@@ -3,6 +3,7 @@ package cn.surveyking.server.service;
 import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.exception.InternalServerError;
+import cn.surveyking.server.core.uitls.ContextHelper;
 import cn.surveyking.server.core.uitls.HTTPUtils;
 import cn.surveyking.server.core.uitls.IPUtils;
 import cn.surveyking.server.domain.dto.*;
@@ -27,7 +28,7 @@ public interface AnswerService {
 
 	long count(AnswerQuery query);
 
-	AnswerView saveAnswer(AnswerRequest answer, HttpServletRequest request);
+	AnswerView saveAnswer(AnswerRequest answer);
 
 	AnswerView updateAnswer(AnswerRequest answer);
 
@@ -37,8 +38,8 @@ public interface AnswerService {
 
 	DownloadData downloadSurvey(DownloadQuery query);
 
-	default AnswerMetaInfo.ClientInfo parseClientInfo(HttpServletRequest request,
-			AnswerMetaInfo.ClientInfo clientInfo) {
+	default AnswerMetaInfo.ClientInfo parseClientInfo(AnswerMetaInfo.ClientInfo clientInfo) {
+		HttpServletRequest request = ContextHelper.getCurrentHttpRequest();
 		if (clientInfo == null) {
 			clientInfo = new AnswerMetaInfo.ClientInfo();
 		}

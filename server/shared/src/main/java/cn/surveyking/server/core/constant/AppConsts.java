@@ -17,6 +17,11 @@ public class AppConsts {
 	public static final String COOKIE_LIMIT_NAME = "sk-limit";
 
 	/**
+	 * 随机问卷答案 ID 前缀
+	 */
+	public static final String COOKIE_RANDOM_PROJECT_PREFIX = "rd_answer_id_";
+
+	/**
 	 * 支持的图片类型
 	 */
 	public static final String[] SUPPORT_IMAGE_TYPE = { "JPG", "JPEG", "PNG", "GIF", "BMP", "WBMP" };

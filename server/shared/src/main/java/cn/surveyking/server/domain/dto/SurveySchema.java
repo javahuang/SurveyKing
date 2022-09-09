@@ -339,6 +339,11 @@ public class SurveySchema implements Serializable {
 		 */
 		private String uniqueText;
 
+		/**
+		 * 正则表达式校验
+		 */
+		private List<ExpressionMessage> regexp;
+
 	}
 
 	/**
@@ -409,6 +414,20 @@ public class SurveySchema implements Serializable {
 			this.value = value;
 			this.children = children;
 		}
+
+	}
+
+	/**
+	 * 表达式和提示语，用于正则校验等场景
+	 */
+	@Data
+	public static class ExpressionMessage implements Serializable {
+
+		private String id;
+
+		private String expression;
+
+		private String message;
 
 	}
 

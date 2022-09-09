@@ -167,6 +167,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 			throw new ErrorCodeException(ErrorCode.FileNotExists);
 		}
 		Optional<MediaType> mediaType = MediaTypeFactory.getMediaType(file.getOriginalName());
+		// FIXME: 在线预览 mp4 文件会报错，但不影响使用
 		return ResponseEntity.ok().contentType(mediaType.orElse(MediaType.APPLICATION_OCTET_STREAM))
 				.headers(query.getHeaders())
 				.header(HttpHeaders.CONTENT_DISPOSITION,

@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -63,8 +62,8 @@ public class AnswerApi {
 	 */
 	@PostMapping("/create")
 	@PreAuthorize("hasAuthority('answer:create')")
-	public void saveAnswer(@RequestBody AnswerRequest request, HttpServletRequest httpRequest) {
-		answerService.saveAnswer(request, httpRequest);
+	public void saveAnswer(@RequestBody AnswerRequest request) {
+		answerService.saveAnswer(request);
 	}
 
 	/**

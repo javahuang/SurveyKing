@@ -4,6 +4,7 @@ import cn.surveyking.server.core.constant.ProjectModeEnum;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.LinkedHashMap;
 
 /**
  * @author javahuang
@@ -40,5 +41,9 @@ public class ProjectView {
 	private Date updateAt;
 
 	private String parentId;
+
+	private String answerId;
+
+	private LinkedHashMap<String, Object> tempAnswer;
 
 }

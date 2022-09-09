@@ -66,7 +66,7 @@ public class TemplateRequest {
 	private Integer shared;
 
 	private String repoId;
-	
+
 	private List<String> ids;
 
 }

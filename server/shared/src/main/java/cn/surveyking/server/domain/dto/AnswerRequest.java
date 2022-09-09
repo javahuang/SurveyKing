@@ -23,6 +23,10 @@ public class AnswerRequest {
 
 	private LinkedHashMap<String, Object> answer;
 
+	private LinkedHashMap<String, Object> tempAnswer;
+
+	private SurveySchema survey;
+
 	private AnswerMetaInfo metaInfo;
 
 	/**
