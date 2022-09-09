@@ -97,6 +97,7 @@ public class DictServiceImpl extends BaseService<CommDictMapper, CommDict> imple
 		try (InputStream is = request.getFile().getInputStream(); ReadableWorkbook wb = new ReadableWorkbook(is)) {
 			wb.getSheets().forEach(sheet -> {
 				try (Stream<Row> rows = sheet.openStream()) {
+
 					rows.forEach(r -> {
 						if (r.getRowNum() == 1) {
 							return;
@@ -106,11 +107,15 @@ public class DictServiceImpl extends BaseService<CommDictMapper, CommDict> imple
 						item.setItemName(r.getCellText(0));
 						item.setItemValue(r.getCellText(1));
 						item.setParentItemValue(r.getCellText(2));
-						item.setLevel(r.getCellAsNumber(3).orElse(new BigDecimal(1)).intValue());
+						item.setItemLevel(r.getCellAsNumber(3).orElse(new BigDecimal(1)).intValue());
 						item.setItemOrder(r.getCellAsNumber(4).orElse(new BigDecimal(1)).intValue());
 						item.setCreateAt(new Date());
 						item.setCreateBy(SecurityContextUtils.getUserId());
 						itemList.add(item);
+						if (itemList.size() == 1000) {
+							dictItemService.saveBatch(itemList);
+							itemList.clear();
+						}
 					});
 				}
 				catch (IOException e) {
@@ -118,7 +123,6 @@ public class DictServiceImpl extends BaseService<CommDictMapper, CommDict> imple
 				}
 			});
 		}
-		dictItemService.saveBatch(itemList);
 	}
 
 }

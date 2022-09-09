@@ -5,10 +5,8 @@ import cn.surveyking.server.core.constant.TagCategoryEnum;
 import cn.surveyking.server.core.uitls.RepoTemplateExcelParseHelper;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.domain.mapper.RepoViewMapper;
-import cn.surveyking.server.domain.model.Repo;
-import cn.surveyking.server.domain.model.RepoTemplate;
-import cn.surveyking.server.domain.model.Tag;
-import cn.surveyking.server.domain.model.Template;
+import cn.surveyking.server.domain.mapper.UserBookViewMapper;
+import cn.surveyking.server.domain.model.*;
 import cn.surveyking.server.mapper.RepoMapper;
 import cn.surveyking.server.service.BaseService;
 import cn.surveyking.server.service.RepoService;
@@ -43,6 +41,10 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 	private final RepoViewMapper repoViewMapper;
 
 	private final TagServiceImpl tagService;
+
+	private final UserBookServiceImpl userBookService;
+
+	private final UserBookViewMapper userBookViewMapper;
 
 	@Override
 	public PaginationResponse<RepoView> listRepo(RepoQuery query) {
@@ -220,6 +222,17 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 	@SneakyThrows
 	private List<TemplateRequest> parseExcelToTemplate(MultipartFile file) {
 		return new RepoTemplateExcelParseHelper(file).parse();
+	}
+
+	@Override
+	public PaginationResponse<UserBookView> listUserBook(UserBookQuery query) {
+		Page<UserBook> page = userBookService.pageByQuery(query,
+				Wrappers.<UserBook>lambdaQuery().like(query.getName() != null, UserBook::getName, query.getName())
+						.ge(query.getStartDate() != null, UserBook::getCreateAt, query.getStartDate())
+						.le(query.getEndDate() != null, UserBook::getCreateAt, query.getEndDate()));
+		PaginationResponse<UserBookView> result = new PaginationResponse<>(page.getTotal(),
+				userBookViewMapper.toView(page.getRecords()));
+		return result;
 	}
 
 }

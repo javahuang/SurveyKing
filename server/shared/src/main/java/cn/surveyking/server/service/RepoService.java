@@ -63,4 +63,6 @@ public interface RepoService {
 
 	void importFromTemplate(RepoTemplateRequest request);
 
+	PaginationResponse<UserBookView> listUserBook(UserBookQuery query);
+
 }

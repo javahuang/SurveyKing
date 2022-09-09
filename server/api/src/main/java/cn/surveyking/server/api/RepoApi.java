@@ -78,4 +78,15 @@ public class RepoApi {
 		repoService.importFromTemplate(request);
 	}
 
+	/**
+	 * 我的笔记
+	 * @param query
+	 * @return
+	 */
+	@GetMapping("/book/list")
+	@PreAuthorize("hasAuthority('repo:book')")
+	public PaginationResponse<UserBookView> listUserBook(UserBookQuery query) {
+		return repoService.listUserBook(query);
+	}
+
 }
