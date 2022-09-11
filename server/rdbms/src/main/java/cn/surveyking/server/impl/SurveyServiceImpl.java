@@ -79,21 +79,37 @@ public class SurveyServiceImpl implements SurveyService {
 	@Override
 	public PublicProjectView loadProject(ProjectQuery query) {
 		ProjectView project = projectService.getProject(query.getId());
-		// 获取登录验证 schema
-		SurveySchema loginFormSchema = convertAndValidateLoginFormIfNeeded(project, null);
-		// 随机问题
-		if (loginFormSchema == null) {
-			replaceSchemaIfRandomSchema(project);
-		}
-		// 校验问卷
-		validateProject(project);
-		// 如果需要登录，将问卷 schema 替换成登录表单的 schema
 		PublicProjectView projectView = projectViewMapper.toPublicProjectView(project);
+		SurveySchema loginFormSchema = null;
+		if (query.getAnswerId() == null) {
+			// 表单需要验证
+			loginFormSchema = convertAndValidateLoginFormIfNeeded(project, null);
+			// 校验问卷
+			validateProject(project);
+		}
+		else {
+			// 直接根据答案加载出 schema
+			AnswerQuery answerQuery = new AnswerQuery();
+			answerQuery.setId(query.getAnswerId());
+			AnswerView answerView = answerService.getAnswer(answerQuery);
+			if (answerView != null) {
+				projectView.setAnswer(answerView.getAnswer());
+				if (answerView.getSurvey() != null) {
+					// 随机问题
+					projectView.setSurvey(answerView.getSurvey());
+				}
+			}
+			return projectView;
+		}
+
+		// 如果需要登录，将问卷 schema 替换成登录表单的 schema
 		if (loginFormSchema != null) {
 			projectView.setSurvey(loginFormSchema);
 			projectView.setLoginRequired(true);
 		}
 		else {
+			// 随机问题
+			replaceSchemaIfRandomSchema(project);
 			// 允许修改答案
 			projectView.setAnswer(getLatestAnswer(projectView, null));
 		}
@@ -138,11 +154,17 @@ public class SurveyServiceImpl implements SurveyService {
 		PublicAnswerView result = new PublicAnswerView();
 		ProjectView project = projectService.getProject(projectId);
 
-		String answerId = null;
+		String answerId = request.getId();
 		if (isNotBlank(request.getQueryId())) {
 			// 公开查询修改答案
-			answerId = request.getId();
 			validateAndMergeAnswer(project, request);
+		}
+		else if (isNotBlank(request.getId())) {
+			// 传入答案ID 并且设置了允许修改答案，则可以修改问卷答案
+			boolean enableUpdate = Boolean.TRUE.equals(project.getSetting().getSubmittedSetting().getEnableUpdate());
+			if (!enableUpdate) {
+				throw new ErrorCodeException(ErrorCode.AnswerChangeDisabled);
+			}
 		}
 		else {
 			// 问卷允许修改答案 开关修改答案
@@ -448,7 +470,7 @@ public class SurveyServiceImpl implements SurveyService {
 	 * @return
 	 */
 	private LinkedHashMap<String, Object> getLatestAnswer(PublicProjectView projectView, String whitelistName) {
-		// 必须打开了答案允许修改开关
+		// 打开了答案允许修改开关
 		ProjectSetting projectSetting = projectView.getSetting();
 		if (projectSetting == null || projectSetting.getSubmittedSetting() == null
 				|| !Boolean.TRUE.equals(projectSetting.getSubmittedSetting().getEnableUpdate())) {
@@ -893,8 +915,7 @@ public class SurveyServiceImpl implements SurveyService {
 			// 执行登录操作，方便后续保存答案的时候获取认证信息
 			UserInfo user = (UserInfo) authentication.getPrincipal();
 			HttpCookie cookie = ResponseCookie
-					.from(AppConsts.COOKIE_TOKEN_NAME,
-							jwtTokenUtil.generateAccessToken(new UserTokenView(user.getUserId())))
+					.from(AppConsts.TOKEN_NAME, jwtTokenUtil.generateAccessToken(new UserTokenView(user.getUserId())))
 					.path("/").httpOnly(true).build();
 			ContextHelper.getCurrentHttpResponse().setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 		}
@@ -955,6 +976,9 @@ public class SurveyServiceImpl implements SurveyService {
 			if (ProjectPartnerTypeEnum.RESPONDENT_SYS_USER.getType() == whitelistType) {
 				queryWrapper.eq(ProjectPartner::getUserId, SecurityContextUtils.getUserId()).eq(ProjectPartner::getType,
 						ProjectPartnerTypeEnum.RESPONDENT_SYS_USER.getType());
+				if (!SecurityContextUtils.isAuthenticated()) {
+					return;
+				}
 			}
 			else if (ProjectPartnerTypeEnum.RESPONDENT_IMP_USER.getType() == whitelistType) {
 				queryWrapper.eq(ProjectPartner::getUserName, request.getWhitelistName()).eq(ProjectPartner::getType,

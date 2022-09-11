@@ -1,6 +1,8 @@
 package cn.surveyking.server.core.security;
 
+import cn.surveyking.server.core.config.WebSecurityConfig;
 import cn.surveyking.server.core.constant.AppConsts;
+import cn.surveyking.server.core.uitls.ContextHelper;
 import cn.surveyking.server.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,6 +23,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * @author javahuang
@@ -40,14 +44,17 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 			throws ServletException, IOException {
 		// Get authorization cookie and validate
-		Cookie tokenCookie = WebUtils.getCookie(request, AppConsts.COOKIE_TOKEN_NAME);
-		if (tokenCookie == null) {
+		Cookie tokenFromCookie = WebUtils.getCookie(request, AppConsts.TOKEN_NAME);
+		WebSecurityConfig securityConfig = ContextHelper.getBean(WebSecurityConfig.class);
+		String tokenFromParameter = securityConfig.getUrlTokenAuthentication().isEnabled()
+				? request.getParameter(AppConsts.TOKEN_NAME) : null;
+		if (tokenFromCookie == null && isBlank(tokenFromParameter)) {
 			chain.doFilter(request, response);
 			return;
 		}
 
 		// Get jwt token and validate
-		final String token = tokenCookie.getValue().trim();
+		final String token = isNotBlank(tokenFromParameter) ? tokenFromParameter : tokenFromCookie.getValue().trim();
 		if (!jwtTokenUtil.validate(token)) {
 			chain.doFilter(request, response);
 			return;
@@ -62,6 +69,15 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 			authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
 			SecurityContextHolder.getContext().setAuthentication(authentication);
+
+			// Execute login
+			if (tokenFromCookie == null && tokenFromParameter != null) {
+				Cookie cookie = new Cookie(AppConsts.TOKEN_NAME, tokenFromParameter);
+				cookie.setPath("/");
+				cookie.setHttpOnly(true);
+				response.addCookie(cookie);
+			}
+
 			chain.doFilter(request, response);
 		}
 		catch (AuthenticationException e) {

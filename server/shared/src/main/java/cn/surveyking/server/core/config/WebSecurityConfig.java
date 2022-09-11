@@ -3,6 +3,7 @@ package cn.surveyking.server.core.config;
 import cn.surveyking.server.core.security.JwtTokenFilter;
 import cn.surveyking.server.core.security.RestAuthenticationEntryPoint;
 import cn.surveyking.server.service.UserService;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,7 +25,13 @@ import org.springframework.web.filter.CorsFilter;
  */
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
+@ConfigurationProperties("sk.security")
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+
+	/**
+	 * 开启 url token 认证
+	 */
+	private final UrlTokenAuthentication urlTokenAuthentication = new UrlTokenAuthentication();
 
 	private final JwtTokenFilter jwtTokenFilter;
 
@@ -87,5 +94,26 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	// public GrantedAuthorityDefaults grantedAuthorityDefaults() {
 	// return new GrantedAuthorityDefaults("");
 	// }
+
+	public UrlTokenAuthentication getUrlTokenAuthentication() {
+		return urlTokenAuthentication;
+	}
+
+	public static class UrlTokenAuthentication {
+
+		/**
+		 * 是否开启 token 认证
+		 */
+		private boolean enabled = true;
+
+		public boolean isEnabled() {
+			return this.enabled;
+		}
+
+		public void setEnabled(boolean enabled) {
+			this.enabled = enabled;
+		}
+
+	}
 
 }

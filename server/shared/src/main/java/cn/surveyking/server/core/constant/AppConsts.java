@@ -7,9 +7,9 @@ package cn.surveyking.server.core.constant;
 public class AppConsts {
 
 	/**
-	 * cookie 保存的 token
+	 * token name
 	 */
-	public static final String COOKIE_TOKEN_NAME = "sk-token";
+	public static final String TOKEN_NAME = "sk-token";
 
 	/**
 	 *
