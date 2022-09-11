@@ -52,8 +52,7 @@ public class UserApi {
 			Authentication authenticate = authenticationManager.authenticate(authentication);
 			UserInfo user = (UserInfo) authenticate.getPrincipal();
 			HttpCookie cookie = ResponseCookie
-					.from(AppConsts.TOKEN_NAME,
-							jwtTokenUtil.generateAccessToken(new UserTokenView(user.getUserId())))
+					.from(AppConsts.TOKEN_NAME, jwtTokenUtil.generateAccessToken(new UserTokenView(user.getUserId())))
 					.path("/").httpOnly(true).build();
 			return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
 					.header(HttpHeaders.AUTHORIZATION,
@@ -67,8 +66,7 @@ public class UserApi {
 
 	@PostMapping("/public/logout")
 	public ResponseEntity logout() {
-		HttpCookie cookie = ResponseCookie.from(AppConsts.TOKEN_NAME, "").path("/").httpOnly(true).maxAge(0)
-				.build();
+		HttpCookie cookie = ResponseCookie.from(AppConsts.TOKEN_NAME, "").path("/").httpOnly(true).maxAge(0).build();
 		return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).build();
 	}
 

@@ -1,6 +1,7 @@
 package cn.surveyking.server.domain.dto;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
@@ -9,6 +10,7 @@ import java.util.List;
  * @date 2022/6/12
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class ProjectPartnerQuery extends PageQuery {
 
 	private String projectId;

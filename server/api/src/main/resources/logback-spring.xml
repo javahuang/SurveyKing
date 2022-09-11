@@ -72,7 +72,7 @@
     </logger>
 
     <springProfile name="dev">
-        <root level="info">
+        <root level="error">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="INFO_FILE"/>
             <appender-ref ref="ERROR_FILE"/>

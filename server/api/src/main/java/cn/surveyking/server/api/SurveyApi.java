@@ -40,7 +40,7 @@ public class SurveyApi {
 	}
 
 	/**
-	 * 校验校验
+	 * 问卷校验
 	 * @param query
 	 * @return
 	 */

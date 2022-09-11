@@ -18,6 +18,7 @@ import cn.surveyking.server.domain.mapper.UserViewMapper;
 import cn.surveyking.server.domain.model.*;
 import cn.surveyking.server.mapper.*;
 import cn.surveyking.server.service.BaseService;
+import cn.surveyking.server.service.ProjectPartnerService;
 import cn.surveyking.server.service.SystemService;
 import cn.surveyking.server.service.UserService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -384,11 +385,23 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 	@Override
 	public UserOverview getUserOverviewData() {
 		UserOverview userOverview = new UserOverview();
-		userOverview.setSurveyCount(projectMapper
-				.selectCount(Wrappers.<Project>lambdaQuery().eq(Project::getStatus, AppConsts.PROJECT_STATUS_RUNNING)
-						.eq(Project::getMode, ProjectModeEnum.survey)));
-		userOverview.setExamCount(projectMapper.selectCount(Wrappers.<Project>lambdaQuery()
-				.eq(Project::getStatus, AppConsts.PROJECT_STATUS_RUNNING).eq(Project::getMode, ProjectModeEnum.exam)));
+		ProjectPartnerServiceImpl partnerService = (ProjectPartnerServiceImpl) ContextHelper
+				.getBean(ProjectPartnerService.class);
+		userOverview.setSurveyCount(partnerService.count(Wrappers.<ProjectPartner>lambdaQuery()
+				.in(ProjectPartner::getType,
+						Arrays.asList(ProjectPartnerTypeEnum.OWNER.getType(),
+								ProjectPartnerTypeEnum.COLLABORATOR.getType()))
+				.exists(String.format(
+						"SELECT 1 FROM t_project t WHERE t.mode = '%s' AND t.id = t_project_partner.project_id",
+						ProjectModeEnum.survey.name()))));
+
+		userOverview.setExamCount(partnerService.count(Wrappers.<ProjectPartner>lambdaQuery()
+				.in(ProjectPartner::getType,
+						Arrays.asList(ProjectPartnerTypeEnum.OWNER.getType(),
+								ProjectPartnerTypeEnum.COLLABORATOR.getType()))
+				.exists(String.format(
+						"SELECT 1 FROM t_project t WHERE t.mode = '%s' AND t.id = t_project_partner.project_id",
+						ProjectModeEnum.exam.name()))));
 		return userOverview;
 	}
 
