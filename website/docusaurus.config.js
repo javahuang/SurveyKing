@@ -121,7 +121,7 @@ module.exports = {
           ],
         },
       ],
-      copyright: `MIT © ${new Date().getFullYear()} - SurveyKing`,
+      copyright: `MIT © ${new Date().getFullYear()} - SurveyKing 豫ICP备2021025098号-1	`,
     },
     prism: {
       theme: require("prism-react-renderer/themes/vsDark"),

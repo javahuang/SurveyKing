@@ -1,0 +1,153 @@
+---
+id: faq
+title: 常见问题
+---
+
+import Image from "@theme/IdealImage";
+import faq0 from "../static/docs/faq/editor.png";
+import faq1 from "../static/docs/faq/faq-1.png";
+import faq2 from "../static/docs/faq/faq-2.png";
+import faq3 from "../static/docs/faq/faq-fillblank-right-answer.png";
+import faq4 from "../static/docs/faq/faq-cascader-batch.png";
+import faq5 from "../static/docs/faq/faq-score-logic.png";
+import faq6 from "../static/docs/faq/faq-score-logic-setting.png";
+import faq7 from "../static/docs/faq/faq-score-logic-view.png";
+
+下面列出卷王(SurveyKing)大家常问的一些问题。
+
+<Image
+  img={faq0}
+  style={{
+    width: "100%",
+  }}
+/>
+
+在问题开始之前，先介绍一下卷王的问卷编辑器。
+
+- ① **题型选择区**，可以点击或者拖拽将问题添加或者插入到问题编辑区
+- ② **工具栏区**，撤销、回退、快键键面板、文本导入、JSON 预览区、预览区
+- ③ **问卷编辑区**，问题和选项都是支持富文本输入的，卷王的问卷和选项都有单独的配置
+- ④ **问卷设置区**，对问题和选项进行设置
+
+## 调查问卷问题
+
+### 如何添加省市县乡村五级级联题
+
+参考 [如何添加五级行政区划级联题](https://surveyking.cn/blog/region) 设置
+
+### 级联题如何批量添加
+
+```txt
+省 市 县
+北京市 市辖区 西城区
+北京市 市辖区 东城区
+湖北省 武汉市 江夏区
+```
+
+第一行会被解析成级联题的标题，第二题开始会被解析成级联题的选项
+
+<Image
+  img={faq4}
+  style={{
+    width: 700,
+  }}
+/>
+
+:::tip
+
+更好的方式是编辑问卷的时候， 通过 **使用文本导入问卷** 功能键，来编辑问卷，支持单选、多选、级联、横向填空等题型。
+
+:::
+
+## 在线考试问题
+
+### 填空题如何设置多个正确答案
+
+每个正确答案一行
+
+<Image
+  img={faq3}
+  style={{
+    width: 300,
+  }}
+/>
+
+## 其他问题
+
+### 题目选项如何添加图片
+
+在问卷编辑器点击高级编辑
+
+<Image
+  img={faq1}
+  style={{
+    width: 450,
+  }}
+/>
+
+点击图片或者直接快捷键复制粘贴图片到编辑区
+
+<Image
+  img={faq2}
+  style={{
+    width: 450,
+  }}
+/>
+
+:::tip
+点击图片，可以放大缩小。
+
+所有的问题和选项都支持高级编辑，高级编辑可以**上传图片**、**视频**、**数学公式**等，所以你可以自由组合出来**图片选择题**、**视频选择题**等等
+
+:::
+
+### 如何添加、删除页眉图、背景图
+
+在外观里面可以上传背景图、删除背景图，上传的背景图在所有问卷里面都可以点击衣服图标来应用。
+
+删除本问卷的背景图，需要点击问卷标题，在弹出的侧边栏的问卷设置里面移除背景图片和页眉图片。
+
+:::tip
+
+在外观里面删除背景图，是直接给背景图删除，如果有问卷应用了此背景图，都将失效。
+
+此删除非删除当前问卷的背景和页眉图。
+
+:::
+
+### 如何根据成绩显示不同的提示
+
+在 **设置->投放与分享->答题完后跳转自定义页面** 里面，可以根据问卷或者考试的答案(考试还支持分数)来设置不同的提示语。
+
+<Image
+  img={faq5}
+  style={{
+    width: 500,
+  }}
+/>
+
+点击自定义提示信息按钮，会弹出来公式设置页面，可以在问题栏里面选择相应问题，公示栏选择相应的公式。
+
+<Image
+  img={faq6}
+  style={{
+    width: 500,
+  }}
+/>
+
+提交问卷之后，页面显示如下
+
+<Image
+  img={faq7}
+  style={{
+    width: 500,
+  }}
+/>
+
+### 填空题如何默认值为当前日期
+
+选项设置 -> 计算公式 -> 选择函数 -> 自定义函数。
+
+- `CURRENT_DATE()` 当前日期，格式 `2018-02-08`
+- `CURRENT_TIME()` 当前时间，格式 `10:11:12`
+- `CURRENT_DATETIME()` 当前日期时间，格式 `2018-02-08 10:11:12`
