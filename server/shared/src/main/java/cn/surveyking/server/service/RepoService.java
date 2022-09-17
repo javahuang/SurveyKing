@@ -65,4 +65,6 @@ public interface RepoService {
 
 	PaginationResponse<UserBookView> listUserBook(UserBookQuery query);
 
+	List<RepoView> selectRepo(SelectRepoRequest request);
+
 }

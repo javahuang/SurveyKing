@@ -8,6 +8,7 @@ import cn.surveyking.server.core.exception.ErrorCodeException;
 import cn.surveyking.server.core.uitls.BarcodeReader;
 import cn.surveyking.server.core.uitls.HTTPUtils;
 import cn.surveyking.server.core.uitls.NanoIdUtils;
+import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.FileQuery;
 import cn.surveyking.server.domain.dto.FileView;
 import cn.surveyking.server.domain.dto.UploadFileRequest;
@@ -32,6 +33,7 @@ import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -151,7 +153,11 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 	public List<FileView> listFiles(FileQuery query) {
 		return fileViewMapper.toFileView(
 				list(Wrappers.<File>lambdaQuery().eq(query.getType() != null, File::getStorageType, query.getType())
-						.in(query.getIds() != null && query.getIds().size() > 0, File::getId, query.getIds())));
+						// 默认只能查询自己的
+						.eq(CollectionUtils.isEmpty(query.getIds()), File::getCreateBy,
+								SecurityContextUtils.getUserId())
+						// 可以根据 ids 查询已知文件
+						.in(!CollectionUtils.isEmpty(query.getIds()), File::getId, query.getIds())));
 	}
 
 	@Override

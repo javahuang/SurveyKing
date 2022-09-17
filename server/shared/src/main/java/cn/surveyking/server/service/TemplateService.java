@@ -4,6 +4,7 @@ import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.domain.dto.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -24,7 +25,9 @@ public interface TemplateService {
 
 	void deleteTemplate(TemplateRequest request);
 
-	List<String> listTemplateCategories(CategoryQuery query);
+	Map<String, List<TemplateView>> selectTemplate(SelectTemplateRequest request);
+
+	Set<String> listTemplateCategories(CategoryQuery query);
 
 	Set<String> getTags(TagQuery query);
 

@@ -30,6 +30,16 @@ public class Repo extends BaseModel {
 	private String description;
 
 	/**
+	 * 题库类型 survey/exam
+	 */
+	private String mode;
+
+	/**
+	 * 是否公开 1是 0否
+	 */
+	private Boolean shared;
+
+	/**
 	 * 标签
 	 */
 	@TableField(typeHandler = JacksonTypeHandler.class, jdbcType = JdbcType.VARCHAR)

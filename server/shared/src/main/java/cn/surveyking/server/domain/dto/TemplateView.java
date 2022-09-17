@@ -35,4 +35,8 @@ public class TemplateView {
 
 	private Date createAt;
 
+	private String repoName;
+
+	private String repoId;
+
 }

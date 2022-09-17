@@ -23,6 +23,11 @@ import org.apache.ibatis.type.JdbcType;
 public class Template extends BaseModel {
 
 	/**
+	 * 题库ID
+	 */
+	private String repoId;
+
+	/**
 	 * 模板标题
 	 */
 	private String name;
@@ -50,7 +55,7 @@ public class Template extends BaseModel {
 	private ProjectModeEnum mode;
 
 	/**
-	 * 模板分类
+	 * 模板分类，主要用于模板广场
 	 */
 	private String category;
 

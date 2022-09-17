@@ -3,6 +3,7 @@ package cn.surveyking.server.impl;
 import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.constant.TagCategoryEnum;
 import cn.surveyking.server.core.uitls.RepoTemplateExcelParseHelper;
+import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.domain.mapper.RepoViewMapper;
 import cn.surveyking.server.domain.mapper.UserBookViewMapper;
@@ -34,8 +35,6 @@ import static com.baomidou.mybatisplus.core.toolkit.StringUtils.isNotBlank;
 @RequiredArgsConstructor
 public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements RepoService {
 
-	private final RepoTemplateServiceImpl repoTemplateService;
-
 	private final TemplateServiceImpl templateService;
 
 	private final RepoViewMapper repoViewMapper;
@@ -48,13 +47,14 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 
 	@Override
 	public PaginationResponse<RepoView> listRepo(RepoQuery query) {
-		Page<Repo> page = pageByQuery(query, Wrappers.<Repo>lambdaQuery()
-				.like(isNotBlank(query.getName()), Repo::getName, query.getName()).orderByAsc(Repo::getCreateAt));
+		Page<Repo> page = pageByQuery(query,
+				Wrappers.<Repo>lambdaQuery().like(isNotBlank(query.getName()), Repo::getName, query.getName())
+						.eq(query.getMode() != null, Repo::getMode, query.getMode()).orderByAsc(Repo::getCreateAt));
 		PaginationResponse<RepoView> result = new PaginationResponse<>(page.getTotal(),
 				repoViewMapper.toView(page.getRecords()));
 		result.getList().forEach(repoView -> {
-			repoView.setTotal(repoTemplateService
-					.count(Wrappers.<RepoTemplate>lambdaQuery().eq(RepoTemplate::getRepoId, repoView.getId())));
+			repoView.setTotal(
+					templateService.count(Wrappers.<Template>lambdaQuery().eq(Template::getRepoId, repoView.getId())));
 			// 获取每个标签对应的题的数量
 			repoView.setTemplateTags(this.getBaseMapper().selectRepoTemplateTags(repoView.getId()));
 			// 获取每个问题类型对应的题的数量
@@ -85,8 +85,8 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 	public void deleteRepo(RepoRequest request) {
 		String id = request.getId();
 		removeById(id);
-		// 解除题库与问题的绑定关系
-		repoTemplateService.remove(Wrappers.<RepoTemplate>lambdaUpdate().eq(RepoTemplate::getRepoId, id));
+		// 删除题库下面的所有题
+		templateService.remove(Wrappers.<Template>lambdaUpdate().eq(Template::getRepoId, id));
 		// 取消题库标签
 		tagService.remove(Wrappers.<Tag>lambdaUpdate().eq(Tag::getEntityId, id));
 	}
@@ -96,19 +96,11 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 		List<Tag> tagList = new ArrayList<>();
 		List<TemplateRequest> templatesAdd = new ArrayList<>();
 		List<TemplateRequest> templatesUpdate = new ArrayList<>();
-		List<RepoTemplate> repoTemplatesAdd = new ArrayList<>();
 
 		request.getTemplates().forEach(template -> {
-			RepoTemplate repoTemplate = new RepoTemplate();
 			if (template.getId() == null) {
 				template.setId(IdWorker.getIdStr());
 				templatesAdd.add(template);
-
-				if (request.getRepoId() != null) {
-					repoTemplate.setRepoId(request.getRepoId());
-					repoTemplate.setTemplateId(template.getId());
-					repoTemplatesAdd.add(repoTemplate);
-				}
 			}
 			else {
 				templatesUpdate.add(template);
@@ -133,10 +125,11 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 
 		if (templatesAdd.size() > 0) {
 			// 添加模板的时候，需要添加题库与模板的关联关系
+			templatesAdd.forEach(x -> x.setRepoId(request.getRepoId()));
 			templateService.batchAddTemplate(templatesAdd);
-			repoTemplateService.saveBatch(repoTemplatesAdd);
 		}
 		if (templatesUpdate.size() > 0) {
+			templatesUpdate.forEach(x -> x.setRepoId(request.getRepoId()));
 			templateService.batchUpdateTemplate(templatesUpdate);
 			// 更新模板时需要删除之前的标签
 			tagService.remove(Wrappers.<Tag>lambdaUpdate().in(Tag::getEntityId,
@@ -151,19 +144,8 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 
 	@Override
 	public void batchUnBindTemplate(RepoTemplateRequest request) {
-		// 只有在问题页面才能执行物理删除，在题库问题列表里面只能解除绑定关系
-		if (request.getRepoId() == null) {
-			// 表示是物理删除
+		if (request.getIds() != null) {
 			templateService.removeBatchByIds(request.getIds());
-			// 删除题库和题的绑定关系
-			repoTemplateService
-					.remove(Wrappers.<RepoTemplate>lambdaUpdate().in(RepoTemplate::getTemplateId, request.getIds()));
-		}
-		else {
-			// 解除绑定关系
-			repoTemplateService
-					.remove(Wrappers.<RepoTemplate>lambdaUpdate().eq(RepoTemplate::getRepoId, request.getRepoId())
-							.in(RepoTemplate::getTemplateId, request.getIds()));
 		}
 	}
 
@@ -233,6 +215,13 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 		PaginationResponse<UserBookView> result = new PaginationResponse<>(page.getTotal(),
 				userBookViewMapper.toView(page.getRecords()));
 		return result;
+	}
+
+	@Override
+	public List<RepoView> selectRepo(SelectRepoRequest request) {
+		// 只能选择自己创建的题库
+		return repoViewMapper.toView(list(Wrappers.<Repo>lambdaQuery().eq(Repo::getMode, request.getMode())
+				.eq(Repo::getCreateBy, SecurityContextUtils.getUserId())));
 	}
 
 }

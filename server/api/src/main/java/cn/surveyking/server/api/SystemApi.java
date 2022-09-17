@@ -27,8 +27,6 @@ public class SystemApi {
 
 	private final DeptService deptService;
 
-	private final RoleService roleService;
-
 	private final DictService dictService;
 
 	/**
@@ -334,30 +332,6 @@ public class SystemApi {
 	@PreAuthorize("hasAuthority('system:dictItem:delete')")
 	public void deleteDictItem(@RequestBody CommDictItemRequest request) {
 		dictService.deleteDictItem(request.getId());
-	}
-
-	@PostMapping("/selectUser")
-	public List<UserInfo> selectUsers(@RequestBody SelectUserRequest request) {
-		return userService.selectUsers(request);
-	}
-
-	@PostMapping("/selectDept")
-	public List<DeptView> selectDepts(@RequestBody SelectDeptRequest request) {
-		return deptService.listDept(request);
-	}
-
-	@PostMapping("/selectRole")
-	public List<RoleView> selectRoles(@RequestBody SelectRoleRequest request) {
-		return roleService.selectRoles(request);
-	}
-
-	/**
-	 * @param request
-	 * @return
-	 */
-	@PostMapping("/selectPosition")
-	public List<PositionView> selectPositions(@RequestBody SelectPositionRequest request) {
-		return positionService.selectPositions(request);
 	}
 
 }

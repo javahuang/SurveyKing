@@ -2,18 +2,17 @@ package cn.surveyking.server.impl;
 
 import cn.surveyking.server.core.constant.TagCategoryEnum;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
+import cn.surveyking.server.domain.dto.SelectTagRequest;
 import cn.surveyking.server.domain.model.Tag;
 import cn.surveyking.server.mapper.TagMapper;
 import cn.surveyking.server.service.BaseService;
 import cn.surveyking.server.service.TagService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author javahuang
@@ -47,6 +46,18 @@ public class TagServiceImpl extends BaseService<TagMapper, Tag> implements TagSe
 	@Override
 	public void deleteTagByEntryId(String entityId) {
 		remove(Wrappers.<Tag>lambdaQuery().eq(Tag::getEntityId, entityId));
+	}
+
+	@Override
+	public Set<String> selectTag(SelectTagRequest request) {
+		QueryWrapper<Tag> queryWrapper = new QueryWrapper<>();
+		queryWrapper.select("DISTINCT name").eq("create_by", SecurityContextUtils.getUserId())
+				.like(request.getName() != null, "name", request.getName()).last("limit 20");
+		Set<String> tags = new HashSet<>();
+		list(queryWrapper).stream().filter(x -> x != null).forEach(x -> {
+			tags.addAll(Arrays.asList(x.getName()));
+		});
+		return tags;
 	}
 
 }

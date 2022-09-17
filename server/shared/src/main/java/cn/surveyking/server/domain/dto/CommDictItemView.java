@@ -39,7 +39,7 @@ public class CommDictItemView {
 	/**
 	 * 层级
 	 */
-	private Integer level;
+	private Integer itemLevel;
 
 	/**
 	 * 字典项顺序

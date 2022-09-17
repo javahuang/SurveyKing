@@ -3,6 +3,8 @@ package cn.surveyking.server.service;
 import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.domain.dto.*;
 
+import java.util.List;
+
 /**
  * @author javahuang
  * @date 2022/7/19
@@ -24,5 +26,7 @@ public interface DictService {
 	void deleteDictItem(String id);
 
 	void importDictItem(CommDictItemRequest request);
+
+	List<CommDictView> selectDict();
 
 }

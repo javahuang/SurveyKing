@@ -24,6 +24,11 @@ public class RepoView {
 	private String description;
 
 	/**
+	 * 问卷/考试
+	 */
+	private String mode;
+
+	/**
 	 * 标签
 	 */
 	private String[] tag;
@@ -49,5 +54,7 @@ public class RepoView {
 	 * 模板
 	 */
 	private List<RepoQuestionTypeTotalView> repoQuestionTypes;
+
+	private Boolean shared;
 
 }

@@ -41,4 +41,6 @@ public class RepoRequest {
 	 */
 	private String mode;
 
+	private Boolean shared;
+
 }

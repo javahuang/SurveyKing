@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -47,11 +46,21 @@ public class TemplateApi {
 		templateService.deleteTemplate(request);
 	}
 
+	/**
+	 * 模板广场获取分类
+	 * @param query
+	 * @return
+	 */
 	@GetMapping("/listCategory")
-	public List<String> listTemplateCategories(CategoryQuery query) {
+	public Set<String> listTemplateCategories(CategoryQuery query) {
 		return templateService.listTemplateCategories(query);
 	}
 
+	/**
+	 * 模板广场获取标签
+	 * @param query
+	 * @return
+	 */
 	@GetMapping("/listTag")
 	public Set<String> getTags(TagQuery query) {
 		return templateService.getTags(query);

@@ -1,10 +1,11 @@
 package cn.surveyking.server.impl;
 
 import cn.surveyking.server.core.common.PaginationResponse;
+import cn.surveyking.server.core.uitls.ContextHelper;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.domain.mapper.TemplateViewMapper;
-import cn.surveyking.server.domain.model.Tag;
+import cn.surveyking.server.domain.model.Repo;
 import cn.surveyking.server.domain.model.Template;
 import cn.surveyking.server.mapper.TemplateMapper;
 import cn.surveyking.server.service.BaseService;
@@ -16,10 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -36,8 +34,6 @@ public class TemplateServiceImpl extends BaseService<TemplateMapper, Template> i
 
 	private final TemplateViewMapper templateViewMapper;
 
-	private final TagServiceImpl tagService;
-
 	@Override
 	public PaginationResponse<TemplateView> listTemplate(TemplateQuery query) {
 		Page<Template> templatePage = pageByQuery(query, Wrappers.<Template>lambdaQuery()
@@ -47,10 +43,8 @@ public class TemplateServiceImpl extends BaseService<TemplateMapper, Template> i
 				// .ne(query.getQuestionType() != null, Template::getQuestionType,
 				// query.getQuestionType())
 				.in(query.getCategories().size() > 0, Template::getCategory, query.getCategories())
+				.eq(query.getRepoId() != null, Template::getRepoId, query.getRepoId())
 				.eq(query.getMode() != null, Template::getMode, query.getMode())
-				.exists(query.getRepoId() != null, String.format(
-						"select 1 from t_repo_template t where t.repo_id = '%s' and t.template_id = t_template.id",
-						query.getRepoId()))
 				.exists(query.getTag().size() > 0,
 						String.format("select 1 from t_tag t where t.entity_id = t_template.id and t.name in (%s)",
 								query.getTag().stream().map(x -> "'" + x + "'").collect(Collectors.joining(","))))
@@ -90,25 +84,39 @@ public class TemplateServiceImpl extends BaseService<TemplateMapper, Template> i
 	}
 
 	@Override
-	public List<String> listTemplateCategories(CategoryQuery query) {
+	public Map<String, List<TemplateView>> selectTemplate(SelectTemplateRequest request) {
+		RepoServiceImpl repoService = ContextHelper.getBean(RepoServiceImpl.class);
+		List<Repo> repos = repoService.list(Wrappers.<Repo>lambdaQuery().eq(Repo::getMode, request.getMode().name())
+				.and(x -> x.eq(Repo::getShared, 1).or(y -> y.eq(Repo::getCreateBy, SecurityContextUtils.getUserId()))));
+		Map<String, List<TemplateView>> result = new LinkedHashMap<>();
+		repos.forEach(repo -> {
+			List<TemplateView> templateViews = templateViewMapper
+					.toView(list(Wrappers.<Template>lambdaQuery().eq(Template::getRepoId, repo.getId())));
+			result.put(repo.getName(), templateViews);
+		});
+		return result;
+	}
+
+	public Set<String> listTemplateCategories(CategoryQuery query) {
 		QueryWrapper<Template> queryWrapper = new QueryWrapper<>();
 		queryWrapper.select("DISTINCT category");
 		queryWrapper.like(hasText(query.getName()), "category", query.getName());
 		queryWrapper.eq("shared", query.getShared());
 		queryWrapper.eq("question_type", query.getQuestionType());
-		return list(queryWrapper).stream().filter(x -> x != null).map(x -> x.getCategory())
-				.collect(Collectors.toList());
+		return list(queryWrapper).stream().filter(x -> x != null).map(x -> x.getCategory()).collect(Collectors.toSet());
 	}
 
 	@Override
 	public Set<String> getTags(TagQuery query) {
-		QueryWrapper<Tag> queryWrapper = new QueryWrapper<>();
-		queryWrapper.select("DISTINCT name").like(hasText(query.getName()), "name", query.getName())
-				.eq("category", query.getCategory()).last("limit 20");
 		Set<String> tags = new HashSet<>();
-		tagService.list(queryWrapper).stream().filter(x -> x != null).forEach(x -> {
-			tags.addAll(Arrays.asList(x.getName()));
-		});
+		list(Wrappers.<Template>lambdaQuery().select(Template::getTag)
+				.eq(Template::getQuestionType, SurveySchema.QuestionType.Survey)
+				.eq(query.getShared() == 0, Template::getCreateBy, SecurityContextUtils.getUserId())
+				.eq(Template::getShared, query.getShared())).forEach(x -> {
+					if (x.getTag() != null) {
+						tags.addAll(Arrays.asList(x.getTag()));
+					}
+				});
 		return tags;
 	}
 

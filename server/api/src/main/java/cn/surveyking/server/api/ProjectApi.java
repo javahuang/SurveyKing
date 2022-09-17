@@ -3,13 +3,14 @@ package cn.surveyking.server.api;
 import cn.surveyking.server.core.annotation.EnableDataPerm;
 import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.domain.dto.*;
-import cn.surveyking.server.service.ProjectPartnerService;
-import cn.surveyking.server.service.ProjectService;
+import cn.surveyking.server.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author javahuang
@@ -23,6 +24,22 @@ public class ProjectApi {
 	private final ProjectService projectService;
 
 	private final ProjectPartnerService projectPartnerService;
+
+	private final UserService userService;
+
+	private final PositionService positionService;
+
+	private final DeptService deptService;
+
+	private final RoleService roleService;
+
+	private final DictService dictService;
+
+	private final TemplateService templateService;
+
+	private final RepoService repoService;
+
+	private final TagService tagService;
 
 	/**
 	 * 获取项目列表
@@ -162,6 +179,85 @@ public class ProjectApi {
 	@PreAuthorize("hasAuthority('project:create')")
 	public void restoreProject(@RequestBody ProjectRequest request) {
 		projectService.restoreProject(request);
+	}
+
+	/**
+	 * 编辑器里面获取用户信息
+	 * @param request
+	 * @return
+	 */
+	@PostMapping("/selectUser")
+	public List<UserInfo> selectUser(@RequestBody SelectUserRequest request) {
+		return userService.selectUsers(request);
+	}
+
+	/**
+	 * 编辑器里面获取部门信息
+	 * @param request
+	 * @return
+	 */
+	@PostMapping("/selectDept")
+	public List<DeptView> selectDept(@RequestBody SelectDeptRequest request) {
+		return deptService.listDept(request);
+	}
+
+	/**
+	 * 编辑器里面获取角色信息
+	 * @param request
+	 * @return
+	 */
+	@PostMapping("/selectRole")
+	public List<RoleView> selectRole(@RequestBody SelectRoleRequest request) {
+		return roleService.selectRoles(request);
+	}
+
+	/**
+	 * 编辑器里面获取岗位信息
+	 * @param request
+	 * @return
+	 */
+	@PostMapping("/selectPosition")
+	public List<PositionView> selectPosition(@RequestBody SelectPositionRequest request) {
+		return positionService.selectPositions(request);
+	}
+
+	/**
+	 * 编辑器里面获取字典
+	 * @return
+	 */
+	@PostMapping("/selectDict")
+	public List<CommDictView> selectDict() {
+		return dictService.selectDict();
+	}
+
+	/**
+	 * 编辑器里面获取题库模板
+	 * @param request
+	 * @return
+	 */
+	@PostMapping("/selectTemplate")
+	public Map<String, List<TemplateView>> selectTemplate(@RequestBody SelectTemplateRequest request) {
+		return templateService.selectTemplate(request);
+	}
+
+	/**
+	 * 编辑器里面获取题库
+	 * @param request
+	 * @return
+	 */
+	@PostMapping("/selectRepo")
+	public List<RepoView> selectRepo(@RequestBody SelectRepoRequest request) {
+		return repoService.selectRepo(request);
+	}
+
+	/**
+	 * 编辑器里面获取标签
+	 * @param request
+	 * @return
+	 */
+	@PostMapping("/selectTag")
+	public Set<String> selectTag(@RequestBody SelectTagRequest request) {
+		return tagService.selectTag(request);
 	}
 
 }

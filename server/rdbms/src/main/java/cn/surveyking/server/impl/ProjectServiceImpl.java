@@ -56,7 +56,7 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 						c -> c.isNull(Project::getParentId).or().eq(Project::getParentId, "0"))
 				.eq(query.getMode() != null, Project::getMode, query.getMode())
 				.exists(String.format(
-						"select 1 from t_project_partner t where t.user_id = '%s' and t.project_id = t_project.id",
+						"SELECT 1 FROM t_project_partner t WHERE t.type in (1, 2) AND t.user_id = '%s' AND t.project_id = t_project.id",
 						SecurityContextUtils.getUserId()))
 				.orderByAsc(Project::getPriority, Project::getCreateAt));
 		PaginationResponse<ProjectView> result = new PaginationResponse<>(page.getTotal(),

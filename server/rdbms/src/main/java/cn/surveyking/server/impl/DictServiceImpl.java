@@ -112,7 +112,7 @@ public class DictServiceImpl extends BaseService<CommDictMapper, CommDict> imple
 						item.setCreateAt(new Date());
 						item.setCreateBy(SecurityContextUtils.getUserId());
 						itemList.add(item);
-						if (itemList.size() == 1000) {
+						if (itemList.size() == 10000) {
 							dictItemService.saveBatch(itemList);
 							itemList.clear();
 						}
@@ -123,6 +123,11 @@ public class DictServiceImpl extends BaseService<CommDictMapper, CommDict> imple
 				}
 			});
 		}
+	}
+
+	@Override
+	public List<CommDictView> selectDict() {
+		return dictViewMapper.toView(list());
 	}
 
 }

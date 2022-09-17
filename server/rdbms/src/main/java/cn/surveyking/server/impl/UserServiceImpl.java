@@ -391,6 +391,7 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 				.in(ProjectPartner::getType,
 						Arrays.asList(ProjectPartnerTypeEnum.OWNER.getType(),
 								ProjectPartnerTypeEnum.COLLABORATOR.getType()))
+				.eq(ProjectPartner::getUserId, SecurityContextUtils.getUserId())
 				.exists(String.format(
 						"SELECT 1 FROM t_project t WHERE t.mode = '%s' AND t.id = t_project_partner.project_id",
 						ProjectModeEnum.survey.name()))));
@@ -399,6 +400,7 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 				.in(ProjectPartner::getType,
 						Arrays.asList(ProjectPartnerTypeEnum.OWNER.getType(),
 								ProjectPartnerTypeEnum.COLLABORATOR.getType()))
+				.eq(ProjectPartner::getUserId, SecurityContextUtils.getUserId())
 				.exists(String.format(
 						"SELECT 1 FROM t_project t WHERE t.mode = '%s' AND t.id = t_project_partner.project_id",
 						ProjectModeEnum.exam.name()))));
