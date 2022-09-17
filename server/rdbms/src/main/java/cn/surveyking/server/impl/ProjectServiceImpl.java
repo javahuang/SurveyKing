@@ -118,18 +118,20 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 	@Override
 	@SneakyThrows
 	public void updateProject(ProjectRequest request) {
-		Project project = projectViewMapper.fromRequest(request);
-		if (request.getSettingKey() != null) {
-			// 实现单个设置的更新
-			ProjectSetting setting = getById(request.getId()).getSetting();
-			spelParser.parseExpression(request.getSettingKey()).setValue(setting, request.getSettingValue());
-			project.setSetting(setting);
-			// 同步更新项目状态
-			if ("status".equals(request.getSettingKey())) {
-				project.setStatus((Integer) request.getSettingValue());
+		synchronized (request.getId().intern()) {
+			Project project = projectViewMapper.fromRequest(request);
+			if (request.getSettingKey() != null) {
+				// 实现单个设置的更新
+				ProjectSetting setting = getById(request.getId()).getSetting();
+				spelParser.parseExpression(request.getSettingKey()).setValue(setting, request.getSettingValue());
+				project.setSetting(setting);
+				// 同步更新项目状态
+				if ("status".equals(request.getSettingKey())) {
+					project.setStatus((Integer) request.getSettingValue());
+				}
 			}
+			updateById(project);
 		}
-		updateById(project);
 	}
 
 	@Override
