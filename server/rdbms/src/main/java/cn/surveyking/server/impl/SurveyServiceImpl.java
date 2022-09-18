@@ -109,7 +109,7 @@ public class SurveyServiceImpl implements SurveyService {
 		}
 		else {
 			// 随机问题
-			replaceSchemaIfRandomSchema(project);
+			replaceSchemaIfRandomSchema(project, projectView);
 			// 允许修改答案
 			projectView.setAnswer(getLatestAnswer(projectView, null));
 		}
@@ -128,11 +128,11 @@ public class SurveyServiceImpl implements SurveyService {
 		ProjectView project = projectService.getProject(projectId);
 		// 登录验证
 		convertAndValidateLoginFormIfNeeded(project, query.getAnswer());
+		PublicProjectView projectView = projectViewMapper.toPublicProjectView(project);
 		// 随机问题
-		replaceSchemaIfRandomSchema(project);
+		replaceSchemaIfRandomSchema(project, projectView);
 		// 校验问卷
 		validateProject(project);
-		PublicProjectView projectView = projectViewMapper.toPublicProjectView(project);
 		projectView.setAnswer(getLatestAnswer(projectView, (String) SchemaHelper.getLoginFormAnswer(query.getAnswer(),
 				SchemaHelper.LoginFormFieldEnum.whitelistName)));
 		return projectView;
@@ -187,6 +187,7 @@ public class SurveyServiceImpl implements SurveyService {
 		if (ProjectModeEnum.exam.equals(project.getMode())) {
 			result.setExamScore(answerView.getExamScore());
 			result.setQuestionScore(answerView.getExamInfo().getQuestionScore());
+			// 计算错题
 		}
 		// 白名单更新答题信息
 		request.setId(answerView.getId());
@@ -1015,7 +1016,7 @@ public class SurveyServiceImpl implements SurveyService {
 	 * 随机问题
 	 * @param project
 	 */
-	private void replaceSchemaIfRandomSchema(ProjectView project) {
+	private void replaceSchemaIfRandomSchema(ProjectView project, PublicProjectView projectView) {
 		if (ProjectModeEnum.exam != project.getMode()) {
 			return;
 		}
@@ -1032,9 +1033,9 @@ public class SurveyServiceImpl implements SurveyService {
 			answerQuery.setId(answerId);
 			AnswerView answerView = answerService.getAnswer(answerQuery);
 			if (answerView != null && answerView.getSurvey() != null) {
-				project.setSurvey(answerView.getSurvey());
-				project.setTempAnswer(answerView.getTempAnswer());
-				return;
+				projectView.setSurvey(answerView.getSurvey());
+				projectView.setTempAnswer(answerView.getTempAnswer());
+				return ;
 			}
 		}
 		// 从题库里面挑题
@@ -1043,7 +1044,7 @@ public class SurveyServiceImpl implements SurveyService {
 		SurveySchema randomSchema = SurveySchema.builder().id(source.getId()).children(questionSchemaList)
 				.title(source.getTitle()).attribute(source.getAttribute()).description(source.getDescription()).build();
 		if (randomSchema != null) {
-			project.setSurvey(randomSchema);
+			projectView.setSurvey(randomSchema);
 			AnswerRequest answerRequest = new AnswerRequest();
 			answerRequest.setSurvey(randomSchema);
 			answerRequest.setProjectId(project.getId());
