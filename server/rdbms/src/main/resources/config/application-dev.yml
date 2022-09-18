@@ -1,7 +1,6 @@
 # 配置文件不能放在根目录下面，否则会被 api 的 application-dev.yml 覆盖
 spring:
   h2:
-
     enabled:
       true console:
   datasource:
@@ -11,7 +10,7 @@ spring:
 #    driver-class-name: org.h2.Driver
     username: root
     password: 123456
-    url: jdbc:mysql://localhost:3306/surveyking
+    url: jdbc:mysql://localhost:3306/surveyking?rewriteBatchedStatements=true&useUnicode=true&characterEncoding=UTF-8
     driver-class-name: com.mysql.cj.jdbc.Driver
 mybatis-plus:
   configuration:
