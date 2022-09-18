@@ -293,6 +293,10 @@ public class SurveyServiceImpl implements SurveyService {
 		if (Boolean.TRUE.equals(submittedSetting.getRankVisible())) {
 			result.setRank(answerView.getRank());
 		}
+		// 随机问题
+		if (answerView.getSurvey() != null) {
+			result.setSchema(answerView.getSurvey());
+		}
 		result.setMetaInfo(answerView.getMetaInfo());
 		return result;
 	}
@@ -1035,7 +1039,7 @@ public class SurveyServiceImpl implements SurveyService {
 			if (answerView != null && answerView.getSurvey() != null) {
 				projectView.setSurvey(answerView.getSurvey());
 				projectView.setTempAnswer(answerView.getTempAnswer());
-				return ;
+				return;
 			}
 		}
 		// 从题库里面挑题
