@@ -926,13 +926,13 @@ public class SurveyServiceImpl implements SurveyService {
 			if (projectPartner != null && projectPartner.getStatus() == AppConsts.ProjectPartnerStatus.UNVISITED) {
 				projectPartner.setStatus(AppConsts.ProjectPartnerStatus.VISITED);
 				projectPartnerMapper.updateById(projectPartner);
-				// 如果配置的外部用户，则 createBy 为 partner 的 id，如果是内部用户则是用户 id
-				if (projectPartner.getUserName() != null) {
-					ContextHelper.getCurrentHttpRequest().setAttribute("createBy", projectPartner.getId());
-				}
-				else if (projectPartner.getUserId() != null) {
-					ContextHelper.getCurrentHttpRequest().setAttribute("createBy", SecurityContextUtils.getUserId());
-				}
+			}
+			// 如果配置的外部用户，则 createBy 为 partner 的 id，如果是内部用户则是用户 id
+			if (projectPartner.getUserName() != null) {
+				ContextHelper.getCurrentHttpRequest().setAttribute("createBy", projectPartner.getId());
+			}
+			else if (projectPartner.getUserId() != null) {
+				ContextHelper.getCurrentHttpRequest().setAttribute("createBy", SecurityContextUtils.getUserId());
 			}
 		}
 
