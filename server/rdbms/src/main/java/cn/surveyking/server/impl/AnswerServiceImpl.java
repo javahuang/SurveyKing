@@ -71,13 +71,12 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	@Override
 	public PaginationResponse<AnswerView> listAnswer(AnswerQuery query) {
 		Page<Answer> page = new Page<>(query.getCurrent(), query.getPageSize());
-		super.page(page,
-				Wrappers.<Answer>lambdaQuery()
-						.eq(query.getProjectId() != null, Answer::getProjectId, query.getProjectId())
-						.in(query.getIds() != null && query.getIds().size() > 0, Answer::getId, query.getIds())
-						.lt(query.getEndTime() != null, Answer::getCreateAt, query.getEndTime())
-						.gt(query.getStartTime() != null, Answer::getCreateAt, query.getStartTime())
-						.eq(query.getId() != null, Answer::getId, query.getId()).orderByDesc(Answer::getCreateAt));
+		super.page(page, Wrappers.<Answer>lambdaQuery().isNotNull(Answer::getAnswer) // 暂存题答案会为空
+				.eq(query.getProjectId() != null, Answer::getProjectId, query.getProjectId())
+				.in(query.getIds() != null && query.getIds().size() > 0, Answer::getId, query.getIds())
+				.lt(query.getEndTime() != null, Answer::getCreateAt, query.getEndTime())
+				.gt(query.getStartTime() != null, Answer::getCreateAt, query.getStartTime())
+				.eq(query.getId() != null, Answer::getId, query.getId()).orderByDesc(Answer::getCreateAt));
 		List<AnswerView> list = answerViewMapper.toAnswerView(page.getRecords());
 		Project project = projectMapper.selectById(query.getProjectId());
 		FlatSurveySchemaByType schemaByType = parseSurveySchemaByType(project.getSurvey());

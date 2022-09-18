@@ -159,9 +159,7 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 		List<Template> templates = new ArrayList<>();
 		repos.forEach(repo -> {
 			List<Template> repoTemplates = templateService.list(Wrappers.<Template>lambdaQuery()
-					.exists(String.format(
-							"select 1 from t_repo_template t where t.repo_id = '%s' and t.template_id = t_template.id",
-							repo.getRepoId()))
+					.eq(Template::getRepoId, repo.getRepoId())
 					.in(!CollectionUtils.isEmpty(repo.getTypes()), Template::getQuestionType, repo.getTypes())
 					.exists(!CollectionUtils.isEmpty(repo.getTags()),
 							String.format("select 1 from t_tag t where t.entity_id = t_template.id and t.name in (%s)",
@@ -219,9 +217,18 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 
 	@Override
 	public List<RepoView> selectRepo(SelectRepoRequest request) {
-		// 只能选择自己创建的题库
-		return repoViewMapper.toView(list(Wrappers.<Repo>lambdaQuery().eq(Repo::getMode, request.getMode())
-				.eq(Repo::getCreateBy, SecurityContextUtils.getUserId())));
+		List<RepoView> result = repoViewMapper
+				.toView(list(Wrappers.<Repo>lambdaQuery().eq(Repo::getMode, request.getMode()).and(x -> x
+						.eq(Repo::getCreateBy, SecurityContextUtils.getUserId()).or(y -> y.eq(Repo::getShared, 1)))));
+		result.forEach(repoView -> {
+			repoView.setTotal(
+					templateService.count(Wrappers.<Template>lambdaQuery().eq(Template::getRepoId, repoView.getId())));
+			// 获取每个标签对应的题的数量
+			repoView.setTemplateTags(this.getBaseMapper().selectRepoTemplateTags(repoView.getId()));
+			// 获取每个问题类型对应的题的数量
+			repoView.setRepoQuestionTypes(this.getBaseMapper().selectRepoQuestionTypes(repoView.getId()));
+		});
+		return result;
 	}
 
 }

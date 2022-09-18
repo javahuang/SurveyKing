@@ -153,9 +153,14 @@ public class SurveyServiceImpl implements SurveyService {
 		String projectId = request.getProjectId();
 		PublicAnswerView result = new PublicAnswerView();
 		ProjectView project = projectService.getProject(projectId);
-
 		String answerId = request.getId();
-		if (isNotBlank(request.getQueryId())) {
+		// 随机问卷更新答案
+		String randomSurveyCookieName = AppConsts.COOKIE_RANDOM_PROJECT_PREFIX + project.getId();
+		String answerIdFromCookie = ContextHelper.getCookie(randomSurveyCookieName);
+		if (isNotBlank(answerIdFromCookie)) {
+			answerId = answerIdFromCookie;
+		}
+		else if (isNotBlank(request.getQueryId())) {
 			// 公开查询修改答案
 			validateAndMergeAnswer(project, request);
 		}
@@ -186,6 +191,12 @@ public class SurveyServiceImpl implements SurveyService {
 		// 白名单更新答题信息
 		request.setId(answerView.getId());
 		updateProjectPartnerByAnswer(request, project);
+		// 完事儿删除 cookie 标识
+		if (isNotBlank(answerIdFromCookie)) {
+			Cookie cookie = new Cookie(randomSurveyCookieName, answerIdFromCookie);
+			cookie.setMaxAge(0);
+			ContextHelper.getCurrentHttpResponse().addCookie(cookie);
+		}
 		return result;
 	}
 
@@ -1035,6 +1046,7 @@ public class SurveyServiceImpl implements SurveyService {
 			project.setSurvey(randomSchema);
 			AnswerRequest answerRequest = new AnswerRequest();
 			answerRequest.setSurvey(randomSchema);
+			answerRequest.setProjectId(project.getId());
 			AnswerView answerView = answerService.saveAnswer(answerRequest);
 			Cookie cookie = new Cookie(cookieName, answerView.getId());
 			cookie.setMaxAge(7 * 24 * 60 * 60);
