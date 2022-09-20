@@ -145,14 +145,14 @@ mvn clean package -DskipTests -Ppro
 # 生成的 jar 包位于 ./api/target/surveyking-v0.x.x.jar
 ```
 
-### 使用 docker 快速启动(非最新版本)
+### 使用 docker 快速启动
 
-启动 SurveyKing 镜像时，你可以指定 SurveyKing 挂载参数，将日志文件和内置数据库保存到你本地。(docker 版本目前还有点问题，待解决）
+启动 SurveyKing 镜像时，你可以指定 SurveyKing 挂载参数，将日志文件和内置数据库保存到你本地。
 
 ```bash
-docker run -p 1991:1991 registry.cn-hangzhou.aliyuncs.com/surveyking/surveyking
+docker run -p 1991:1991 surveyking/surveyking
 # 挂载数据文件
-docker run -p 1991:1991 -v /surveyking:/surveyking registry.cn-hangzhou.aliyuncs.com/surveyking/surveyking
+docker run -d -p 1991:1991 -v /my/logs:/files -v /my/logs:/logs
 ```
 
 ## 使用
