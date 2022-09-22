@@ -42,6 +42,7 @@ module.exports = {
             "guides/logic/validate",
             "guides/logic/calculate",
             "guides/logic/replaceText",
+            "guides/logic/redirect",
           ],
         },
         "guides/public_query",
