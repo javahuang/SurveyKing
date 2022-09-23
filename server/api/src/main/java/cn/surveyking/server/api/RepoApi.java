@@ -49,7 +49,7 @@ public class RepoApi {
 
 	@PostMapping("/delete")
 	@PreAuthorize("hasAuthority('repo:delete')")
-	public void deleteRepo(RepoRequest request) {
+	public void deleteRepo(@RequestBody RepoRequest request) {
 		repoService.deleteRepo(request);
 	}
 
