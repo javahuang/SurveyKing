@@ -20,6 +20,7 @@ module.exports = {
       collapsed: false,
       items: [
         "guides/introduction",
+        "guides/formula",
         {
           type: "category",
           label: "题型",

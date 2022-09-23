@@ -27,7 +27,7 @@ title: 自定义跳转逻辑
 
 注意：得使用 `CONCATENATE` 函数，否则会出现错误。 ![1663851498155](image/redirect/1663851498155.png)
 
-### 复杂跳转逻辑和答案组合
+## 复杂跳转逻辑和答案组合
 
 如果选择了跳转京东，则会跳转到 [https://jd.com?account=xxxx](https://jd.com?account=xxxx)；如果选择了跳转到淘宝，则会跳转到 [https://taboa.com?account=yyyy](https://taboa.com?account=yyyy)
 
