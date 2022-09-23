@@ -49,6 +49,7 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 	public PaginationResponse<RepoView> listRepo(RepoQuery query) {
 		Page<Repo> page = pageByQuery(query,
 				Wrappers.<Repo>lambdaQuery().like(isNotBlank(query.getName()), Repo::getName, query.getName())
+						.eq(Repo::getCreateAt, SecurityContextUtils.getUserId())
 						.eq(query.getMode() != null, Repo::getMode, query.getMode()).orderByAsc(Repo::getCreateAt));
 		PaginationResponse<RepoView> result = new PaginationResponse<>(page.getTotal(),
 				repoViewMapper.toView(page.getRecords()));
