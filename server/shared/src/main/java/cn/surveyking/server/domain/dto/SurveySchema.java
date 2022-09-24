@@ -265,6 +265,11 @@ public class SurveySchema implements Serializable {
 		private String jumpRule;
 
 		/**
+		 * 单选多选自动勾选规则
+		 */
+		private String checkedRule;
+
+		/**
 		 * 计算规则
 		 */
 		private String calculate;
