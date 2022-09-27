@@ -12,7 +12,7 @@ repositories {
 
 allprojects {
     group = 'cn.surveyking'
-    version = 'v1.1.0'
+    version = 'v1.1.1'
 }
 
 subprojects {
