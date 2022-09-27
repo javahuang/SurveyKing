@@ -40,6 +40,7 @@ module.exports = {
           },
           items: [
             "guides/logic/show",
+            "guides/logic/jump",
             "guides/logic/validate",
             "guides/logic/calculate",
             "guides/logic/replaceText",
