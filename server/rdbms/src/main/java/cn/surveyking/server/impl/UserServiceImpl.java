@@ -339,10 +339,9 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 
 	@Override
 	public List<UserInfo> selectUsers(SelectUserRequest request) {
-		List<User> users = pageByQuery(request,
-				Wrappers.<User>lambdaQuery().select(User::getId)
-						.eq(StringUtils.hasText(request.getDeptId()), User::getDeptId, request.getDeptId())
-						.like(StringUtils.hasText(request.getName()), User::getName, request.getName())).getRecords();
+		List<User> users = list(Wrappers.<User>lambdaQuery().select(User::getId)
+				.eq(StringUtils.hasText(request.getDeptId()), User::getDeptId, request.getDeptId())
+				.like(StringUtils.hasText(request.getName()), User::getName, request.getName()));
 		return Stream.concat(users.stream().map(user -> user.getId()), request.getSelected().stream())
 				.collect(Collectors.toSet()).stream()
 				.map(userId -> ContextHelper.getBean(UserService.class).loadUserById(userId).simpleMode())
