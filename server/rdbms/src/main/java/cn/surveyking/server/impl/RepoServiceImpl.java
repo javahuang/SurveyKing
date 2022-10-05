@@ -189,8 +189,11 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 			});
 		});
 		// 相同类型的问题排放在一起
-		return templates.stream().map(x -> x.getTemplate()).sorted(Comparator.comparing(SurveySchema::getType))
-				.collect(Collectors.toList());
+		return templates.stream().map(x -> {
+			SurveySchema schema = x.getTemplate();
+			schema.setId(x.getId());
+			return schema;
+		}).sorted(Comparator.comparing(SurveySchema::getType)).collect(Collectors.toList());
 	}
 
 	@Override

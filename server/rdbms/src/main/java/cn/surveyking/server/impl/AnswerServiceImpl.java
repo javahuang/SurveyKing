@@ -11,7 +11,6 @@ import cn.surveyking.server.domain.mapper.AnswerViewMapper;
 import cn.surveyking.server.domain.model.Answer;
 import cn.surveyking.server.domain.model.Project;
 import cn.surveyking.server.domain.model.ProjectPartner;
-import cn.surveyking.server.domain.model.Template;
 import cn.surveyking.server.mapper.AnswerMapper;
 import cn.surveyking.server.mapper.ProjectMapper;
 import cn.surveyking.server.mapper.ProjectPartnerMapper;
@@ -595,13 +594,12 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		if (project != null && ProjectModeEnum.exam.equals(project.getMode()) && answer != null
 				&& answer.getAnswer() != null) {
 			SurveySchema srcSchema = project.getSurvey();
-			// 随机抽题需要根据答案反查出schema
-			if (project.getSetting().getExamSetting().getRandomSurvey() != null) {
-				srcSchema = SurveySchema.builder()
-						.children(templateService
-								.list(Wrappers.<Template>lambdaQuery().in(Template::getId, answer.getAnswer().keySet()))
-								.stream().map(t -> t.getTemplate()).collect(Collectors.toList()))
-						.build();
+			// 随机抽题需要根据答案获取 schema
+			if (answer.getId() != null) {
+				Answer existAnswer = getById(answer.getId());
+				if (existAnswer != null && existAnswer.getSurvey() != null) {
+					srcSchema = existAnswer.getSurvey();
+				}
 			}
 			AnswerScoreEvaluator evaluator = new AnswerScoreEvaluator(srcSchema, answer.getAnswer());
 			answer.setExamScore(evaluator.eval());
