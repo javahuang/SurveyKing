@@ -42,7 +42,7 @@ public class TemplateApi {
 
 	@PostMapping("/delete")
 	@PreAuthorize("hasAuthority('template:delete')")
-	public void deleteTemplate(TemplateRequest request) {
+	public void deleteTemplate(@RequestBody TemplateRequest request) {
 		templateService.deleteTemplate(request);
 	}
 
