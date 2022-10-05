@@ -40,8 +40,7 @@ public class TemplateServiceImpl extends BaseService<TemplateMapper, Template> i
 				.like(isNotEmpty(query.getName()), Template::getName, query.getName())
 				.eq(query.getQuestionType() != null, Template::getQuestionType, query.getQuestionType())
 				// 默认查询额是普通题型
-				// .ne(query.getQuestionType() != null, Template::getQuestionType,
-				// query.getQuestionType())
+				.ne(query.getQuestionType() == null, Template::getQuestionType, SurveySchema.QuestionType.Survey)
 				.in(query.getCategories().size() > 0, Template::getCategory, query.getCategories())
 				.eq(query.getRepoId() != null, Template::getRepoId, query.getRepoId())
 				.eq(query.getMode() != null, Template::getMode, query.getMode())
@@ -51,6 +50,7 @@ public class TemplateServiceImpl extends BaseService<TemplateMapper, Template> i
 				.eq(query.getShared() != null, Template::getShared, query.getShared())
 				.eq(query.getShared() != null && query.getShared() == 0, Template::getCreateBy,
 						SecurityContextUtils.getUserId())
+				.eq(query.getShared() == null, Template::getCreateBy, SecurityContextUtils.getUserId())
 				.orderByAsc(Template::getPriority));
 		return new PaginationResponse<>(templatePage.getTotal(),
 				templatePage.getRecords().stream().map(x -> templateViewMapper.toView(x)).collect(Collectors.toList()));
