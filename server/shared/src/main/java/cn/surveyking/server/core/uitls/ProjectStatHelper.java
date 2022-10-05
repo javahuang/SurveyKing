@@ -51,9 +51,11 @@ public class ProjectStatHelper {
 
 	private Map<String, PublicStatisticsView.QuestionStatistics> initQuestionStatistics() {
 		List<SurveySchema> flatSurveySchema = SchemaHelper.flatSurveySchema(schema);
-		// 只有配置了 statEnabled 属性的题才能进行统计
+		// 只有问题配置了 statEnabled 和选项配置了 quota 属性的题才能进行统计
 		List<SurveySchema> canStatSchema = flatSurveySchema.stream()
-				.filter(questionSchema -> Boolean.TRUE.equals(questionSchema.getAttribute().getStatEnabled()))
+				.filter(questionSchema -> Boolean.TRUE.equals(questionSchema.getAttribute().getStatEnabled())
+						|| questionSchema.getChildren().stream().filter(x -> x.getAttribute().getQuota() != null)
+								.findFirst().isPresent())
 				.collect(Collectors.toList());
 
 		Map<String, PublicStatisticsView.QuestionStatistics> questionStatistics = new LinkedHashMap<>();

@@ -421,6 +421,36 @@ public class SurveyServiceImpl implements SurveyService {
 				throw new ValidationException(isNotBlank(uniqueText) ? uniqueText : "问卷重复保存");
 			}
 		});
+
+		// 选项配额校验
+		List<SurveySchema> hasQuotaSchemaList = SchemaHelper.findSchemaHasAttribute(project.getSurvey(), "quota");
+		if (hasQuotaSchemaList.size() > 0) {
+			ProjectQuery query = new ProjectQuery();
+			query.setId(request.getProjectId());
+			PublicStatisticsView statisticsView = statProject(query);
+
+			hasQuotaSchemaList.forEach(optionSchema -> {
+				String questionId = treeNode.getTreeNodeMap().get(optionSchema.getId()).getParent().getData().getId();
+				Object questionValue = request.getAnswer().get(questionId);
+				if (questionValue == null) {
+					return;
+				}
+				boolean optionNotChecked = ((Map) questionValue).get(optionSchema.getId()) == null;
+				if (optionNotChecked) {
+					return;
+				}
+				PublicStatisticsView.QuestionStatistics questionStatistics = statisticsView.getQuestionStatistics()
+						.get(questionId);
+				int optionSelectedCount = questionStatistics.getOptionStatistics().stream()
+						.filter(x -> x.getOptionId().equals(optionSchema.getId())).findFirst()
+						.orElse(new PublicStatisticsView.OptionStatistics()).getCount();
+				Integer quota = optionSchema.getAttribute().getQuota();
+				if (quota != null && optionSelectedCount + 1 > quota) {
+					throw new ValidationException("选项数量超过限制，请重新选择");
+				}
+			});
+		}
+
 	}
 
 	private void validateExamSetting(ProjectView project) {

@@ -349,6 +349,11 @@ public class SurveySchema implements Serializable {
 		 */
 		private List<ExpressionMessage> regexp;
 
+		/**
+		 * 选项配额
+		 */
+		private Integer quota;
+
 	}
 
 	/**

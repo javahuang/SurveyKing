@@ -394,6 +394,26 @@ public class SchemaHelper {
 	}
 
 	/**
+	 * 根据属性名查找子 schema 列表
+	 * @param schema
+	 * @param attributeName
+	 */
+	public static List<SurveySchema> findSchemaHasAttribute(SurveySchema schema, String attributeName) {
+		List<SurveySchema> result = new ArrayList<>();
+		BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(schema.getAttribute());
+		Object attrValue = wrapper.getPropertyValue(attributeName);
+		if (attrValue != null) {
+			result.add(schema);
+		}
+		if (schema.getChildren() != null) {
+			schema.getChildren().forEach(child -> {
+				result.addAll(findSchemaHasAttribute(child, attributeName));
+			});
+		}
+		return result;
+	}
+
+	/**
 	 * 主要是用于构建 FillBlank 类型的查询表单
 	 * @param field
 	 * @return
