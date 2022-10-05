@@ -137,6 +137,10 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 	@Override
 	public void deleteProject(ProjectRequest request) {
 		removeById(request.getId());
+		// 删除项目参与者
+		ProjectPartnerRequest deletePartnerRequest = new ProjectPartnerRequest();
+		deletePartnerRequest.setProjectId(request.getId());
+		projectPartnerService.deleteProjectPartner(deletePartnerRequest);
 	}
 
 	@Override

@@ -16,6 +16,7 @@ import cn.surveyking.server.mapper.ProjectPartnerMapper;
 import cn.surveyking.server.service.BaseService;
 import cn.surveyking.server.service.ProjectPartnerService;
 import cn.surveyking.server.service.UserService;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
@@ -118,7 +119,9 @@ public class ProjectPartnerServiceImpl extends BaseService<ProjectPartnerMapper,
 
 	@Override
 	public void deleteProjectPartner(ProjectPartnerRequest request) {
-		remove(Wrappers.<ProjectPartner>lambdaQuery().in(ProjectPartner::getId, request.getIds()));
+		remove(Wrappers.<ProjectPartner>lambdaUpdate()
+				.in(CollectionUtils.isNotEmpty(request.getIds()), ProjectPartner::getId, request.getIds())
+				.eq(request.getProjectId() != null, ProjectPartner::getProjectId, request.getProjectId()));
 	}
 
 	@Override
