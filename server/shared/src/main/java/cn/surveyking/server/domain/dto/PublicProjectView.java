@@ -41,4 +41,6 @@ public class PublicProjectView {
 
 	LinkedHashMap<String, Object> tempAnswer;
 
+	private Boolean isAuthenticated;
+
 }

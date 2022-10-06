@@ -252,6 +252,11 @@ public class ProjectSetting {
 		 */
 		private List<RandomSurveyCondition> randomSurvey;
 
+		/**
+		 * 错题练习
+		 */
+		private Boolean randomSurveyWrong;
+
 	}
 
 	/**

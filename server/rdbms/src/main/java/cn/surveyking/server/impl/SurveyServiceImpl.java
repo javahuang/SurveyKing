@@ -10,10 +10,10 @@ import cn.surveyking.server.domain.mapper.ProjectViewMapper;
 import cn.surveyking.server.domain.model.Answer;
 import cn.surveyking.server.domain.model.CommDictItem;
 import cn.surveyking.server.domain.model.ProjectPartner;
+import cn.surveyking.server.domain.model.UserBook;
 import cn.surveyking.server.mapper.ProjectPartnerMapper;
 import cn.surveyking.server.service.AnswerService;
 import cn.surveyking.server.service.ProjectService;
-import cn.surveyking.server.service.RepoService;
 import cn.surveyking.server.service.SurveyService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -26,6 +26,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.WebUtils;
@@ -69,7 +70,11 @@ public class SurveyServiceImpl implements SurveyService {
 
 	private final DictItemServiceImpl dictItemService;
 
-	private final RepoService repoService;
+	private final RepoServiceImpl repoService;
+
+	private final UserBookServiceImpl userBookService;
+
+	private final TemplateServiceImpl templateService;
 
 	/**
 	 * answerService 如果需要验证密码，则只有密码输入正确之后才开始加载 schema
@@ -80,6 +85,9 @@ public class SurveyServiceImpl implements SurveyService {
 	public PublicProjectView loadProject(ProjectQuery query) {
 		ProjectView project = projectService.getProject(query.getId());
 		PublicProjectView projectView = projectViewMapper.toPublicProjectView(project);
+		if (project == null) {
+			throw new ErrorCodeException(ErrorCode.ProjectNotFound);
+		}
 		SurveySchema loginFormSchema = null;
 		if (query.getAnswerId() == null) {
 			// 表单需要验证
@@ -113,7 +121,7 @@ public class SurveyServiceImpl implements SurveyService {
 			// 允许修改答案
 			projectView.setAnswer(getLatestAnswer(projectView, null));
 		}
-
+		projectView.setIsAuthenticated(SecurityContextUtils.isAuthenticated());
 		return projectView;
 	}
 
@@ -188,6 +196,9 @@ public class SurveyServiceImpl implements SurveyService {
 			result.setExamScore(answerView.getExamScore());
 			result.setQuestionScore(answerView.getExamInfo().getQuestionScore());
 			// 计算错题
+			AnswerExamInfo answerExamInfo = answerView.getExamInfo();
+			LinkedHashMap<String, Double> questionScore = answerExamInfo.getQuestionScore();
+			userBookService.saveWrongQuestion(questionScore);
 		}
 		// 白名单更新答题信息
 		request.setId(answerView.getId());
@@ -856,7 +867,21 @@ public class SurveyServiceImpl implements SurveyService {
 		List<SurveySchema> queryConditions = new ArrayList<>();
 		SurveySchema loginFormSchema = SurveySchema.builder().id(project.getId()).children(queryConditions)
 				.title(project.getName()).build();
+		// 错题练习模式需要登录
+		if (project != null && project.getSetting() != null && project.getSetting().getExamSetting() != null) {
+			ProjectSetting.ExamSetting examSetting = project.getSetting().getExamSetting();
+			if (Boolean.TRUE.equals(examSetting.getRandomSurveyWrong()) && !SecurityContextUtils.isAuthenticated()) {
+				loginRequired = true;
+				SchemaHelper.appendChildIfNotExist(loginFormSchema,
+						SchemaHelper.buildFillBlankQuerySchema(SchemaHelper.LoginFormFieldEnum.username));
+				SchemaHelper.appendChildIfNotExist(loginFormSchema,
+						SchemaHelper.buildFillBlankQuerySchema(SchemaHelper.LoginFormFieldEnum.password));
 
+				if (answer != null) {
+					authentication = validateUsernameAndPassword(answer);
+				}
+			}
+		}
 		if (project != null && project.getSetting() != null && project.getSetting().getAnswerSetting() != null) {
 			ProjectSetting.AnswerSetting answerSetting = project.getSetting().getAnswerSetting();
 			// 需要登录答卷
@@ -996,9 +1021,11 @@ public class SurveyServiceImpl implements SurveyService {
 	 */
 	private Authentication validateUsernameAndPassword(LinkedHashMap<String, Object> answer) {
 		try {
-			return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+			Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
 					SchemaHelper.getLoginFormAnswer(answer, SchemaHelper.LoginFormFieldEnum.username),
 					SchemaHelper.getLoginFormAnswer(answer, SchemaHelper.LoginFormFieldEnum.password)));
+			SecurityContextHolder.getContext().setAuthentication(authentication);
+			return authentication;
 		}
 		catch (Exception e) {
 			throw new ErrorCodeException(ErrorCode.ValidationError);
@@ -1047,11 +1074,36 @@ public class SurveyServiceImpl implements SurveyService {
 	}
 
 	/**
-	 * 随机问题
+	 * 随机问题，分为随机问题和错题练习
 	 * @param project
 	 */
 	private void replaceSchemaIfRandomSchema(ProjectView project, PublicProjectView projectView) {
 		if (ProjectModeEnum.exam != project.getMode()) {
+			return;
+		}
+		SurveySchema source = project.getSurvey();
+		Boolean randomSurveyWrong = project.getSetting().getExamSetting().getRandomSurveyWrong();
+		if (Boolean.TRUE.equals(randomSurveyWrong)) {
+			if (!SecurityContextUtils.isAuthenticated()) {
+				// 需要登录
+
+			}
+			List<UserBook> wrongUserQuestions = userBookService
+					.list(Wrappers.<UserBook>lambdaQuery().eq(UserBook::getType, UserBookServiceImpl.BOOK_TYPE_WRONG)
+							.eq(UserBook::getCreateBy, SecurityContextUtils.getUserId()));
+			if (wrongUserQuestions.size() == 0) {
+				return;
+			}
+			SurveySchema randomSchema = SurveySchema.builder().id(source.getId()).children(templateService
+					.listByIds(wrongUserQuestions.stream().map(x -> x.getTemplateId()).collect(Collectors.toList()))
+					.stream().map(x -> {
+						SurveySchema schema = x.getTemplate();
+						schema.setId(x.getId());
+						schema.setTitle(x.getName());
+						return schema;
+					}).collect(Collectors.toList())).title(source.getTitle()).attribute(source.getAttribute())
+					.description(source.getDescription()).build();
+			projectView.setSurvey(randomSchema);
 			return;
 		}
 		List<ProjectSetting.RandomSurveyCondition> randomSurveyCondition = project.getSetting().getExamSetting()
@@ -1074,10 +1126,10 @@ public class SurveyServiceImpl implements SurveyService {
 		}
 		// 从题库里面挑题
 		List<SurveySchema> questionSchemaList = repoService.pickQuestionFromRepo(randomSurveyCondition);
-		SurveySchema source = project.getSurvey();
+
 		SurveySchema randomSchema = SurveySchema.builder().id(source.getId()).children(questionSchemaList)
 				.title(source.getTitle()).attribute(source.getAttribute()).description(source.getDescription()).build();
-		if (randomSchema != null) {
+		if (questionSchemaList.size() > 0) {
 			projectView.setSurvey(randomSchema);
 			AnswerRequest answerRequest = new AnswerRequest();
 			answerRequest.setSurvey(randomSchema);

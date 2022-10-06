@@ -421,7 +421,9 @@ public class SchemaHelper {
 	public static SurveySchema buildFillBlankQuerySchema(LoginFormFieldEnum field) {
 		return SurveySchema.builder().id(field.name()).type(SurveySchema.QuestionType.FillBlank).title(field.getTitle())
 				.attribute(SurveySchema.Attribute.builder().required(true).build())
-				.children(Collections.singletonList(SurveySchema.builder().id(field.name()).build())).build();
+				.children(Collections.singletonList(SurveySchema.builder().id(field.name())
+						.attribute(SurveySchema.Attribute.builder().dataType(field.getDataType()).build()).build()))
+				.build();
 	}
 
 	public static Object getLoginFormAnswer(LinkedHashMap<String, Object> answer, LoginFormFieldEnum field) {
@@ -528,16 +530,24 @@ public class SchemaHelper {
 
 	public enum LoginFormFieldEnum {
 
-		username("用户名"), password("密码"), extraPassword("请输入问卷密码"), whitelistName("请先输入名单，再进行填写");
+		username("用户名", SurveySchema.DataType.text), password("密码", SurveySchema.DataType.password), extraPassword(
+				"请输入问卷密码", SurveySchema.DataType.text), whitelistName("请先输入名单，再进行填写", SurveySchema.DataType.text);
 
 		private String title;
 
-		LoginFormFieldEnum(String title) {
+		private SurveySchema.DataType dataType;
+
+		LoginFormFieldEnum(String title, SurveySchema.DataType dataType) {
 			this.title = title;
+			this.dataType = dataType;
 		}
 
 		public String getTitle() {
 			return title;
+		}
+
+		public SurveySchema.DataType getDataType() {
+			return dataType;
 		}
 
 	}

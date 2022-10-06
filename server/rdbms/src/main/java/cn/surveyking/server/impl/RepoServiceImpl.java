@@ -7,10 +7,14 @@ import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.domain.mapper.RepoViewMapper;
 import cn.surveyking.server.domain.mapper.UserBookViewMapper;
-import cn.surveyking.server.domain.model.*;
+import cn.surveyking.server.domain.model.Repo;
+import cn.surveyking.server.domain.model.Tag;
+import cn.surveyking.server.domain.model.Template;
+import cn.surveyking.server.domain.model.UserBook;
 import cn.surveyking.server.mapper.RepoMapper;
 import cn.surveyking.server.service.BaseService;
 import cn.surveyking.server.service.RepoService;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -18,7 +22,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
@@ -212,11 +215,40 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 	public PaginationResponse<UserBookView> listUserBook(UserBookQuery query) {
 		Page<UserBook> page = userBookService.pageByQuery(query,
 				Wrappers.<UserBook>lambdaQuery().like(query.getName() != null, UserBook::getName, query.getName())
+						.eq(query.getType() != null, UserBook::getType, query.getType())
 						.ge(query.getStartDate() != null, UserBook::getCreateAt, query.getStartDate())
-						.le(query.getEndDate() != null, UserBook::getCreateAt, query.getEndDate()));
+						.le(query.getEndDate() != null, UserBook::getCreateAt, query.getEndDate())
+						.eq(UserBook::getCreateBy, SecurityContextUtils.getUserId()));
 		PaginationResponse<UserBookView> result = new PaginationResponse<>(page.getTotal(),
 				userBookViewMapper.toView(page.getRecords()));
 		return result;
+	}
+
+	@Override
+	public void createUserBook(UserBookRequest request) {
+		UserBook userBook = userBookViewMapper.fromRequest(request);
+		userBookService.save(userBook);
+	}
+
+	@Override
+	public void updateUserBook(UserBookRequest request) {
+		UserBook userBook = userBookViewMapper.fromRequest(request);
+		userBookService.updateById(userBook);
+	}
+
+	@Override
+	public void deleteUserBook(UserBookRequest request) {
+		if (request.getId() != null) {
+			userBookService.removeById(request.getId());
+		}
+		if (CollectionUtils.isNotEmpty(request.getIds())) {
+			userBookService.removeByIds(request.getIds());
+		}
+		if (request.getTemplateId() != null) {
+			userBookService
+					.remove(Wrappers.<UserBook>lambdaUpdate().eq(UserBook::getTemplateId, request.getTemplateId())
+							.eq(UserBook::getCreateBy, SecurityContextUtils.getUserId()));
+		}
 	}
 
 	@Override

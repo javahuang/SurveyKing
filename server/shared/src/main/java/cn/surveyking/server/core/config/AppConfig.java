@@ -10,6 +10,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.scheduling.annotation.AsyncConfigurer;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
+import java.util.concurrent.Executor;
 
 /**
  * @author javahuang
@@ -17,7 +22,8 @@ import org.springframework.core.convert.support.DefaultConversionService;
  */
 @Configuration
 @EnableAspectJAutoProxy
-public class AppConfig {
+@EnableAsync
+public class AppConfig implements AsyncConfigurer {
 
 	private UserService userService;
 
@@ -37,6 +43,16 @@ public class AppConfig {
 		defaultConversionService.addConverter(new UniqueLimitSettingConverter());
 		defaultConversionService.addConverter(new PublicQueryConverter());
 		defaultConversionService.addConverter(new RandomSurveyConverter());
+	}
+
+	@Override
+	public Executor getAsyncExecutor() {
+		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+		executor.setCorePoolSize(4);
+		executor.setMaxPoolSize(8);
+		executor.setThreadNamePrefix("MyExecutor-");
+		executor.initialize();
+		return executor;
 	}
 
 }

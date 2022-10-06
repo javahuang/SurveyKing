@@ -65,6 +65,12 @@ public interface RepoService {
 
 	PaginationResponse<UserBookView> listUserBook(UserBookQuery query);
 
+	void createUserBook(UserBookRequest request);
+
+	void updateUserBook(UserBookRequest request);
+
+	void deleteUserBook(UserBookRequest request);
+
 	List<RepoView> selectRepo(SelectRepoRequest request);
 
 }

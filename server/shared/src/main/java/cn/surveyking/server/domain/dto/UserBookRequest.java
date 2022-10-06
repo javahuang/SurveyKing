@@ -1,17 +1,15 @@
 package cn.surveyking.server.domain.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
-import org.springframework.format.annotation.DateTimeFormat;
 
-import java.util.Date;
+import java.util.List;
 
 /**
  * @author javahuang
- * @date 2022/9/9
+ * @date 2022/09/08
  */
 @Data
-public class UserBookView {
+public class UserBookRequest {
 
 	private String id;
 
@@ -45,10 +43,6 @@ public class UserBookView {
 	 */
 	private Integer type;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
-	private Date createAt;
-
-	private Date updateAt;
+	private List<String> ids;
 
 }
