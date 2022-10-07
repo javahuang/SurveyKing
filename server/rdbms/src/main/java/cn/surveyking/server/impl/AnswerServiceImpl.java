@@ -183,7 +183,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 			List<Double> scores = list(Wrappers.<Answer>lambdaQuery().select(Answer::getExamScore, Answer::getId)
 					.eq(Answer::getProjectId, answerView.getProjectId())).stream().map(x -> x.getExamScore())
 							.collect(Collectors.toList());
-			Collections.sort(scores);
+			Collections.sort(scores, Collections.reverseOrder());
 			answerView.setRank(scores.indexOf(answerView.getExamScore()) + 1);
 		}
 		String projectId = answerView.getProjectId();
