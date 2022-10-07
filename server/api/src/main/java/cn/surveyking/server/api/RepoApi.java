@@ -89,4 +89,27 @@ public class RepoApi {
 		return repoService.listUserBook(query);
 	}
 
+	@PostMapping("/book/create")
+	@PreAuthorize("hasAuthority('repo:book')")
+	public void createUserBook(@RequestBody UserBookRequest request) {
+		repoService.createUserBook(request);
+	}
+
+	@PostMapping("/book/update")
+	@PreAuthorize("hasAuthority('repo:book')")
+	public void updateUserBook(@RequestBody UserBookRequest request) {
+		repoService.updateUserBook(request);
+	}
+
+	/**
+	 * 我的笔记
+	 * @param request
+	 * @return
+	 */
+	@PostMapping("/book/delete")
+	@PreAuthorize("hasAuthority('repo:book')")
+	public void deleteUserBook(@RequestBody UserBookRequest request) {
+		repoService.deleteUserBook(request);
+	}
+
 }
