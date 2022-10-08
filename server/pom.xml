@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
     <modules>
@@ -24,7 +24,7 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <revision>v1.1.1</revision>
+        <revision>v1.2.0</revision>
         <org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
         <org.projectlombok.version>1.18.16</org.projectlombok.version>
     </properties>
@@ -134,7 +134,7 @@
                 <artifactId>pinyin4j</artifactId>
                 <version>2.5.0</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.mapstruct</groupId>
                 <artifactId>mapstruct</artifactId>
@@ -142,7 +142,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    
+
     <build>
         <plugins>
             <plugin>
@@ -173,20 +173,15 @@
                     </annotationProcessorPaths>
 
                     <compilerArgs>
-                        <arg>
-                            -Amapstruct.suppressGeneratorTimestamp=true
+                        <arg> -Amapstruct.suppressGeneratorTimestamp=true
                         </arg>
-                        <arg>
-                            -Amapstruct.suppressGeneratorVersionInfoComment=true
+                        <arg> -Amapstruct.suppressGeneratorVersionInfoComment=true
                         </arg>
-                        <arg>
-                            -Amapstruct.verbose=true
+                        <arg> -Amapstruct.verbose=true
                         </arg>
-                        <arg>
-                            -Amapstruct.defaultComponentModel=spring
+                        <arg> -Amapstruct.defaultComponentModel=spring
                         </arg>
-                        <arg>
-                            -Amapstruct.unmappedTargetPolicy=IGNORE
+                        <arg> -Amapstruct.unmappedTargetPolicy=IGNORE
                         </arg>
                     </compilerArgs>
                 </configuration>
