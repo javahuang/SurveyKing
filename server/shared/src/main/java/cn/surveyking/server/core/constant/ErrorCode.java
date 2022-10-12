@@ -8,6 +8,8 @@ public enum ErrorCode {
 
 	/** 账号或者密码错误 */
 	UsernameOrPasswordError(1024, "账号或者密码错误"),
+	/** 注册失败 */
+	RegisterError(1401, "注册失败"),
 	/** 账号已存在 */
 	UsernameExists(1025, "账号已存在"),
 	/** 暂停回收 */

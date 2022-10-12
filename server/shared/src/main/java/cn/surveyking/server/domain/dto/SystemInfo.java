@@ -2,6 +2,7 @@ package cn.surveyking.server.domain.dto;
 
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -54,7 +55,7 @@ public class SystemInfo {
 		/**
 		 * 注册用户可选角色列表
 		 */
-		private List<String> roles;
+		private List<String> roles = new ArrayList<>();
 
 		/**
 		 * 开启强密码验证
