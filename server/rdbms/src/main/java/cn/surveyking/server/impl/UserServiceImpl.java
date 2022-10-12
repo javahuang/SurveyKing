@@ -506,9 +506,6 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 			throw new ErrorCodeException(ErrorCode.RegisterError);
 		}
 		String role = request.getRole();
-		if (CollectionUtils.isEmpty(registerInfo.getRoles()) && isNotBlank(role)) {
-			throw new ErrorCodeException(ErrorCode.RegisterError);
-		}
 		if (CollectionUtils.isEmpty(registerInfo.getRoles()) && isBlank(role)) {
 			return;
 		}
