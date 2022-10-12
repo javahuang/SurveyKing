@@ -339,15 +339,29 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 
 	@Override
 	public List<UserInfo> selectUsers(SelectUserRequest request) {
+		List<String> list = new ArrayList<>();
+		if (request.getDeptId() != null) {
+			list.add(request.getDeptId());
+			this.getTreeDeptId(request.getDeptId(),list);
+		}
 		List<User> users = list(Wrappers.<User>lambdaQuery().select(User::getId)
-				.eq(StringUtils.hasText(request.getDeptId()), User::getDeptId, request.getDeptId())
-				.like(StringUtils.hasText(request.getName()), User::getName, request.getName()));
+				.in(StringUtils.hasText(request.getDeptId()), User::getDeptId, list));
 		return Stream.concat(users.stream().map(user -> user.getId()), request.getSelected().stream())
 				.collect(Collectors.toSet()).stream()
 				.map(userId -> ContextHelper.getBean(UserService.class).loadUserById(userId).simpleMode())
 				.collect(Collectors.toList());
 	}
 
+	private void getTreeDeptId(String deptId,List<String> list) {
+		List<Dept> deptList = deptMapper.selectList(Wrappers.<Dept>lambdaQuery().eq(Dept::getParentId, deptId));
+		Optional.ofNullable(deptList)
+				.map(List::stream)
+				.orElseGet(Stream::empty)
+				.forEach(info -> {
+					list.add(info.getId());
+					this.getTreeDeptId(info.getId(),list);
+				});
+	}
 	@Override
 	public void register(RegisterRequest request) {
 		long total = accountMapper
