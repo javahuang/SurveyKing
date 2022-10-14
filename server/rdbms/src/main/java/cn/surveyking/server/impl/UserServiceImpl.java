@@ -364,7 +364,6 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 	}
 	@Override
 	public void register(RegisterRequest request) {
-		checkResisterValid(request);
 		long total = accountMapper
 				.selectCount(Wrappers.<Account>lambdaQuery().eq(Account::getAuthAccount, request.getUsername()));
 		if (total > 0) {
@@ -376,6 +375,7 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 		createUserRequest.setName(request.getName());
 		createUserRequest.setStatus(AppConsts.USER_STATUS.VALID);
 		if (request.getRole() != null) {
+			checkResisterValid(request);
 			createUserRequest.setRoles(Collections.singletonList(request.getRole()));
 		}
 		createUser(createUserRequest);
@@ -520,9 +520,6 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 			throw new ErrorCodeException(ErrorCode.RegisterError);
 		}
 		String role = request.getRole();
-		if (CollectionUtils.isEmpty(registerInfo.getRoles()) && isBlank(role)) {
-			return;
-		}
 		if (!registerInfo.getRoles().contains(role)) {
 			throw new ErrorCodeException(ErrorCode.RegisterError);
 		}
