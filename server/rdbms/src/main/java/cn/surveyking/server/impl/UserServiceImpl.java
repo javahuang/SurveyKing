@@ -342,7 +342,7 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 		List<String> list = new ArrayList<>();
 		if (request.getDeptId() != null) {
 			list.add(request.getDeptId());
-			this.getTreeDeptId(request.getDeptId(),list);
+			this.getTreeDeptId(request.getDeptId(), list);
 		}
 		List<User> users = list(Wrappers.<User>lambdaQuery().select(User::getId)
 				.in(StringUtils.hasText(request.getDeptId()), User::getDeptId, list));
@@ -352,18 +352,22 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 				.collect(Collectors.toList());
 	}
 
-	private void getTreeDeptId(String deptId,List<String> list) {
+	private void getTreeDeptId(String deptId, List<String> list) {
 		List<Dept> deptList = deptMapper.selectList(Wrappers.<Dept>lambdaQuery().eq(Dept::getParentId, deptId));
-		Optional.ofNullable(deptList)
-				.map(List::stream)
-				.orElseGet(Stream::empty)
-				.forEach(info -> {
-					list.add(info.getId());
-					this.getTreeDeptId(info.getId(),list);
-				});
+		Optional.ofNullable(deptList).map(List::stream).orElseGet(Stream::empty).forEach(info -> {
+			list.add(info.getId());
+			this.getTreeDeptId(info.getId(), list);
+		});
 	}
+
 	@Override
 	public void register(RegisterRequest request) {
+		SystemInfo systemInfo = systemService.getSystemInfo();
+		SystemInfo.RegisterInfo registerInfo = systemInfo.getRegisterInfo();
+		if (registerInfo == null || !Boolean.TRUE.equals(registerInfo.getRegisterEnabled())) {
+			throw new ErrorCodeException(ErrorCode.RegisterError);
+		}
+
 		long total = accountMapper
 				.selectCount(Wrappers.<Account>lambdaQuery().eq(Account::getAuthAccount, request.getUsername()));
 		if (total > 0) {
@@ -374,8 +378,11 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 		createUserRequest.setPassword(request.getPassword());
 		createUserRequest.setName(request.getName());
 		createUserRequest.setStatus(AppConsts.USER_STATUS.VALID);
-		if (request.getRole() != null) {
-			checkResisterValid(request);
+		String role = request.getRole();
+		if (role != null) {
+			if (!registerInfo.getRoles().contains(role)) {
+				throw new ErrorCodeException(ErrorCode.RegisterError);
+			}
 			createUserRequest.setRoles(Collections.singletonList(request.getRole()));
 		}
 		createUser(createUserRequest);
@@ -511,18 +518,6 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 			return Optional.empty();
 		}
 		return Optional.of(cellValue);
-	}
-
-	private void checkResisterValid(RegisterRequest request) {
-		SystemInfo systemInfo = systemService.getSystemInfo();
-		SystemInfo.RegisterInfo registerInfo = systemInfo.getRegisterInfo();
-		if (registerInfo == null || !Boolean.TRUE.equals(registerInfo.getRegisterEnabled())) {
-			throw new ErrorCodeException(ErrorCode.RegisterError);
-		}
-		String role = request.getRole();
-		if (!registerInfo.getRoles().contains(role)) {
-			throw new ErrorCodeException(ErrorCode.RegisterError);
-		}
 	}
 
 }
