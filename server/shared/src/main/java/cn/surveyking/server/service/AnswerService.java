@@ -10,6 +10,7 @@ import cn.surveyking.server.domain.dto.*;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.WebUtils;
 
 import javax.servlet.http.Cookie;
@@ -55,6 +56,9 @@ public interface AnswerService {
 
 	default ResponseEntity<Resource> download(DownloadQuery query) {
 		DownloadData download;
+		if (!CollectionUtils.isEmpty(query.getIds())) {
+			query.setPageSize(query.getIds().size());
+		}
 		// 下载问卷答案
 		if (query.getType() == DownloadQuery.DownloadType.answer) {
 			download = downloadSurvey(query);
