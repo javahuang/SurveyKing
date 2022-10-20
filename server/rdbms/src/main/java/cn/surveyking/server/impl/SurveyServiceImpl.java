@@ -42,6 +42,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -1126,6 +1127,11 @@ public class SurveyServiceImpl implements SurveyService {
 		}
 		// 从题库里面挑题
 		List<SurveySchema> questionSchemaList = repoService.pickQuestionFromRepo(randomSurveyCondition);
+		// 最终的试卷=编辑器的问题+题库挑的题
+		if (project.getSurvey() != null) {
+			questionSchemaList = Stream.concat(project.getSurvey().getChildren().stream(), questionSchemaList.stream())
+					.collect(Collectors.toList());
+		}
 
 		SurveySchema randomSchema = SurveySchema.builder().id(source.getId()).children(questionSchemaList)
 				.title(source.getTitle()).attribute(source.getAttribute()).description(source.getDescription()).build();
