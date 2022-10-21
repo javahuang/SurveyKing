@@ -260,4 +260,12 @@ public class ProjectApi {
 		return tagService.selectTag(request);
 	}
 
+	/**
+	 * 导入白名单
+	 * @param request
+	 */
+	@PostMapping("/importProjectPartner")
+	public List<UserInfo> importProjectPartner(WhiteListRequest request) {
+		return userService.importProjectPartner(request);
+	}
 }
