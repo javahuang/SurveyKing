@@ -11,7 +11,7 @@ sidebar_label: 快速开始
 目前已适配 mysql 数据库，理论上支持所有的关系型数据库
 
 
-点击[下载 surveyking-mysql 版本](https://gitee.com/surveyking/surveyking/attach_files/1044180/download/surveyking-v0.3.0-beta.18.jar)到本地
+点击[下载 surveyking-mysql 版本](https://gitee.com/surveyking/surveyking)到本地
 
 ### 使用源码编译安装
 
@@ -47,9 +47,9 @@ mvn clean package -DskipTests -Ppro
 启动 SurveyKing 镜像时，你可以指定 SurveyKing 挂载参数，将日志文件和内置数据库保存到你本地。(docker 版本目前还有点问题，待解决）
 
 ```bash
-docker run -p 1991:1991 registry.cn-hangzhou.aliyuncs.com/surveyking/surveyking
+docker run -p 1991:1991 surveyking/surveyking
 # 挂载数据文件
-docker run -p 1991:1991 -v /surveyking:/surveyking registry.cn-hangzhou.aliyuncs.com/surveyking/surveyking
+docker run -d -p 1991:1991 -v /my/logs:/files -v /my/logs:/logs
 ```
 
 ## 使用
@@ -73,7 +73,7 @@ java -jar surveyking-v0.x.x.jar
 
 使用参数启动
 
-1. 首先创建 mysql 数据库，然后执行初始化脚本，[下载脚本](https://gitee.com/surveyking/surveyking/raw/master/server/rdbms/src/main/resources/scripts/init-mysql.sql)。
+1. 首先创建 mysql 数据库，然后执行初始化脚本，点击 [快速开始-获取最新数据库脚本](https://wj.surveyking.cn/s/start))。
 2. 执行 `java -jar surveyking-v0.x.x.jar --server.port=1991 --spring.datasource.url=jdbc:mysql://localhost:3306/surveyking --spring.datasource.username=root --spring.datasource.password=123456`（只有首次启动系统需要添加后面的参数）
 
 参数说明(按照实际需要自行修改)：
@@ -111,5 +111,5 @@ java -jar surveyking-v0.x.x.jar
 如果遇到任何问题或者建议，欢迎加群讨论。
 
 <div>
- QQ群：338461197
+ QQ群：1074277968
 </div>

@@ -43,7 +43,7 @@ module.exports = {
     announcementBar: {
       id: "new_version_rc.2",
       content:
-        '版本 v1.0.0 已发布! 🎉 点击 <a target="_blank" rel="noopener noreferrer" href="/docs/quickstart">quickstart</a> 开始吧!  Q群(338461197)',
+        '版本 v1.0.0 已发布! 🎉 点击 <a target="_blank" rel="noopener noreferrer" href="/docs/quickstart">quickstart</a> 开始吧!  Q群(1074277968)',
       backgroundColor: "#FF5B79",
       textColor: "black",
       isCloseable: true,
@@ -118,10 +118,14 @@ module.exports = {
               label: "演示",
               to: "https://s.surveyking.cn",
             },
+            {
+              label: "豫ICP备2021025098号-1",
+              to: "https://beian.miit.gov.cn/",
+            },
           ],
         },
       ],
-      copyright: `MIT © ${new Date().getFullYear()} - SurveyKing 豫ICP备2021025098号-1	`,
+      copyright: `MIT © ${new Date().getFullYear()} - SurveyKing`,
     },
     prism: {
       theme: require("prism-react-renderer/themes/vsDark"),
