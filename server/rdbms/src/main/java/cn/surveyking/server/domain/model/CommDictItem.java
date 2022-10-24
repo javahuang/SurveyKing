@@ -1,5 +1,6 @@
 package cn.surveyking.server.domain.model;
 
+import cn.surveyking.server.core.model.BaseModel;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -13,13 +14,7 @@ import java.util.Date;
  */
 @TableName(value = "t_comm_dict_item")
 @Data
-public class CommDictItem implements Serializable {
-
-	/**
-	 *
-	 */
-	@TableId(value = "id")
-	private String id;
+public class CommDictItem extends BaseModel {
 
 	/**
 	 * 字典编码
@@ -57,29 +52,8 @@ public class CommDictItem implements Serializable {
 	@TableField(value = "item_order")
 	private Integer itemOrder;
 
-	/**
-	 * 创建时间
-	 */
-	@TableField(value = "create_at")
-	private Date createAt;
-
-	/**
-	 *
-	 */
-	@TableField(value = "create_by")
-	private String createBy;
-
-	/**
-	 * 更新时间
-	 */
-	@TableField(value = "update_at")
-	private Date updateAt;
-
-	/**
-	 *
-	 */
-	@TableField(value = "update_by")
-	private String updateBy;
+	@TableField(exist = false)
+	private Boolean deleted = false;
 
 	@TableField(exist = false)
 	private static final long serialVersionUID = 1L;

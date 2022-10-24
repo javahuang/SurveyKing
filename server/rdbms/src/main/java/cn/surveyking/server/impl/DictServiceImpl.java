@@ -93,11 +93,10 @@ public class DictServiceImpl extends BaseService<CommDictMapper, CommDict> imple
 	@Override
 	@SneakyThrows
 	public void importDictItem(CommDictItemRequest request) {
-		List<CommDictItem> itemList = new ArrayList<>();
 		try (InputStream is = request.getFile().getInputStream(); ReadableWorkbook wb = new ReadableWorkbook(is)) {
 			wb.getSheets().forEach(sheet -> {
 				try (Stream<Row> rows = sheet.openStream()) {
-
+					List<CommDictItem> itemList = new ArrayList<>();
 					rows.forEach(r -> {
 						if (r.getRowNum() == 1) {
 							return;
@@ -117,6 +116,9 @@ public class DictServiceImpl extends BaseService<CommDictMapper, CommDict> imple
 							itemList.clear();
 						}
 					});
+					if (itemList.size() > 0) {
+						dictItemService.saveBatch(itemList);
+					}
 				}
 				catch (IOException e) {
 					throw new InternalServerError("模板解析失败");

@@ -1,6 +1,9 @@
 package cn.surveyking.server.domain.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+
+import java.util.Date;
 
 /**
  * @author javahuang
@@ -30,5 +33,8 @@ public class CommDictView {
 	 * 字典类型 1:问卷字典
 	 */
 	private Integer dictType;
+
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+	private Date createAt;
 
 }
