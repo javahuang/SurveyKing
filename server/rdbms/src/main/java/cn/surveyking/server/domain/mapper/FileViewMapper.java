@@ -1,5 +1,6 @@
 package cn.surveyking.server.domain.mapper;
 
+import cn.surveyking.server.core.base.mapper.BaseModelMapper;
 import cn.surveyking.server.domain.dto.FileView;
 import cn.surveyking.server.domain.model.File;
 import cn.surveyking.server.storage.StorePath;
@@ -12,12 +13,6 @@ import java.util.List;
  * @date 2021/9/8
  */
 @Mapper
-public interface FileViewMapper {
-
-	FileView toFileView(File file);
-
-	List<FileView> toFileView(List<File> fileList);
-
-	File toFile(StorePath storePath, String originalName, int storageType);
+public interface FileViewMapper extends BaseModelMapper<Void, FileView, File> {
 
 }

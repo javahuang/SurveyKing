@@ -9,7 +9,8 @@ import java.util.List;
 @Data
 public class WhiteListRequest {
 
-    private List<String> selected = new ArrayList<>();
+	private List<String> selected = new ArrayList<>();
 
-    private MultipartFile file;
+	private MultipartFile file;
+
 }

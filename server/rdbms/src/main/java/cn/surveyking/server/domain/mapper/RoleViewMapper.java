@@ -1,5 +1,6 @@
 package cn.surveyking.server.domain.mapper;
 
+import cn.surveyking.server.core.base.mapper.BaseModelMapper;
 import cn.surveyking.server.domain.dto.RoleRequest;
 import cn.surveyking.server.domain.dto.RoleView;
 import cn.surveyking.server.domain.model.Role;
@@ -12,11 +13,7 @@ import java.util.Arrays;
  * @date 2021/10/12
  */
 @Mapper
-public interface RoleViewMapper {
-
-	RoleView toView(Role role);
-
-	Role fromRequest(RoleRequest roleRequest);
+public interface RoleViewMapper extends BaseModelMapper<RoleRequest, RoleView, Role> {
 
 	@AfterMapping
 	default void afterMapping(Role role, @MappingTarget RoleView target) {

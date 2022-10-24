@@ -1,5 +1,6 @@
 package cn.surveyking.server.domain.mapper;
 
+import cn.surveyking.server.core.base.mapper.BaseModelMapper;
 import cn.surveyking.server.domain.dto.DeptRequest;
 import cn.surveyking.server.domain.dto.DeptView;
 import cn.surveyking.server.domain.model.Dept;
@@ -12,12 +13,6 @@ import java.util.List;
  * @date 2021/11/2
  */
 @Mapper
-public interface DeptDtoMapper {
-
-	Dept fromRequest(DeptRequest request);
-
-	DeptView toView(Dept dept);
-
-	List<DeptView> toView(List<Dept> depts);
+public interface DeptDtoMapper extends BaseModelMapper<DeptRequest, DeptView, Dept> {
 
 }

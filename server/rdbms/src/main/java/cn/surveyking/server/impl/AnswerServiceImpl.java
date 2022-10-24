@@ -76,7 +76,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 				.lt(query.getEndTime() != null, Answer::getCreateAt, query.getEndTime())
 				.gt(query.getStartTime() != null, Answer::getCreateAt, query.getStartTime())
 				.eq(query.getId() != null, Answer::getId, query.getId()).orderByDesc(Answer::getCreateAt));
-		List<AnswerView> list = answerViewMapper.toAnswerView(page.getRecords());
+		List<AnswerView> list = answerViewMapper.toView(page.getRecords());
 		Project project = projectMapper.selectById(query.getProjectId());
 		FlatSurveySchemaByType schemaByType = parseSurveySchemaByType(project.getSurvey());
 		list.forEach(view -> setAnswerExtraInfo(view, schemaByType));
@@ -166,10 +166,10 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	public AnswerView getAnswer(AnswerQuery query) {
 		AnswerView answerView = null;
 		if (query.getId() != null) {
-			answerView = answerViewMapper.toAnswerView(getById(query.getId()));
+			answerView = answerViewMapper.toView(getById(query.getId()));
 		}
 		else if (query.getProjectId() != null && Boolean.TRUE.equals(query.getLatest())) {
-			answerView = answerViewMapper.toAnswerView(list(Wrappers.<Answer>lambdaQuery()
+			answerView = answerViewMapper.toView(list(Wrappers.<Answer>lambdaQuery()
 					.eq(Answer::getProjectId, query.getProjectId())
 					.eq(SecurityContextUtils.isAuthenticated(), Answer::getCreateBy, SecurityContextUtils.getUserId())
 					.eq(query.getCreateBy() != null, Answer::getCreateBy, query.getCreateBy())
@@ -212,7 +212,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 			answer.setId(UUID.randomUUID().toString());
 			answer.setCreateAt(new Date());
 			save(beforeSaveAnswer(answer));
-			return answerViewMapper.toAnswerView(answer);
+			return answerViewMapper.toView(answer);
 		}
 	}
 
@@ -231,7 +231,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	public AnswerView updateAnswer(AnswerRequest request) {
 		Answer answer = beforeSaveAnswer(answerViewMapper.fromRequest(request));
 		updateById(answer);
-		return answerViewMapper.toAnswerView(answer);
+		return answerViewMapper.toView(answer);
 	}
 
 	@Override
@@ -326,7 +326,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
 	@Override
 	public List<AnswerView> listAnswerDeleted(AnswerQuery query) {
-		List<AnswerView> list = answerViewMapper.toAnswerView(getBaseMapper().selectLogicDeleted(query.getProjectId()));
+		List<AnswerView> list = answerViewMapper.toView(getBaseMapper().selectLogicDeleted(query.getProjectId()));
 		Project project = projectMapper.selectById(query.getProjectId());
 		FlatSurveySchemaByType schemaByType = parseSurveySchemaByType(project.getSurvey());
 		list.forEach(view -> setAnswerExtraInfo(view, schemaByType));

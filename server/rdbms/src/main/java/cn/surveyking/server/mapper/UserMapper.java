@@ -10,9 +10,8 @@ import org.apache.ibatis.annotations.Select;
  */
 public interface UserMapper extends BaseMapper<User> {
 
-    @Select("select t_user.id from t_user " +
-            "left join t_account " +
-            "on t_user.id = t_account.user_id " +
-            "where t_user.name = #{name} and t_account.auth_account = #{authAccount}")
-    User getUser(String name, String authAccount);
+	@Select("select t_user.id from t_user " + "left join t_account " + "on t_user.id = t_account.user_id "
+			+ "where t_user.name = #{name} and t_account.auth_account = #{authAccount}")
+	User getUser(String name, String authAccount);
+
 }

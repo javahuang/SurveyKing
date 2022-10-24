@@ -1,5 +1,6 @@
 package cn.surveyking.server.domain.mapper;
 
+import cn.surveyking.server.core.base.mapper.BaseModelMapper;
 import cn.surveyking.server.core.constant.ProjectModeEnum;
 import cn.surveyking.server.core.uitls.SchemaHelper;
 import cn.surveyking.server.domain.dto.ProjectRequest;
@@ -23,13 +24,7 @@ import java.util.stream.Collectors;
  * @date 2021/8/25
  */
 @Mapper
-public interface ProjectViewMapper {
-
-	List<ProjectView> toProjectView(List<Project> projects);
-
-	ProjectView toProjectView(Project project);
-
-	Project fromRequest(ProjectRequest projectRequest);
+public interface ProjectViewMapper extends BaseModelMapper<ProjectRequest, ProjectView, Project> {
 
 	@Mapping(target = "setting", source = "setting.answerSetting")
 	@Mapping(target = "setting.answerSetting.password", ignore = true)

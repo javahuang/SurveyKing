@@ -60,7 +60,7 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 						SecurityContextUtils.getUserId()))
 				.orderByAsc(Project::getPriority, Project::getCreateAt));
 		PaginationResponse<ProjectView> result = new PaginationResponse<>(page.getTotal(),
-				projectViewMapper.toProjectView(page.getRecords()));
+				projectViewMapper.toView(page.getRecords()));
 		result.getList().forEach(view -> {
 			if (ProjectModeEnum.folder.equals(view.getMode())) {
 				view.setTotal(count(Wrappers.<Project>lambdaQuery().eq(Project::getParentId, view.getId())));
@@ -74,7 +74,7 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 	}
 
 	public ProjectView getProject(String id) {
-		return projectViewMapper.toProjectView(getById(id));
+		return projectViewMapper.toView(getById(id));
 	}
 
 	@Override
@@ -100,7 +100,7 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 		partnerRequest.setProjectId(project.getId());
 		partnerRequest.setUserIds(Collections.singletonList(SecurityContextUtils.getUserId()));
 		projectPartnerService.addProjectPartner(partnerRequest);
-		return projectViewMapper.toProjectView(project);
+		return projectViewMapper.toView(project);
 	}
 
 	private String generateProjectId() {
@@ -150,7 +150,7 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 
 	@Override
 	public List<ProjectView> getDeleted(ProjectQuery query) {
-		List<ProjectView> list = projectViewMapper.toProjectView(getBaseMapper().selectLogicDeleted());
+		List<ProjectView> list = projectViewMapper.toView(getBaseMapper().selectLogicDeleted());
 		list.forEach(view -> {
 			if (!ProjectModeEnum.folder.equals(view.getMode())) {
 				view.setTotal(answerMapper

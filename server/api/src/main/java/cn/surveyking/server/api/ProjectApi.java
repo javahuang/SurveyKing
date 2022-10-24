@@ -268,4 +268,5 @@ public class ProjectApi {
 	public List<UserInfo> importProjectPartner(WhiteListRequest request) {
 		return userService.importProjectPartner(request);
 	}
+
 }

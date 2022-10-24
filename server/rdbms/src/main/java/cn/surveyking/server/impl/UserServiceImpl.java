@@ -140,7 +140,7 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 						.in(orgIds.size() > 0, User::getDeptId, orgIds).in(query.getIds() != null, User::getId,
 								Arrays.asList(query.getIds() != null ? query.getIds() : new String[0])));
 		return new PaginationResponse<>(userPage.getTotal(), userPage.getRecords().stream().map(x -> {
-			UserView userView = userViewMapper.toUserView(x);
+			UserView userView = userViewMapper.toView(x);
 			Account account = accountMapper
 					.selectOne(Wrappers.<Account>lambdaQuery().eq(Account::getUserId, x.getId()));
 			userView.setUsername(account.getAuthAccount());
@@ -176,7 +176,7 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 
 	@Override
 	public void createUser(UserRequest request) {
-		User user = userViewMapper.toUser(request);
+		User user = userViewMapper.fromRequest(request);
 		this.save(user);
 
 		// 创建登录账号
@@ -223,7 +223,7 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 		if (request.getId() == null) {
 			return;
 		}
-		User user = userViewMapper.toUser(request);
+		User user = userViewMapper.fromRequest(request);
 		this.updateById(user);
 
 		if (request.getStatus() != null || isNotBlank(request.getPassword())) {
@@ -526,9 +526,9 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 							return;
 						}
 						rowNum[0] = r.getRowNum();
-						if(getCellValue(r,0).isPresent()&&getCellValue(r,1).isPresent()){
-							User user = baseMapper.getUser(getCellValue(r,0).get(),getCellValue(r,1).get());
-							if(user != null){
+						if (getCellValue(r, 0).isPresent() && getCellValue(r, 1).isPresent()) {
+							User user = baseMapper.getUser(getCellValue(r, 0).get(), getCellValue(r, 1).get());
+							if (user != null) {
 								users.add(user);
 							}
 						}

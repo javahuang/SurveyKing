@@ -43,5 +43,6 @@ public interface UserService extends UserDetailsService {
 
 	PaginationResponse<MyTaskView> queryTask(MyTaskQuery query);
 
-    List<UserInfo> importProjectPartner(WhiteListRequest request);
+	List<UserInfo> importProjectPartner(WhiteListRequest request);
+
 }

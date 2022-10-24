@@ -94,7 +94,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 		storageService.uploadFile(uploadFile.getInputStream(), filePath);
 
 		save(file);
-		FileView fileView = fileViewMapper.toFileView(file);
+		FileView fileView = fileViewMapper.toView(file);
 
 		if (AppConsts.FileType.BARCODE == request.getFileType()) {
 			fileView.setContent(BarcodeReader.readBarcode(uploadFile.getInputStream()));
@@ -151,7 +151,7 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
 
 	@Override
 	public List<FileView> listFiles(FileQuery query) {
-		return fileViewMapper.toFileView(
+		return fileViewMapper.toView(
 				list(Wrappers.<File>lambdaQuery().eq(query.getType() != null, File::getStorageType, query.getType())
 						// 默认只能查询自己的
 						.eq(CollectionUtils.isEmpty(query.getIds()), File::getCreateBy,

@@ -1,5 +1,6 @@
 package cn.surveyking.server.domain.mapper;
 
+import cn.surveyking.server.core.base.mapper.BaseModelMapper;
 import cn.surveyking.server.domain.dto.PositionRequest;
 import cn.surveyking.server.domain.dto.PositionView;
 import cn.surveyking.server.domain.model.Position;
@@ -12,12 +13,6 @@ import java.util.List;
  * @date 2021/11/2
  */
 @Mapper
-public interface PositionDtoMapper {
-
-	Position fromRequest(PositionRequest request);
-
-	PositionView toView(Position position);
-
-	List<PositionView> toView(List<Position> positionList);
+public interface PositionDtoMapper extends BaseModelMapper<PositionRequest, PositionView, Position> {
 
 }
