@@ -345,7 +345,8 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 			this.getTreeDeptId(request.getDeptId(), list);
 		}
 		List<User> users = list(Wrappers.<User>lambdaQuery().select(User::getId)
-				.in(StringUtils.hasText(request.getDeptId()), User::getDeptId, list));
+				.in(StringUtils.hasText(request.getDeptId()), User::getDeptId, list)
+				.like(StringUtils.hasText(request.getName()), User::getName, request.getName()));
 		return Stream.concat(users.stream().map(user -> user.getId()), request.getSelected().stream())
 				.collect(Collectors.toSet()).stream()
 				.map(userId -> ContextHelper.getBean(UserService.class).loadUserById(userId).simpleMode())
@@ -510,6 +511,39 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 					return taskView;
 				}).collect(Collectors.toList()));
 		return result;
+	}
+
+	@SneakyThrows
+	@Override
+	public List<UserInfo> importProjectPartner(WhiteListRequest request) {
+		List<User> users = new ArrayList<>();
+		try (InputStream is = request.getFile().getInputStream(); ReadableWorkbook wb = new ReadableWorkbook(is)) {
+			wb.getSheets().forEach(sheet -> {
+				int[] rowNum = { 1 };
+				try (Stream<Row> rows = sheet.openStream()) {
+					rows.forEach(r -> {
+						if (r.getRowNum() == 1) {
+							return;
+						}
+						rowNum[0] = r.getRowNum();
+						if(getCellValue(r,0).isPresent()&&getCellValue(r,1).isPresent()){
+							User user = baseMapper.getUser(getCellValue(r,0).get(),getCellValue(r,1).get());
+							if(user != null){
+								users.add(user);
+							}
+						}
+
+					});
+				}
+				catch (Exception e) {
+					throw new InternalServerError(String.format("模板第%d行解析失败", rowNum[0]), e);
+				}
+			});
+		}
+		return Stream.concat(users.stream().map(user -> user.getId()), request.getSelected().stream())
+				.collect(Collectors.toSet()).stream()
+				.map(userId -> ContextHelper.getBean(UserService.class).loadUserById(userId).simpleMode())
+				.collect(Collectors.toList());
 	}
 
 	private Optional<String> getCellValue(Row row, int cellIndex) {
