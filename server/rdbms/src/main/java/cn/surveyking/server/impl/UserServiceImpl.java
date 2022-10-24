@@ -137,6 +137,12 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 		List<String> orgIds = getChildOrgIds(query.getDeptId());
 		Page<User> userPage = pageByQuery(query,
 				Wrappers.<User>lambdaQuery().like(isNotBlank(query.getName()), User::getName, query.getName())
+						.exists(isNotBlank(query.getRoleId()),
+								"select 1 from t_user_role t where t.user_id = t_user.id and t.role_id = {0}",
+								query.getRoleId())
+						.notExists(isNotBlank(query.getNeRoleId()),
+								"select 1 from t_user_role t where t.user_id = t_user.id and t.role_id = {0}",
+								query.getNeRoleId())
 						.in(orgIds.size() > 0, User::getDeptId, orgIds).in(query.getIds() != null, User::getId,
 								Arrays.asList(query.getIds() != null ? query.getIds() : new String[0])));
 		return new PaginationResponse<>(userPage.getTotal(), userPage.getRecords().stream().map(x -> {

@@ -5,6 +5,7 @@ import cn.surveyking.server.domain.dto.RoleRequest;
 import cn.surveyking.server.domain.dto.RoleView;
 import cn.surveyking.server.domain.model.Role;
 import org.mapstruct.*;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Arrays;
 
@@ -22,6 +23,9 @@ public interface RoleViewMapper extends BaseModelMapper<RoleRequest, RoleView, R
 
 	@AfterMapping
 	default void afterMappingRole(RoleRequest request, @MappingTarget Role target) {
+		if (CollectionUtils.isEmpty(request.getAuthorities())) {
+			return;
+		}
 		target.setAuthority(String.join(",", request.getAuthorities()));
 	}
 

@@ -22,4 +22,10 @@ public class RoleRequest {
 	/** 权限编码列表 */
 	private List<String> authorities;
 
+	private List<String> userIds;
+
+	private List<String> evictUserIds;
+
+	private Integer status;
+
 }

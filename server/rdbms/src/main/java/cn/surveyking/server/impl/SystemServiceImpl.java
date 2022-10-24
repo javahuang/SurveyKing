@@ -18,6 +18,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -73,8 +74,24 @@ public class SystemServiceImpl implements SystemService {
 
 	@Override
 	public void updateRole(RoleRequest request) {
-		roleService.updateById(roleViewMapper.fromRequest(request));
-		evictCache(request.getId());
+		if (!CollectionUtils.isEmpty(request.getUserIds())) {
+			// 批量添加角色用户
+			for (String userId : request.getUserIds()) {
+				UserRole userRole = new UserRole();
+				userRole.setUserId(userId);
+				userRole.setRoleId(request.getId());
+				userRoleMapper.insert(userRole);
+			}
+		}
+		else if (!CollectionUtils.isEmpty(request.getEvictUserIds())) {
+			// 批量移除用户角色
+			userRoleMapper.delete(Wrappers.<UserRole>lambdaUpdate().eq(UserRole::getRoleId, request.getId())
+					.in(UserRole::getUserId, request.getEvictUserIds()));
+		}
+		else {
+			roleService.updateById(roleViewMapper.fromRequest(request));
+			evictCache(request.getId());
+		}
 	}
 
 	@Override

@@ -24,4 +24,6 @@ public class RoleView {
 
 	private Date createAt;
 
+	private Integer status;
+
 }

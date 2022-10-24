@@ -30,4 +30,9 @@ public class Role extends BaseModel {
 	@TableField(fill = FieldFill.INSERT)
 	private Date createAt;
 
+	/**
+	 * 0失活 1 激活
+	 */
+	private Integer status;
+
 }

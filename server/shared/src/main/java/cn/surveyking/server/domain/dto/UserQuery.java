@@ -17,4 +17,8 @@ public class UserQuery extends PageQuery {
 
 	private String[] ids;
 
+	private String roleId;
+
+	private String neRoleId;
+
 }
