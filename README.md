@@ -14,6 +14,7 @@
 2. 解压，双击运行 start.bat
 3. 打开浏览器访问 [http://localhost:1991](http://localhost:1991)，输入账号密码： *admin*/*123456*
 
+
 ## 特性
 
 - 🥇 支持 20 多种题型，如填空、选择、下拉、级联、矩阵、分页、签名、题组、上传等
@@ -106,3 +107,5 @@
         <td><img src="docs/images/survey-post.jpg"/></td>
     </tr>
 </table>
+
+## 友情推荐 [专注于中台化架构的低代码生成工具](https://gitee.com/orangeform/orange-admin)
