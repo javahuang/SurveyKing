@@ -491,7 +491,7 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 				Wrappers.<ProjectPartner>lambdaQuery().eq(ProjectPartner::getUserId, SecurityContextUtils.getUserId())
 						.eq(ProjectPartner::getType, ProjectPartnerTypeEnum.RESPONDENT_SYS_USER.getType())
 						.exists(String.format(
-								"SELECT 1 FROM t_project t WHERE t.mode = '%s' AND t.id = t_project_partner.project_id",
+								"SELECT 1 FROM t_project t WHERE t.mode = '%s' AND t.id = t_project_partner.project_id And t.is_deleted = 0",
 								query.getType()))
 						.orderByAsc(ProjectPartner::getStatus).orderByDesc(ProjectPartner::getCreateAt));
 		PaginationResponse<MyTaskView> result = new PaginationResponse<>(page.getTotal(),
