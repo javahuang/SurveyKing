@@ -69,6 +69,12 @@ public class SysInfo implements Serializable {
 	private SystemInfo.RegisterInfo registerInfo;
 
 	/**
+	 * 其他设置信息
+	 */
+	@TableField(typeHandler = JacksonTypeHandler.class, jdbcType = JdbcType.VARCHAR)
+	private SystemInfo.SystemSetting setting;
+
+	/**
 	 * 创建时间
 	 */
 	@TableField(value = "create_at")

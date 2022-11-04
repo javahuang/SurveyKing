@@ -18,6 +18,8 @@ public class AuthRequest {
 	@NotNull
 	private String password;
 
+	private String captchaVerification;
+
 	/**
 	 * 默认认证方式，密码认证
 	 */

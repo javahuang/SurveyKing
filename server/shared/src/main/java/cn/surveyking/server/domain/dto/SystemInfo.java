@@ -44,6 +44,8 @@ public class SystemInfo {
 
 	private RegisterInfo registerInfo;
 
+	private SystemSetting setting;
+
 	@Data
 	public static class RegisterInfo {
 
@@ -61,6 +63,16 @@ public class SystemInfo {
 		 * 开启强密码验证
 		 */
 		private Boolean strongPasswordEnabled;
+
+	}
+
+	@Data
+	public static class SystemSetting {
+
+		/**
+		 * 是否开启验证码
+		 */
+		private Boolean captchaEnabled;
 
 	}
 

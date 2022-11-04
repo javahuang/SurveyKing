@@ -45,4 +45,6 @@ public interface UserService extends UserDetailsService {
 
 	List<UserInfo> importProjectPartner(WhiteListRequest request);
 
+	void validateCaptcha(AuthRequest request);
+
 }

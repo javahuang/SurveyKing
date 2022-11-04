@@ -13,6 +13,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-aop'
     annotationProcessor "org.springframework.boot:spring-boot-autoconfigure-processor"
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+    implementation 'com.anji-plus:spring-boot-starter-captcha'
 
     implementation 'org.dhatim:fastexcel:0.12.13'
     implementation 'org.dhatim:fastexcel-reader:0.12.3'

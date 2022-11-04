@@ -70,6 +70,10 @@
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.anji-plus</groupId>
+            <artifactId>spring-boot-starter-captcha</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.dhatim</groupId>
             <artifactId>fastexcel</artifactId>
         </dependency>

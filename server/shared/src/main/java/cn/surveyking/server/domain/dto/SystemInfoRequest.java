@@ -39,4 +39,6 @@ public class SystemInfoRequest {
 	 */
 	private SystemInfo.RegisterInfo registerInfo;
 
+	private SystemInfo.SystemSetting setting;
+
 }

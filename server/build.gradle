@@ -38,6 +38,7 @@ subprojects {
         implementation 'org.springframework.boot:spring-boot-starter-security'
         implementation 'org.apache.commons:commons-lang3:3.0'
         implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.0-rc3'
+        implementation 'com.anji-plus:spring-boot-starter-captcha:1.3.0'
 
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
         testImplementation 'org.springframework.security:spring-security-test'

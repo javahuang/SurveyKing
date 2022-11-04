@@ -8,6 +8,9 @@ import cn.surveyking.server.core.security.JwtTokenUtil;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.service.UserService;
+import com.anji.captcha.model.common.ResponseModel;
+import com.anji.captcha.model.vo.CaptchaVO;
+import com.anji.captcha.service.CaptchaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
@@ -47,6 +50,9 @@ public class UserApi {
 		else {
 			throw new AccessDeniedException("不支持的认证方式");
 		}
+		// 验证码校验
+		userService.validateCaptcha(request);
+
 		// 将 token 提交给 spring security 的 DaoAuthenticationProvider 进行认证
 		try {
 			Authentication authenticate = authenticationManager.authenticate(authentication);

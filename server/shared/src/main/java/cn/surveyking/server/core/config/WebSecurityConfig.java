@@ -63,9 +63,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 		http = http.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint).and();
 		// 所有请求都放行，目的是单 jar 部署，输入任意路由也能跳转到对应的页面，权限拦截通过注解配置
+
 		http.authorizeRequests().antMatchers("/api/public/**").permitAll().antMatchers("/api/system").permitAll()
-				.antMatchers(HttpMethod.GET, "/api/file/**").permitAll().antMatchers("/api/**").authenticated()
-				.antMatchers("/").permitAll();
+				.antMatchers("/captcha/get", "/captcha/check").permitAll().antMatchers(HttpMethod.GET, "/api/file/**")
+				.permitAll().antMatchers("/api/**").authenticated().antMatchers("/").permitAll();
 		http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 	}
 
