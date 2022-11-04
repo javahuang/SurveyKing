@@ -398,6 +398,9 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 			}
 			createUserRequest.setRoles(Collections.singletonList(request.getRole()));
 		}
+		else if (registerInfo.getRoles().size() > 0) {
+			createUserRequest.setRoles(registerInfo.getRoles());
+		}
 		createUser(createUserRequest);
 	}
 
@@ -405,8 +408,8 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 	public List<RegisterRoleView> getRegisterRoles() {
 		List<String> defaultRegisterRoleCodes = systemService.getSystemInfo().getRegisterInfo().getRoles();
 		if (defaultRegisterRoleCodes.size() > 0) {
-			return roleService.list(Wrappers.<Role>lambdaQuery().in(Role::getCode,
-					systemService.getSystemInfo().getRegisterInfo().getRoles())).stream().map(role -> {
+			return roleService.listByIds(systemService.getSystemInfo().getRegisterInfo().getRoles()).stream()
+					.map(role -> {
 						RegisterRoleView roleView = new RegisterRoleView();
 						roleView.setId(role.getId());
 						roleView.setName(role.getName());
