@@ -144,4 +144,14 @@ public class SurveyApi {
 		return surveyService.loadExamResult(request);
 	}
 
+	/**
+	 * 加载问卷关联结果
+	 * @param request
+	 * @return
+	 */
+	@PostMapping("/loadLinkResult")
+	public PublicLinkResult loadLinkResult(@RequestBody PublicLinkRequest request) {
+		return surveyService.loadLinkResult(request);
+	}
+
 }

@@ -63,10 +63,6 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 
 	private final ProjectPartnerMapper projectPartnerMapper;
 
-	private final TemplateServiceImpl templateService;
-
-	private final DictService dictService;
-
 	@Override
 	public PaginationResponse<AnswerView> listAnswer(AnswerQuery query) {
 		Page<Answer> page = new Page<>(query.getCurrent(), query.getPageSize());

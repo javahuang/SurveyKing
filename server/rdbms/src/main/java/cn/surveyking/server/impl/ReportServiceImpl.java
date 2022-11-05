@@ -1,8 +1,12 @@
 package cn.surveyking.server.impl;
 
+import cn.surveyking.server.core.uitls.SchemaHelper;
 import cn.surveyking.server.domain.dto.ReportData;
+import cn.surveyking.server.domain.dto.SurveySchema;
 import cn.surveyking.server.domain.model.Answer;
+import cn.surveyking.server.domain.model.Project;
 import cn.surveyking.server.mapper.AnswerMapper;
+import cn.surveyking.server.mapper.ProjectMapper;
 import cn.surveyking.server.service.ReportService;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +27,8 @@ public class ReportServiceImpl implements ReportService {
 
 	private final AnswerMapper answerMapper;
 
+	private final ProjectMapper projectMapper;
+
 	@Override
 	public ReportData getData(String shortId) {
 		List<Answer> answerList = answerMapper
@@ -34,14 +40,17 @@ public class ReportServiceImpl implements ReportService {
 		result.setStatistics(data);
 		Map<String, Integer> dailyCountStat = new LinkedHashMap<>();
 		result.setDailyCountStat(dailyCountStat);
+		if (answerList.size() == 0) {
+			return result;
+		}
+		Project project = projectMapper.selectById(answerList.get(0).getProjectId());
+		List<SurveySchema> questionSchemaList = SchemaHelper.flatSurveySchema(project.getSurvey());
 		for (Answer answer : answerList) {
 			parseAnswer(data, answer.getAnswer());
 			computeDailyAnswer(dailyCountStat, answer);
 		}
 		return result;
 	}
-
-	// TODO: 考虑分页取，然后计算
 
 	/**
 	 * 选项报表统计

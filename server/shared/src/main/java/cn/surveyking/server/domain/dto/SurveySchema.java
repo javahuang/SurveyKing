@@ -37,6 +37,8 @@ public class SurveySchema implements Serializable {
 
 	private List<Row> row;
 
+	private List<LinkSurvey> linkSurveys;
+
 	/**
 	 * 当前 schema 标签
 	 */
@@ -370,9 +372,13 @@ public class SurveySchema implements Serializable {
 
 	public enum ExamMatchRule {
 
-		/** 与答案完全相同才得分 */
+		/**
+		 * 与答案完全相同才得分
+		 */
 		completeSame,
-		/** 包含答案，多个答案分号间隔 */
+		/**
+		 * 包含答案，多个答案分号间隔
+		 */
 		contain
 
 	}
@@ -392,17 +398,29 @@ public class SurveySchema implements Serializable {
 
 	public enum ExamScoreMode {
 
-		/** 只有一个选项 */
+		/**
+		 * 只有一个选项
+		 */
 		onlyOne,
-		/** 精确匹配，全部选对得分 */
+		/**
+		 * 精确匹配，全部选对得分
+		 */
 		selectAll,
-		/** 答对几项得几分，打错不得分(单选、多选、下拉) 答对几项得几分(填空) */
+		/**
+		 * 答对几项得几分，打错不得分(单选、多选、下拉) 答对几项得几分(填空)
+		 */
 		selectCorrect,
-		/** 部分选中，按选中分值算分/按选中计分 */
+		/**
+		 * 部分选中，按选中分值算分/按选中计分
+		 */
 		select,
-		/** 人工打分 */
+		/**
+		 * 人工打分
+		 */
 		manual,
-		/** 非考试题型 */
+		/**
+		 * 非考试题型
+		 */
 		none
 
 	}
@@ -438,6 +456,76 @@ public class SurveySchema implements Serializable {
 		private String expression;
 
 		private String message;
+
+	}
+
+	/**
+	 * 关联问卷
+	 */
+	@Data
+	public static class LinkSurvey implements Serializable {
+
+		/**
+		 * 关联问卷id
+		 */
+		private String linkSurveyId;
+
+		/**
+		 * 关联问题id
+		 */
+		private String linkQuestionId;
+
+		/**
+		 * 关联选项id
+		 */
+		private String linkOptionId;
+
+		/**
+		 * 关联条件
+		 */
+		private LinkType linkType;
+
+		/**
+		 * 关联字段
+		 */
+		private List<LinkField> linkFields;
+
+	}
+
+	/**
+	 * 关联
+	 */
+	@Data
+	public static class LinkField implements Serializable {
+
+		/**
+		 * 关联的问题id
+		 */
+		private String linkQuestionId;
+
+		/**
+		 * 关联的选项id
+		 */
+		private String linkOptionId;
+
+		/**
+		 * 要填充的问题id
+		 */
+		private String fillQuestionId;
+
+		/**
+		 * 要填充的选项id
+		 */
+		private String fillOptionId;
+
+	}
+
+	/**
+	 * 关联条件
+	 */
+	public enum LinkType {
+
+		eq, like
 
 	}
 

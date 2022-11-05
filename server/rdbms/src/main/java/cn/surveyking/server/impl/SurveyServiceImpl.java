@@ -12,14 +12,15 @@ import cn.surveyking.server.domain.model.CommDictItem;
 import cn.surveyking.server.domain.model.ProjectPartner;
 import cn.surveyking.server.domain.model.UserBook;
 import cn.surveyking.server.mapper.ProjectPartnerMapper;
-import cn.surveyking.server.service.AnswerService;
 import cn.surveyking.server.service.ProjectService;
 import cn.surveyking.server.service.SurveyService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -61,7 +62,7 @@ public class SurveyServiceImpl implements SurveyService {
 
 	private final ProjectViewMapper projectViewMapper;
 
-	private final AnswerService answerService;
+	private final AnswerServiceImpl answerService;
 
 	private final ProjectPartnerMapper projectPartnerMapper;
 
@@ -76,6 +77,8 @@ public class SurveyServiceImpl implements SurveyService {
 	private final UserBookServiceImpl userBookService;
 
 	private final TemplateServiceImpl templateService;
+
+	private final ObjectMapper objectMapper;
 
 	/**
 	 * answerService 如果需要验证密码，则只有密码输入正确之后才开始加载 schema
@@ -332,6 +335,65 @@ public class SurveyServiceImpl implements SurveyService {
 		answerRequest.setTempSave(0);
 		answerRequest.setTempAnswer(request.getTempAnswer());
 		answerService.updateAnswer(answerRequest);
+	}
+
+	@Override
+	public PublicLinkResult loadLinkResult(PublicLinkRequest request) {
+		PublicLinkResult result = new PublicLinkResult();
+		ProjectView projectView = projectService.getProject(request.getProjectId());
+		if (projectView == null) {
+			throw new ErrorCodeException(ErrorCode.ProjectNotFound);
+		}
+		SurveySchema currentQuestionSchema = SchemaHelper.flatSurveySchema(projectView.getSurvey()).stream()
+				.filter(x -> x.getId().equals(request.getQuestionId())).findFirst().get();
+
+		List<SurveySchema.LinkSurvey> linkSurveys = currentQuestionSchema.getChildren().stream()
+				.filter(x -> request.getOptionId().equals(x.getId())).findFirst().get().getLinkSurveys();
+		if (linkSurveys == null) {
+			throw new ErrorCodeException(ErrorCode.LinkConditionNotFound);
+		}
+		LinkedHashMap<String, Map<String, Object>> fillAnswer = new LinkedHashMap<>();
+		result.setAnswer(fillAnswer);
+		for (SurveySchema.LinkSurvey linkSurvey : linkSurveys) {
+			Answer answer = answerService
+					.getOne(Wrappers.<Answer>lambdaQuery().eq(Answer::getProjectId, linkSurvey.getLinkSurveyId())
+							.like(Answer::getAnswer, buildLinkLikeCondition(linkSurvey, request.getValue()))
+							.orderByDesc(Answer::getCreateAt).last("limit 1"));
+			if (answer == null) {
+				continue;
+			}
+			fillLinkFieldAndAnswer(answer.getAnswer(), linkSurvey.getLinkFields(), fillAnswer);
+		}
+
+		return result;
+	}
+
+	@SneakyThrows
+	private String buildLinkLikeCondition(SurveySchema.LinkSurvey linkSurvey, Object value) {
+		Map<String, Object> optionValue = new HashMap<>();
+		optionValue.put(linkSurvey.getLinkOptionId(), value);
+		// Map<String, Map<String, Object>> questionValue = new HashMap<>();
+		// questionValue.put(linkSurvey.getLinkQuestionId(), optionValue);
+		return StringUtils.substringBetween(objectMapper.writeValueAsString(optionValue), "{", "}");
+	}
+
+	public void fillLinkFieldAndAnswer(LinkedHashMap answer, List<SurveySchema.LinkField> linkFields,
+			LinkedHashMap<String, Map<String, Object>> fillAnswer) {
+		for (SurveySchema.LinkField linkField : linkFields) {
+			Map<String, Object> linkQuestionValue = (Map<String, Object>) answer.get(linkField.getLinkQuestionId());
+			if (linkQuestionValue == null) {
+				continue;
+			}
+			Map<String, Object> questionValueMap = fillAnswer.computeIfAbsent(linkField.getFillQuestionId(),
+					(k) -> new HashMap<>());
+			questionValueMap.put(linkField.getFillOptionId(), linkQuestionValue.get(linkField.getLinkOptionId()));
+		}
+	}
+
+	@SneakyThrows
+	public static void main(String[] args) {
+		System.out.println(1);
+
 	}
 
 	/**
@@ -781,7 +843,7 @@ public class SurveyServiceImpl implements SurveyService {
 		SchemaHelper.TreeNode treeNode = SchemaHelper.SurveySchema2TreeNode(projectView.getSurvey());
 
 		// 通过 url 参数构建查询表单
-		LinkedHashMap<String, Map> queryFormValues = buildFormValuesFromQueryParrameter(treeNode, request.getQuery());
+		LinkedHashMap<String, Map> queryFormValues = buildFormValuesFromQueryParameter(treeNode, request.getQuery());
 		// 将查询表单和url参数构建的查询表单合并
 		queryFormValues.putAll(request.getAnswer());
 
@@ -804,7 +866,7 @@ public class SurveyServiceImpl implements SurveyService {
 	 * @param query
 	 * @return
 	 */
-	private LinkedHashMap buildFormValuesFromQueryParrameter(SchemaHelper.TreeNode surveySchemaTreeNode,
+	private LinkedHashMap buildFormValuesFromQueryParameter(SchemaHelper.TreeNode surveySchemaTreeNode,
 			Map<String, String> query) {
 		LinkedHashMap<String, Map> formValues = new LinkedHashMap<>();
 		query.forEach((id, value) -> {

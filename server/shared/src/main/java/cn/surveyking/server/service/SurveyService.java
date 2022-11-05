@@ -28,4 +28,6 @@ public interface SurveyService {
 
 	void tempSaveAnswer(AnswerRequest request);
 
+	PublicLinkResult loadLinkResult(PublicLinkRequest request);
+
 }
