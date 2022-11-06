@@ -110,6 +110,7 @@ public class ProjectSetting {
 
 		/**
 		 * 白名单类型，支持系统用户和外部导入用户
+		 *
 		 * @see ProjectPartnerTypeEnum
 		 */
 		private Integer whitelistType;
@@ -118,6 +119,28 @@ public class ProjectSetting {
 		 * 白名单答题限制
 		 */
 		private UniqueLimitSetting whitelistLimit;
+
+		/**
+		 * 问卷校验触发类型
+		 */
+		private TriggerType triggerType = TriggerType.onBlur;
+		
+	}
+
+	public enum TriggerType {
+
+		/**
+		 * 输入时校验
+		 */
+		onInput,
+		/**
+		 * 失去焦点时校验
+		 */
+		onBlur,
+		/**
+		 * 点击提交按钮时校验并滚动到校验失败的问题
+		 */
+		onSubmit
 
 	}
 
