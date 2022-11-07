@@ -1149,7 +1149,6 @@ public class SurveyServiceImpl implements SurveyService {
 		if (Boolean.TRUE.equals(randomSurveyWrong)) {
 			if (!SecurityContextUtils.isAuthenticated()) {
 				// 需要登录
-
 			}
 			List<UserBook> wrongUserQuestions = userBookService
 					.list(Wrappers.<UserBook>lambdaQuery().eq(UserBook::getType, UserBookServiceImpl.BOOK_TYPE_WRONG)

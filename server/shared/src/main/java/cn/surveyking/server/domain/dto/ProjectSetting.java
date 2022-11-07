@@ -124,7 +124,7 @@ public class ProjectSetting {
 		 * 问卷校验触发类型
 		 */
 		private TriggerType triggerType = TriggerType.onBlur;
-		
+
 	}
 
 	public enum TriggerType {

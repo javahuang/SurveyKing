@@ -55,7 +55,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * @author javahuang
- * @date 2021/8/24
+ * @date 2021/8/24getCellValue
  */
 @Service
 @Transactional
@@ -496,13 +496,13 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 
 	@Override
 	public PaginationResponse<MyTaskView> queryTask(MyTaskQuery query) {
-		Page<ProjectPartner> page = ContextHelper.getBean(ProjectPartnerServiceImpl.class).pageByQuery(query,
-				Wrappers.<ProjectPartner>lambdaQuery().eq(ProjectPartner::getUserId, SecurityContextUtils.getUserId())
-						.eq(ProjectPartner::getType, ProjectPartnerTypeEnum.RESPONDENT_SYS_USER.getType())
-						.exists(String.format(
-								"SELECT 1 FROM t_project t WHERE t.mode = '%s' AND t.id = t_project_partner.project_id And t.is_deleted = 0",
-								query.getType()))
-						.orderByAsc(ProjectPartner::getStatus).orderByDesc(ProjectPartner::getCreateAt));
+		Page<ProjectPartner> page = ContextHelper.getBean(ProjectPartnerServiceImpl.class).pageByQuery(query, Wrappers
+				.<ProjectPartner>lambdaQuery().eq(ProjectPartner::getUserId, SecurityContextUtils.getUserId())
+				.eq(ProjectPartner::getType, ProjectPartnerTypeEnum.RESPONDENT_SYS_USER.getType())
+				.exists(String.format(
+						"SELECT 1 FROM t_project t WHERE t.mode = '%s' AND t.id = t_project_partner.project_id And t.is_deleted = 0",
+						query.getType()))
+				.orderByAsc(ProjectPartner::getStatus).orderByDesc(ProjectPartner::getCreateAt));
 		PaginationResponse<MyTaskView> result = new PaginationResponse<>(page.getTotal(),
 				page.getRecords().stream().map(projectPartner -> {
 					MyTaskView taskView = new MyTaskView();
@@ -526,39 +526,6 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 					return taskView;
 				}).collect(Collectors.toList()));
 		return result;
-	}
-
-	@SneakyThrows
-	@Override
-	public List<UserInfo> importProjectPartner(WhiteListRequest request) {
-		List<User> users = new ArrayList<>();
-		try (InputStream is = request.getFile().getInputStream(); ReadableWorkbook wb = new ReadableWorkbook(is)) {
-			wb.getSheets().forEach(sheet -> {
-				int[] rowNum = { 1 };
-				try (Stream<Row> rows = sheet.openStream()) {
-					rows.forEach(r -> {
-						if (r.getRowNum() == 1) {
-							return;
-						}
-						rowNum[0] = r.getRowNum();
-						if (getCellValue(r, 0).isPresent() && getCellValue(r, 1).isPresent()) {
-							User user = baseMapper.getUser(getCellValue(r, 0).get(), getCellValue(r, 1).get());
-							if (user != null) {
-								users.add(user);
-							}
-						}
-
-					});
-				}
-				catch (Exception e) {
-					throw new InternalServerError(String.format("模板第%d行解析失败", rowNum[0]), e);
-				}
-			});
-		}
-		return Stream.concat(users.stream().map(user -> user.getId()), request.getSelected().stream())
-				.collect(Collectors.toSet()).stream()
-				.map(userId -> ContextHelper.getBean(UserService.class).loadUserById(userId).simpleMode())
-				.collect(Collectors.toList());
 	}
 
 	@Override

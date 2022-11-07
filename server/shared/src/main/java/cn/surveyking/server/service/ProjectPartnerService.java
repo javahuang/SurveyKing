@@ -5,6 +5,7 @@ import cn.surveyking.server.core.constant.CacheConsts;
 import cn.surveyking.server.domain.dto.ProjectPartnerQuery;
 import cn.surveyking.server.domain.dto.ProjectPartnerRequest;
 import cn.surveyking.server.domain.dto.ProjectPartnerView;
+import cn.surveyking.server.domain.dto.WhiteListRequest;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 
@@ -31,5 +32,7 @@ public interface ProjectPartnerService {
 	List<String> getProjectPerms();
 
 	void downloadPartner(ProjectPartnerQuery request);
+
+	void importPartner(WhiteListRequest request);
 
 }

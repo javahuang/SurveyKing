@@ -4,14 +4,17 @@ import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.constant.AppConsts;
 import cn.surveyking.server.core.constant.CacheConsts;
 import cn.surveyking.server.core.constant.ProjectPartnerTypeEnum;
+import cn.surveyking.server.core.exception.InternalServerError;
 import cn.surveyking.server.core.uitls.ContextHelper;
 import cn.surveyking.server.core.uitls.ExcelExporter;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.ProjectPartnerQuery;
 import cn.surveyking.server.domain.dto.ProjectPartnerRequest;
 import cn.surveyking.server.domain.dto.ProjectPartnerView;
+import cn.surveyking.server.domain.dto.WhiteListRequest;
 import cn.surveyking.server.domain.mapper.ProjectPartnerViewMapper;
 import cn.surveyking.server.domain.model.ProjectPartner;
+import cn.surveyking.server.domain.model.User;
 import cn.surveyking.server.mapper.ProjectPartnerMapper;
 import cn.surveyking.server.service.BaseService;
 import cn.surveyking.server.service.ProjectPartnerService;
@@ -21,14 +24,21 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.dhatim.fastexcel.reader.ReadableWorkbook;
+import org.dhatim.fastexcel.reader.Row;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * @author javahuang
@@ -40,7 +50,7 @@ import java.util.stream.Collectors;
 public class ProjectPartnerServiceImpl extends BaseService<ProjectPartnerMapper, ProjectPartner>
 		implements ProjectPartnerService {
 
-	private final UserService userService;
+	private final UserServiceImpl userService;
 
 	private final CacheManager cacheManager;
 
@@ -147,6 +157,49 @@ public class ProjectPartnerServiceImpl extends BaseService<ProjectPartnerMapper,
 		}).collect(Collectors.toList());
 		new ExcelExporter.Builder().setOutputStream(ContextHelper.getCurrentHttpResponse().getOutputStream())
 				.setRows(rows).setColumns(Arrays.asList("名单", "状态")).build().exportToStream();
+	}
+
+	@Override
+	@SneakyThrows
+	public void importPartner(WhiteListRequest request) {
+		List<String> userIds = new ArrayList<>();
+		try (InputStream is = request.getFile().getInputStream(); ReadableWorkbook wb = new ReadableWorkbook(is)) {
+			wb.getSheets().forEach(sheet -> {
+				int[] rowNum = { 1 };
+				try (Stream<Row> rows = sheet.openStream()) {
+					rows.forEach(r -> {
+						if (r.getRowNum() == 1) {
+							return;
+						}
+						rowNum[0] = r.getRowNum();
+						if (getCellValue(r, 0).isPresent() && getCellValue(r, 1).isPresent()) {
+							User user = userService.getBaseMapper().getUser(getCellValue(r, 0).get(),
+									getCellValue(r, 1).get());
+							if (user != null) {
+								userIds.add(user.getId());
+							}
+						}
+
+					});
+				}
+				catch (Exception e) {
+					throw new InternalServerError(String.format("模板第%d行解析失败", rowNum[0]), e);
+				}
+			});
+		}
+		ProjectPartnerRequest addRequest = new ProjectPartnerRequest();
+		addRequest.setProjectId(request.getProjectId());
+		addRequest.setUserIds(userIds);
+		addRequest.setType(ProjectPartnerTypeEnum.RESPONDENT_SYS_USER.getType());
+		addProjectPartner(addRequest);
+	}
+
+	private Optional<String> getCellValue(Row row, int cellIndex) {
+		String cellValue = row.getCellAsString(cellIndex).orElse(null);
+		if (isBlank(cellValue)) {
+			return Optional.empty();
+		}
+		return Optional.of(cellValue);
 	}
 
 }

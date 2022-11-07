@@ -13,4 +13,6 @@ public class WhiteListRequest {
 
 	private MultipartFile file;
 
+	private String projectId;
+
 }
