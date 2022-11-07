@@ -151,6 +151,16 @@ public class ProjectApi {
 	}
 
 	/**
+	 * 导入项目参与者列表
+	 * @param request
+	 */
+	@PostMapping("/partner/import")
+	@EnableDataPerm(key = "#request.projectId")
+	public void importPartner(WhiteListRequest request) {
+		projectPartnerService.importPartner(request);
+	}
+
+	/**
 	 * 获取回收站里的项目列表
 	 * @param query
 	 * @return
@@ -258,15 +268,6 @@ public class ProjectApi {
 	@PostMapping("/selectTag")
 	public Set<String> selectTag(@RequestBody SelectTagRequest request) {
 		return tagService.selectTag(request);
-	}
-
-	/**
-	 * 导入白名单
-	 * @param request
-	 */
-	@PostMapping("/importProjectPartner")
-	public List<UserInfo> importProjectPartner(WhiteListRequest request) {
-		return userService.importProjectPartner(request);
 	}
 
 }
