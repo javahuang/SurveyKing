@@ -125,6 +125,11 @@ public class ProjectSetting {
 		 */
 		private TriggerType triggerType = TriggerType.onBlur;
 
+		/**
+		 * 是否允许复制题目
+		 */
+		private Boolean copyEnabled = true;
+
 	}
 
 	public enum TriggerType {
@@ -280,6 +285,10 @@ public class ProjectSetting {
 		 */
 		private Boolean randomSurveyWrong;
 
+		/**
+		 * 考试过程允许切换屏幕次数
+		 */
+		private Integer switchScreenTimes;
 	}
 
 	/**
