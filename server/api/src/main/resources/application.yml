@@ -3,8 +3,8 @@ spring:
   application:
     name: survey
   profiles:
-#    active: @activeProfile@ # maven 配置
-    active: ${activeProfile} # gradle 配置
+    active: @activeProfile@ # maven 配置
+#    active: ${activeProfile} # gradle 配置
   mvc:
     async:
       request-timeout: -1
