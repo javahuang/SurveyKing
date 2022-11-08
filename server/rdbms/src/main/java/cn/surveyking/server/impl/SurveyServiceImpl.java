@@ -390,12 +390,6 @@ public class SurveyServiceImpl implements SurveyService {
 		}
 	}
 
-	@SneakyThrows
-	public static void main(String[] args) {
-		System.out.println(1);
-
-	}
-
 	/**
 	 * 判断考试是否结束，未设置默认为已结束
 	 * @param examSetting

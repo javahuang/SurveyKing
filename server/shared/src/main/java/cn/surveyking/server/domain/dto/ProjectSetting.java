@@ -288,7 +288,8 @@ public class ProjectSetting {
 		/**
 		 * 考试过程允许切换屏幕次数
 		 */
-		private Integer switchScreenTimes;
+		private Integer maxSwitchScreenTimes;
+
 	}
 
 	/**
