@@ -32,7 +32,7 @@ public class ReportServiceImpl implements ReportService {
 	@Override
 	public ReportData getData(String shortId) {
 		List<Answer> answerList = answerMapper
-				.selectList(Wrappers.<Answer>lambdaQuery().select(Answer::getAnswer, Answer::getCreateAt)
+				.selectList(Wrappers.<Answer>lambdaQuery().select(Answer::getAnswer, Answer::getCreateAt,Answer::getProjectId)
 						.eq(Answer::getProjectId, shortId).orderByAsc(Answer::getCreateAt));
 		ReportData result = new ReportData();
 		result.setTotal(answerList.size());
