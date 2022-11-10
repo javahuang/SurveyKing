@@ -3,6 +3,7 @@ package cn.surveyking.server.impl;
 import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.constant.ProjectModeEnum;
 import cn.surveyking.server.core.constant.ProjectPartnerTypeEnum;
+import cn.surveyking.server.core.uitls.ClassUtils;
 import cn.surveyking.server.core.uitls.NanoIdUtils;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.*;
@@ -22,7 +23,9 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.ValidationException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,6 +48,8 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 	private final ProjectPartnerService projectPartnerService;
 
 	private SpelExpressionParser spelParser = new SpelExpressionParser();
+
+	private List<String> projectSettingUpdateKeys;
 
 	@Override
 	public PaginationResponse<ProjectView> listProject(ProjectQuery query) {
@@ -121,6 +126,7 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 		synchronized (request.getId().intern()) {
 			Project project = projectViewMapper.fromRequest(request);
 			if (request.getSettingKey() != null) {
+				validateSettingKey(request.getSettingKey());
 				// 实现单个设置的更新
 				ProjectSetting setting = getById(request.getId()).getSetting();
 				spelParser.parseExpression(request.getSettingKey()).setValue(setting, request.getSettingValue());
@@ -131,6 +137,19 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 				}
 			}
 			updateById(project);
+		}
+	}
+
+	/**
+	 * spel漏洞修复，只允许更新指定参数
+	 * @param expressionString
+	 */
+	private void validateSettingKey(String expressionString) {
+		if (projectSettingUpdateKeys == null) {
+			projectSettingUpdateKeys = ClassUtils.flatClassFields(ProjectSetting.class, new ArrayList<>(), 2);
+		}
+		if (!projectSettingUpdateKeys.contains(expressionString)) {
+			throw new ValidationException("非法的更新参数");
 		}
 	}
 
