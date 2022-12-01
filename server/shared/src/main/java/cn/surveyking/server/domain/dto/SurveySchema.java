@@ -356,6 +356,11 @@ public class SurveySchema implements Serializable {
 		 */
 		private Integer quota;
 
+		/**
+		 * 提示文本
+		 */
+		private String placeholder;
+
 	}
 
 	/**
