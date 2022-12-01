@@ -498,34 +498,67 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 	public PaginationResponse<MyTaskView> queryTask(MyTaskQuery query) {
 		Page<ProjectPartner> page = ContextHelper.getBean(ProjectPartnerServiceImpl.class).pageByQuery(query, Wrappers
 				.<ProjectPartner>lambdaQuery().eq(ProjectPartner::getUserId, SecurityContextUtils.getUserId())
+				.ne(ProjectPartner::getStatus, AppConsts.ProjectPartnerStatus.ANSWERED)
 				.eq(ProjectPartner::getType, ProjectPartnerTypeEnum.RESPONDENT_SYS_USER.getType())
-				.exists(String.format(
-						"SELECT 1 FROM t_project t WHERE t.mode = '%s' AND t.id = t_project_partner.project_id And t.is_deleted = 0",
-						query.getType()))
+				.exists("SELECT 1 FROM t_project t WHERE t.mode = {0} AND t.id = t_project_partner.project_id And t.is_deleted = 0",
+						query.getType())
 				.orderByAsc(ProjectPartner::getStatus).orderByDesc(ProjectPartner::getCreateAt));
 		PaginationResponse<MyTaskView> result = new PaginationResponse<>(page.getTotal(),
 				page.getRecords().stream().map(projectPartner -> {
 					MyTaskView taskView = new MyTaskView();
 					Project project = projectMapper.selectById(projectPartner.getProjectId());
+					taskView.setId(projectPartner.getId());
 					taskView.setProjectId(projectPartner.getProjectId());
 					taskView.setName(project.getName());
 					taskView.setStatus(projectPartner.getStatus());
 					taskView.setExamStartTime(project.getSetting().getExamSetting().getStartTime());
 					taskView.setExamEndTime(project.getSetting().getExamSetting().getEndTime());
-					taskView.setEndTime(project.getSetting().getAnswerSetting().getEndTime());
-					if (AppConsts.ProjectPartnerStatus.ANSWERED == projectPartner.getStatus()) {
-						// 获取最近一次的答题记录
-						List<Answer> answers = ContextHelper.getBean(AnswerServiceImpl.class)
-								.list(Wrappers.<Answer>lambdaQuery().select(Answer::getId)
-										.eq(Answer::getCreateBy, SecurityContextUtils.getUserId())
-										.orderByDesc(Answer::getCreateAt));
-						if (answers.size() > 0) {
-							taskView.setAnswerId(answers.get(0).getId());
+					return taskView;
+				}).collect(Collectors.toList()));
+		return result;
+	}
+
+	@Override
+	public PaginationResponse<MyTaskView> queryHistoryTask(MyTaskQuery query) {
+		Page<Answer> page = new Page<>(query.getCurrent(), query.getPageSize());
+		ContextHelper.getBean(AnswerServiceImpl.class).page(page,
+				Wrappers.<Answer>lambdaQuery().eq(Answer::getCreateBy, SecurityContextUtils.getUserId()).exists(
+						"SELECT 1 FROM t_project t WHERE t.mode = {0} AND t.id = t_answer.project_id And t.is_deleted = 0",
+						query.getType()));
+		if (page.getTotal() == 0) {
+			return new PaginationResponse<>(0l, new ArrayList<>());
+		}
+		List<Project> projectList = projectMapper.selectList(Wrappers.<Project>lambdaQuery().in(Project::getId,
+				page.getRecords().stream().map(x -> x.getProjectId()).collect(Collectors.toSet())));
+
+		PaginationResponse<MyTaskView> result = new PaginationResponse<>(page.getTotal(),
+				page.getRecords().stream().map(answer -> {
+					MyTaskView taskView = new MyTaskView();
+					taskView.setId(answer.getId());
+					taskView.setAnswerId(answer.getId());
+
+					Project project = projectList.stream().filter(x -> x.getId().equals(answer.getProjectId()))
+							.findFirst().orElse(null);
+					if (project != null) {
+						taskView.setProjectId(project.getId());
+						taskView.setName(project.getName());
+						if (ProjectModeEnum.exam.equals(project.getMode())) {
+							taskView.setExamScore(answer.getExamScore());
+							taskView.setExamTotal(project.getSurvey().getAttribute().getExamScore());
 						}
+					}
+
+					try {
+						taskView.setStartTime(answer.getMetaInfo().getAnswerInfo().getStartTime());
+						taskView.setEndTime(answer.getMetaInfo().getAnswerInfo().getEndTime());
+					}
+					catch (Exception e) {
+						// ignore error
 					}
 					return taskView;
 				}).collect(Collectors.toList()));
 		return result;
+
 	}
 
 	@Override

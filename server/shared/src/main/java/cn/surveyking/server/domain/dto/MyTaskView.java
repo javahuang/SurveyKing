@@ -9,6 +9,8 @@ import lombok.Data;
 @Data
 public class MyTaskView {
 
+	private String id;
+
 	/**
 	 * 项目ID
 	 */
@@ -35,7 +37,12 @@ public class MyTaskView {
 	private Long examEndTime;
 
 	/**
-	 * 截止回收时间
+	 * 开始时间
+	 */
+	private Long startTime;
+
+	/**
+	 * 结束时间
 	 */
 	private Long endTime;
 
@@ -43,5 +50,15 @@ public class MyTaskView {
 	 * 回答状态 0未访问 1已访问 2已答题
 	 */
 	private Integer status;
+
+	/**
+	 * 考试分数
+	 */
+	private Double examScore;
+
+	/**
+	 * 卷面分
+	 */
+	private Double examTotal;
 
 }

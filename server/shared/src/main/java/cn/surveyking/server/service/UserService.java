@@ -45,4 +45,6 @@ public interface UserService extends UserDetailsService {
 
 	void validateCaptcha(AuthRequest request);
 
+	PaginationResponse<MyTaskView> queryHistoryTask(MyTaskQuery query);
+
 }
