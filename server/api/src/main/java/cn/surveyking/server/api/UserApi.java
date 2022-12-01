@@ -51,7 +51,7 @@ public class UserApi {
 			throw new AccessDeniedException("不支持的认证方式");
 		}
 		// 验证码校验
-		userService.validateCaptcha(request);
+		// userService.validateCaptcha(request);
 
 		// 将 token 提交给 spring security 的 DaoAuthenticationProvider 进行认证
 		try {
@@ -124,6 +124,16 @@ public class UserApi {
 	@GetMapping("/listUserTask")
 	public PaginationResponse<MyTaskView> myTask(MyTaskQuery query) {
 		return userService.queryTask(query);
+	}
+
+	/**
+	 * 查询历史任务
+	 * @param query
+	 * @return
+	 */
+	@GetMapping("/listHistoryTask")
+	public PaginationResponse<MyTaskView> myHistoryTask(MyTaskQuery query) {
+		return userService.queryHistoryTask(query);
 	}
 
 }

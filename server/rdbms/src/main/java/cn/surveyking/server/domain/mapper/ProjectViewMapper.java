@@ -39,13 +39,13 @@ public interface ProjectViewMapper extends BaseModelMapper<ProjectRequest, Proje
 		// 非练习模式需要去掉 schema 里面的答案信息
 		if (ProjectModeEnum.exam.equals(source.getMode())
 				&& !((source.getSetting() != null && source.getSetting().getExamSetting() != null
-				&& Boolean.TRUE.equals(source.getSetting().getExamSetting().getExerciseMode())))) {
+						&& Boolean.TRUE.equals(source.getSetting().getExamSetting().getExerciseMode())))) {
 			trimExamAnswerInfo(view.getSurvey());
 		}
 		// 考试模式，随机问题顺序
 		if (ProjectModeEnum.exam.equals(source.getMode())
 				&& ((source.getSetting() != null && source.getSetting().getExamSetting() != null
-				&& Boolean.TRUE.equals(source.getSetting().getExamSetting().getRandomOrder())))) {
+						&& Boolean.TRUE.equals(source.getSetting().getExamSetting().getRandomOrder())))) {
 			randomSchemaOrder(view.getSurvey());
 		}
 	}
