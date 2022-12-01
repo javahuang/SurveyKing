@@ -30,6 +30,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.WebUtils;
 
 import javax.servlet.http.Cookie;
@@ -1183,7 +1184,7 @@ public class SurveyServiceImpl implements SurveyService {
 		// 从题库里面挑题
 		List<SurveySchema> questionSchemaList = repoService.pickQuestionFromRepo(randomSurveyCondition);
 		// 最终的试卷=编辑器的问题+题库挑的题
-		if (project.getSurvey() != null) {
+		if (project.getSurvey() != null && !CollectionUtils.isEmpty(project.getSurvey().getChildren())) {
 			questionSchemaList = Stream.concat(project.getSurvey().getChildren().stream(), questionSchemaList.stream())
 					.collect(Collectors.toList());
 		}
