@@ -39,13 +39,13 @@ public interface ProjectViewMapper extends BaseModelMapper<ProjectRequest, Proje
 		// 非练习模式需要去掉 schema 里面的答案信息
 		if (ProjectModeEnum.exam.equals(source.getMode())
 				&& !((source.getSetting() != null && source.getSetting().getExamSetting() != null
-						&& Boolean.TRUE.equals(source.getSetting().getExamSetting().getExerciseMode())))) {
+				&& Boolean.TRUE.equals(source.getSetting().getExamSetting().getExerciseMode())))) {
 			trimExamAnswerInfo(view.getSurvey());
 		}
 		// 考试模式，随机问题顺序
 		if (ProjectModeEnum.exam.equals(source.getMode())
 				&& ((source.getSetting() != null && source.getSetting().getExamSetting() != null
-						&& Boolean.TRUE.equals(source.getSetting().getExamSetting().getRandomOrder())))) {
+				&& Boolean.TRUE.equals(source.getSetting().getExamSetting().getRandomOrder())))) {
 			randomSchemaOrder(view.getSurvey());
 		}
 	}
@@ -60,10 +60,14 @@ public interface ProjectViewMapper extends BaseModelMapper<ProjectRequest, Proje
 	default void randomSchemaOrder(SurveySchema schema) {
 		if (schema.getChildren() != null) {
 			// 非考试题的顺序需要保持不变
+			// 填空题的顺序也保持不变
 			Map<SurveySchema, Integer> schemaShouldKeepOrder = new LinkedHashMap<>();
 			for (int i = 0; i < schema.getChildren().size(); i++) {
 				SurveySchema curr = schema.getChildren().get(i);
-				if (curr.getAttribute().getExamAnswerMode() == SurveySchema.ExamScoreMode.none) {
+				if (curr.getAttribute().getExamAnswerMode() == SurveySchema.ExamScoreMode.none
+						|| SurveySchema.QuestionType.FillBlank.equals(curr.getType())
+						|| SurveySchema.QuestionType.MultipleBlank.equals(curr.getType())
+						|| SurveySchema.QuestionType.Textarea.equals(curr.getType())) {
 					schemaShouldKeepOrder.put(curr, i);
 				}
 			}
