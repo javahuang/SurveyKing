@@ -471,6 +471,11 @@ public class SurveySchema implements Serializable {
 	public static class LinkSurvey implements Serializable {
 
 		/**
+		 * 允许更新原始更新关联数据
+		 */
+		private Boolean enableUpdate;
+
+		/**
 		 * 关联问卷id
 		 */
 		private String linkSurveyId;

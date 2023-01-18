@@ -23,11 +23,13 @@ import lombok.SneakyThrows;
 import org.dhatim.fastexcel.reader.ReadableWorkbook;
 import org.dhatim.fastexcel.reader.Row;
 import org.dhatim.fastexcel.reader.Sheet;
+import org.springframework.beans.BeanUtils;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.*;
@@ -583,6 +585,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 	private Answer beforeSaveAnswer(Answer answer) {
 		Project project = projectMapper.selectById(answer.getProjectId());
 		computeExamScore(answer, project);
+		updateLinkSurveyAnswer(answer, project);
 		return answer;
 	}
 
@@ -603,6 +606,62 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 			examInfo.setQuestionScore(evaluator.getQuestionScore());
 			answer.setExamInfo(examInfo);
 		}
+	}
+
+	/**
+	 * 更新原始问卷答案
+	 * @param answer
+	 * @param project
+	 */
+	private void updateLinkSurveyAnswer(Answer answer, Project project) {
+		SchemaHelper.flatSurveySchema(project.getSurvey()).stream()
+				.filter(qSchema -> !CollectionUtils.isEmpty(qSchema.getChildren().get(0).getLinkSurveys()))
+				.forEach(qSchemaHasLinkSurvey -> {
+					Map<String, Object> qValue = (Map<String, Object>) answer.getAnswer()
+							.get(qSchemaHasLinkSurvey.getId());
+					if (qValue == null) {
+						return;
+					}
+					SurveySchema optionSchemaHasLinkAttr = qSchemaHasLinkSurvey.getChildren().get(0);
+					optionSchemaHasLinkAttr.getLinkSurveys().forEach(linkSurvey -> {
+						if (Boolean.TRUE.equals(linkSurvey.getEnableUpdate())) {
+							Object optionValue = qValue.get(optionSchemaHasLinkAttr.getId());
+							Answer linkedAnswer = this.getOne(Wrappers.<Answer>lambdaQuery()
+									.eq(Answer::getProjectId, linkSurvey.getLinkSurveyId())
+									.like(Answer::getAnswer,
+											SchemaHelper.buildLinkLikeCondition(linkSurvey, optionValue))
+									.orderByDesc(Answer::getCreateAt).last("limit 1"));
+							if (linkedAnswer != null) {
+								// 修改
+								for (SurveySchema.LinkField linkField : linkSurvey.getLinkFields()) {
+									SchemaHelper.setQuestionValue(linkedAnswer.getAnswer(),
+											linkField.getLinkQuestionId(), linkField.getLinkOptionId(),
+											SchemaHelper.getQuestionValue(answer.getAnswer(),
+													linkField.getFillQuestionId(), linkField.getFillOptionId()));
+								}
+								this.updateById(linkedAnswer);
+							}
+							else {
+								// 添加
+								Answer addAnswer = new Answer();
+								BeanUtils.copyProperties(answer, addAnswer, "id", "examScore", "examInfo", "answer",
+										"projectId");
+								addAnswer.setProjectId(linkSurvey.getLinkSurveyId());
+								LinkedHashMap addAnswerMap = new LinkedHashMap();
+								addAnswer.setAnswer(addAnswerMap);
+								SchemaHelper.setQuestionValue(addAnswerMap, linkSurvey.getLinkQuestionId(),
+										linkSurvey.getLinkOptionId(), optionValue);
+								for (SurveySchema.LinkField linkField : linkSurvey.getLinkFields()) {
+									SchemaHelper.setQuestionValue(addAnswerMap, linkField.getLinkQuestionId(),
+											linkField.getLinkOptionId(),
+											SchemaHelper.getQuestionValue(answer.getAnswer(),
+													linkField.getFillQuestionId(), linkField.getFillOptionId()));
+								}
+								this.save(addAnswer);
+							}
+						}
+					});
+				});
 	}
 
 	private ProjectView parseRow2Schema(Row row, String name, String parentId) {

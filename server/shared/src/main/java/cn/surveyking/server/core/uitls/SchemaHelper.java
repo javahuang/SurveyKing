@@ -3,6 +3,9 @@ package cn.surveyking.server.core.uitls;
 import cn.surveyking.server.core.constant.FieldPermissionType;
 import cn.surveyking.server.core.constant.ProjectModeEnum;
 import cn.surveyking.server.domain.dto.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 
@@ -446,6 +449,22 @@ public class SchemaHelper {
 		}
 	}
 
+	public static void setQuestionValue(LinkedHashMap<String, Object> answer, String qId, String oId, Object newValue) {
+		Map<String, Object> qValue = (Map<String, Object>) answer.computeIfAbsent(qId, k -> new LinkedHashMap<>());
+		qValue.put(oId, newValue);
+	}
+
+	public static Object getQuestionValue(LinkedHashMap<String, Object> answer, String qId, String oId) {
+		Map<String, Object> qValue = (Map<String, Object>) answer.get(qId);
+		if (qValue == null) {
+			return null;
+		}
+		if (oId == null) {
+			return qValue;
+		}
+		return qValue.get(oId);
+	}
+
 	public static TreeNode SurveySchema2TreeNode(SurveySchema surveySchema) {
 		return new TreeNode(surveySchema, null);
 	}
@@ -459,6 +478,20 @@ public class SchemaHelper {
 				iterator.set("'" + next);
 			}
 		}
+	}
+
+	/**
+	 * 构建 linkSurvey 的查询条件
+	 * @param linkSurvey
+	 * @param value
+	 * @return
+	 */
+	@SneakyThrows
+	public static String buildLinkLikeCondition(SurveySchema.LinkSurvey linkSurvey, Object value) {
+		Map<String, Object> optionValue = new HashMap<>();
+		optionValue.put(linkSurvey.getLinkOptionId(), value);
+		ObjectMapper objectMapper = new ObjectMapper();
+		return StringUtils.substringBetween(objectMapper.writeValueAsString(optionValue), "{", "}");
 	}
 
 	private static String parseHumanReadableDuration(AnswerView answerInfo) {
