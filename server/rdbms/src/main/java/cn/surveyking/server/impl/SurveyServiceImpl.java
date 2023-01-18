@@ -360,10 +360,7 @@ public class SurveyServiceImpl implements SurveyService {
 					.getOne(Wrappers.<Answer>lambdaQuery().eq(Answer::getProjectId, linkSurvey.getLinkSurveyId())
 							.like(Answer::getAnswer, buildLinkLikeCondition(linkSurvey, request.getValue()))
 							.orderByDesc(Answer::getCreateAt).last("limit 1"));
-			if (answer == null) {
-				continue;
-			}
-			fillLinkFieldAndAnswer(answer.getAnswer(), linkSurvey.getLinkFields(), fillAnswer);
+			fillLinkFieldAndAnswer(answer != null ? answer.getAnswer() : null, linkSurvey.getLinkFields(), fillAnswer);
 		}
 
 		return result;
@@ -381,12 +378,15 @@ public class SurveyServiceImpl implements SurveyService {
 	public void fillLinkFieldAndAnswer(LinkedHashMap answer, List<SurveySchema.LinkField> linkFields,
 			LinkedHashMap<String, Map<String, Object>> fillAnswer) {
 		for (SurveySchema.LinkField linkField : linkFields) {
+			Map<String, Object> questionValueMap = fillAnswer.computeIfAbsent(linkField.getFillQuestionId(),
+					(k) -> new HashMap<>());
+			if (answer == null) {
+				continue;
+			}
 			Map<String, Object> linkQuestionValue = (Map<String, Object>) answer.get(linkField.getLinkQuestionId());
 			if (linkQuestionValue == null) {
 				continue;
 			}
-			Map<String, Object> questionValueMap = fillAnswer.computeIfAbsent(linkField.getFillQuestionId(),
-					(k) -> new HashMap<>());
 			questionValueMap.put(linkField.getFillOptionId(), linkQuestionValue.get(linkField.getLinkOptionId()));
 		}
 	}
