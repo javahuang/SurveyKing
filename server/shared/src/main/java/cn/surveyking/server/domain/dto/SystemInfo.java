@@ -74,6 +74,16 @@ public class SystemInfo {
 		 */
 		private Boolean captchaEnabled;
 
+		/**
+		 * 版权
+		 */
+		private String copyright;
+
+		/**
+		 * 备案号
+		 */
+		private String recordNum;
+
 	}
 
 }
