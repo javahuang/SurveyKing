@@ -365,6 +365,7 @@ public class SurveySchema implements Serializable {
 		 * 全局规则
 		 */
 		private List<String> globalRule;
+
 	}
 
 	/**
