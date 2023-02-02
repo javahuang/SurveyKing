@@ -524,7 +524,7 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 		ContextHelper.getBean(AnswerServiceImpl.class).page(page,
 				Wrappers.<Answer>lambdaQuery().eq(Answer::getCreateBy, SecurityContextUtils.getUserId()).exists(
 						"SELECT 1 FROM t_project t WHERE t.mode = {0} AND t.id = t_answer.project_id And t.is_deleted = 0",
-						query.getType()));
+						query.getType()).orderByDesc(Answer::getCreateAt));
 		if (page.getTotal() == 0) {
 			return new PaginationResponse<>(0l, new ArrayList<>());
 		}
