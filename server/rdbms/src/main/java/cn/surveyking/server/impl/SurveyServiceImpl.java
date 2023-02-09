@@ -998,8 +998,18 @@ public class SurveyServiceImpl implements SurveyService {
 						// 执行登录操作
 						UserInfo user = (UserInfo) authentication.getPrincipal();
 						// 判断登录用户是否在白名单里面
+						/**
+						 * todo 这里应该加上用户类型，否则会出查询出来多条
+						 * 多条原因：
+						 * 新创建的问卷的时候，默认的插入一条名单数据，type = 1
+						 * 修改答题白名单设置为系统用户时，又插入一条，type = 3
+						 * 修改答题白名单设置为外部用户时，又插入一条，type = 4，当然这条数据没有用户id，在这里不会被查出来
+						 * 综上，这里至少会查询出2条，所以需要加入用户类型限制，或者修改答题白名单时移除旧数据
+						 * 这里验证的是"白名单为系统用户"，所以type = 3
+						 */
 						boolean currentHasPerm = projectPartnerMapper.selectCount(
 								Wrappers.<ProjectPartner>lambdaQuery().eq(ProjectPartner::getProjectId, project.getId())
+										.eq(ProjectPartner::getType, ProjectPartnerTypeEnum.RESPONDENT_SYS_USER.getType())
 										.eq(ProjectPartner::getUserId, user.getUserId())) == 1;
 						if (!currentHasPerm) {
 							throw new ErrorCodeException(ErrorCode.PermVerifyFailed);
