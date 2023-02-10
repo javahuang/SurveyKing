@@ -162,6 +162,7 @@ public class SurveyServiceImpl implements SurveyService {
 	}
 
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public PublicAnswerView saveAnswer(AnswerRequest request) {
 		String projectId = request.getProjectId();
 		PublicAnswerView result = new PublicAnswerView();
@@ -1135,6 +1136,7 @@ public class SurveyServiceImpl implements SurveyService {
 				AnswerRequest answerUpdateRequest = new AnswerRequest();
 				answerUpdateRequest.setId(request.getId());
 				answerUpdateRequest.setCreateBy(projectPartner.getId());
+				answerUpdateRequest.setProjectId(request.getProjectId());
 				answerService.updateAnswer(answerUpdateRequest);
 			}
 
