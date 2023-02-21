@@ -131,6 +131,8 @@ public class ProjectPartnerServiceImpl extends BaseService<ProjectPartnerMapper,
 	public void deleteProjectPartner(ProjectPartnerRequest request) {
 		remove(Wrappers.<ProjectPartner>lambdaUpdate()
 				.in(CollectionUtils.isNotEmpty(request.getIds()), ProjectPartner::getId, request.getIds())
+				.in(CollectionUtils.isNotEmpty(request.getProjectIds()), ProjectPartner::getProjectId,
+						request.getProjectIds())
 				.eq(request.getProjectId() != null, ProjectPartner::getProjectId, request.getProjectId()));
 	}
 

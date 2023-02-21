@@ -156,10 +156,6 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 	@Override
 	public void deleteProject(ProjectRequest request) {
 		removeById(request.getId());
-		// 删除项目参与者
-		ProjectPartnerRequest deletePartnerRequest = new ProjectPartnerRequest();
-		deletePartnerRequest.setProjectId(request.getId());
-		projectPartnerService.deleteProjectPartner(deletePartnerRequest);
 	}
 
 	@Override
@@ -169,7 +165,8 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 
 	@Override
 	public List<ProjectView> getDeleted(ProjectQuery query) {
-		List<ProjectView> list = projectViewMapper.toView(getBaseMapper().selectLogicDeleted());
+		List<ProjectView> list = projectViewMapper
+				.toView(getBaseMapper().selectLogicDeleted(SecurityContextUtils.getUserId()));
 		list.forEach(view -> {
 			if (!ProjectModeEnum.folder.equals(view.getMode())) {
 				view.setTotal(answerMapper
@@ -182,6 +179,10 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
 	@Override
 	public void batchDestroyProject(ProjectRequest request) {
 		getBaseMapper().batchDestroy(request.getIds());
+		// 删除项目参与者
+		ProjectPartnerRequest deletePartnerRequest = new ProjectPartnerRequest();
+		deletePartnerRequest.setProjectIds(request.getIds());
+		projectPartnerService.deleteProjectPartner(deletePartnerRequest);
 	}
 
 	@Override

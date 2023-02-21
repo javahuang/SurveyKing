@@ -179,7 +179,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 		// 获取考试排名信息
 		if (query.isRankEnabled()) {
 			List<Double> scores = list(Wrappers.<Answer>lambdaQuery().select(Answer::getExamScore, Answer::getId)
-					.eq(Answer::getProjectId, answerView.getProjectId())).stream().map(x -> x.getExamScore())
+					.eq(Answer::getProjectId, answerView.getProjectId())).stream()
+							.map(x -> Optional.ofNullable(x.getExamScore()).orElse(Double.valueOf(0)))
 							.collect(Collectors.toList());
 			Collections.sort(scores, Collections.reverseOrder());
 			answerView.setRank(scores.indexOf(answerView.getExamScore()) + 1);

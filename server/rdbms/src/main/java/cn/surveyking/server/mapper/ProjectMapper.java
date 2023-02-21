@@ -15,9 +15,9 @@ import java.util.List;
  */
 public interface ProjectMapper extends BaseMapper<Project> {
 
-	@Select("select * from t_project where is_deleted = 1")
+	@Select("select * from t_project where is_deleted = 1 and create_by = #{userId}")
 	@ResultMap("mybatis-plus_Project")
-	List<Project> selectLogicDeleted();
+	List<Project> selectLogicDeleted(String userId);
 
 	@Delete({ "<script>", "delete", "FROM t_project", "WHERE id IN",
 			"<foreach item='item' index='index' collection='ids'", "open='(' separator=',' close=')'>", "#{item}",

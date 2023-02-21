@@ -24,4 +24,6 @@ public class ProjectPartnerRequest {
 
 	private MultipartFile file;
 
+	private List<String> projectIds;
+
 }
