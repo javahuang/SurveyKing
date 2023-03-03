@@ -4,6 +4,8 @@
 
 ## 功能最强大的调查问卷系统和考试系统
 
+### [点击了解](https://docs.qq.com/sheet/DZEVveUVMSHpVZkJw) 卷王都有哪些功能
+
 ### [点击演示](https://pro.surveyking.cn/s/survey) 体验最强调查问卷功能
 
 ### [点击演示](https://pro.surveyking.cn/s/exam) 体验最强考试功能
