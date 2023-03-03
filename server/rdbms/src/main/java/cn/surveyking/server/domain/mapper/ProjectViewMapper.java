@@ -54,7 +54,8 @@ public interface ProjectViewMapper extends BaseModelMapper<ProjectRequest, Proje
 		if (schema.getAttribute() == null) {
 			schema.setAttribute(SurveySchema.Attribute.builder().build());
 		}
-		SchemaHelper.ignoreAttributes(schema, "examAnswerMode", "examCorrectAnswer", "examScore", "examMatchRule");
+		// examAnswerMode 不能去除，前端要用于区分计分题和信息题
+		SchemaHelper.ignoreAttributes(schema, "examCorrectAnswer", "examScore", "examMatchRule");
 	}
 
 	default void randomSchemaOrder(SurveySchema schema) {
