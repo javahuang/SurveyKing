@@ -71,13 +71,21 @@ module.exports = {
           position: "left",
         },
         {
-          to: "https://s.surveyking.cn",
-          label: "演示",
+          to: "https://docs.qq.com/sheet/DZEVveUVMSHpVZkJw?",
+          label: "功能对比",
           className:
-            "btn mr-2 px-6 py-2 text-white font-bold uppercase bg-blue-600 hover:text-white hover:bg-blue-700",
+            "btn mr-2 px-6 py-2 text-white font-bold uppercase bg-red-600 hover:text-white hover:bg-red-700",
           "aria-label": "Open the demo project",
           position: "right",
         },
+        // {
+        //   to: "https://s.surveyking.cn",
+        //   label: "演示",
+        //   className:
+        //     "btn mr-2 px-6 py-2 text-white font-bold uppercase bg-blue-600 hover:text-white hover:bg-blue-700",
+        //   "aria-label": "Open the demo project",
+        //   position: "right",
+        // },
         {
           href: "https://github.com/javahuang/SurveyKing",
           // label: 'GitHub',

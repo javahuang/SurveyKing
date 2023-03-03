@@ -1,28 +1,12 @@
 ---
 id: intro
-title: 介绍
-sidebar_label: 介绍
+title: 关于卷王
+sidebar_label: 关于卷王
 slug: /
 ---
-[快速开始](./quickstart.md)
+卷(juàn)王(SurveyKing)是一款**部署简单**，**功能强大**，**开源免费**的企业级在线问卷考试系统，支持**在线考试/调查问卷**/**公开查询**/**题库刷题**/**投票系统**。
 
-## 了解卷王
-
-卷王问卷(SurveyKing)是一款**部署简单**，**功能强大**，**开源免费**的企业级在线问卷考试系统。
-
-卷王的优势
-
-- 比问卷星更好的问卷编辑操作体验
-- 比问卷星更强大的问卷逻辑设置
-- 比问卷星更细致的答案校验设置
-- 比问卷星更灵活的答题后自定义页面设置
-- 比问卷星更灵活的数据和附件导出
-- 比考试宝更强大的考试题库编辑
-- 比金山快查更强大的公开查询功能
+在[开源问卷](https://gitee.com/explore/survey)和[考试系统](https://gitee.com/explore/instructional)领域，卷王一骑绝尘，无论是功能、体验都远超竞品。
 
 
-### [一文了解开源考试系统天花板-卷王](https://zhuanlan.zhihu.com/p/509950590)
-
-### [一文了解开源调查问卷天花板-卷王](https://zhuanlan.zhihu.com/p/505131248)
-
-### [一文了解开源公开查询系统天花板-卷王](https://zhuanlan.zhihu.com/p/518342894)
+<iframe src="https://kdocs.cn/l/cmjYQgVnjgBu" width="100%" height="600" />
