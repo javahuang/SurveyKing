@@ -3,7 +3,8 @@ id: changelog
 title: 更新日志
 ---
 
-点击链接给作者一个 [star](https://gitee.com/surveyking/surveyking) 支持
+点击链接 [star](https://gitee.com/surveyking/surveyking) 支持一下
+
 点击链接查看版本功能对比 [功能对比](https://docs.qq.com/sheet/DZEVveUVMSHpVZkJw?tab=BB08J2)
 
 ## v1.6.0(2023-03-03)
