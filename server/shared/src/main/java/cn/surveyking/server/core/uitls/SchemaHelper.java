@@ -113,6 +113,9 @@ public class SchemaHelper {
 					|| questionType == SurveySchema.QuestionType.Signature) {
 				Map mapValue = (Map) valueObj;
 				rowData.add(mapValue.values().stream().map((x) -> {
+					if(x instanceof String) {
+						return x;
+					}
 					List<String> fileIds = (List<String>) x;
 					return fileIds.stream()
 							.map(id -> answerInfo.getAttachment().stream()
