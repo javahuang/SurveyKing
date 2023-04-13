@@ -1,14 +1,26 @@
 # 卷王
 
+<p align="center">
+    <img src='https://gitee.com/surveyking/surveyking/badge/star.svg?theme=dark' alt='star'></img>
+    <img src='https://gitee.com/surveyking/surveyking/badge/fork.svg?theme=dark' alt='fork'></img>
+    <img src='https://img.shields.io/github/stars/javahuang/surveyking?style=social' alt='star'></img>
+    <img src='https://img.shields.io/github/forks/javahuang/surveyking?style=social' alt='fork'></img>
+    <br />
+    <br />   
+    <a href="https://surveyking.cn/" target="_blank">官方网站</a>&nbsp;
+    <a href="https://surveyking.cn/open-source/deploy.html"  target="_blank" >部署文档</a>&nbsp;
+    <a href="https://surveyking.cn/help/quickstart.html" target="_blank">操作手册</a>&nbsp;
+</p>
+
 简体中文 | [English](./README.en-us.md)
 
 ## 功能最强大的调查问卷系统和考试系统
 
 ### [点击了解](https://docs.qq.com/sheet/DZEVveUVMSHpVZkJw) 卷王都有哪些功能
 
-### [点击演示](https://pro.surveyking.cn/s/survey) 体验最强调查问卷功能
+### [点击演示](https://pro.surveyking.cn/s/survey) 体验调查问卷功能
 
-### [点击演示](https://pro.surveyking.cn/s/exam) 体验最强考试功能
+### [点击演示](https://pro.surveyking.cn/s/exam) 体验考试功能
 
 ### [点击链接](https://wj.surveyking.cn/s/start) 卷王问卷考试系统-快速开始
 
