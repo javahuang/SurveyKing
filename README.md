@@ -10,6 +10,7 @@
     <a href="https://surveyking.cn/" target="_blank">官方网站</a>&nbsp;
     <a href="https://surveyking.cn/open-source/deploy.html"  target="_blank" >部署文档</a>&nbsp;
     <a href="https://surveyking.cn/help/quickstart.html" target="_blank">操作手册</a>&nbsp;
+    <a href="https://pro.surveyking.cn/s/plus" target="_blank">演示问卷</a>&nbsp;
 </p>
 
 简体中文 | [English](./README.en-us.md)
