@@ -216,7 +216,7 @@ public class SchemaHelper {
 						else if (v != null && v instanceof Boolean) {
 							// 单选、多选题，选中的话，答案会是 true，需要转换成标题
 							matrixRowData.add(trimHtmlTag(schemaType.getChildren().stream()
-									.filter(x -> x.getId().equals(optionId)).findFirst().get().getTitle()));
+									.filter(x -> x.getId().equals(optionId)).findFirst().orElseGet(SurveySchema::new).getTitle()));
 						}
 						else {
 							matrixRowData.add(v + "");
@@ -230,12 +230,12 @@ public class SchemaHelper {
 				List<String> result = new ArrayList<>();
 				((Map<?, ?>) valueObj).forEach((optionId, valueMap) -> {
 					String title = trimHtmlTag(schemaType.getRow().stream().filter(x -> x.getId().equals(optionId))
-							.findFirst().get().getTitle());
+							.findFirst().orElseGet(SurveySchema.Row::new).getTitle());
 					List<String> valueList = new ArrayList<>();
 					((LinkedHashMap) valueMap).forEach((childOptId, val) -> {
 						if (val != null && val instanceof Boolean) {
 							valueList.add(trimHtmlTag(schemaType.getChildren().stream()
-									.filter(x -> x.getId().equals(childOptId)).findFirst().get().getTitle()));
+									.filter(x -> x.getId().equals(childOptId)).findFirst().orElseGet(SurveySchema::new).getTitle()));
 						}
 						else {
 							valueList.add(val + "");

@@ -347,10 +347,14 @@ public class SurveyServiceImpl implements SurveyService {
 			throw new ErrorCodeException(ErrorCode.ProjectNotFound);
 		}
 		SurveySchema currentQuestionSchema = SchemaHelper.flatSurveySchema(projectView.getSurvey()).stream()
-				.filter(x -> x.getId().equals(request.getQuestionId())).findFirst().get();
+				.filter(x -> x.getId().equals(request.getQuestionId())).findFirst().orElseGet(() -> {
+					SurveySchema surveySchema = new SurveySchema();
+					surveySchema.setChildren(new ArrayList<>());
+					return surveySchema;
+				});
 
 		List<SurveySchema.LinkSurvey> linkSurveys = currentQuestionSchema.getChildren().stream()
-				.filter(x -> request.getOptionId().equals(x.getId())).findFirst().get().getLinkSurveys();
+				.filter(x -> request.getOptionId().equals(x.getId())).findFirst().orElseGet(SurveySchema::new).getLinkSurveys();
 		if (linkSurveys == null) {
 			throw new ErrorCodeException(ErrorCode.LinkConditionNotFound);
 		}
@@ -622,7 +626,11 @@ public class SurveyServiceImpl implements SurveyService {
 		try {
 			// 公开查询设置必须存在，并且包含可编辑字段
 			ProjectSetting.PublicQuery query = project.getSetting().getSubmittedSetting().getPublicQuery().stream()
-					.filter(x -> x.getId().equals(answer.getQueryId())).findFirst().get();
+					.filter(x -> x.getId().equals(answer.getQueryId())).findFirst().orElseGet(() -> {
+						ProjectSetting.PublicQuery publicQuery = new ProjectSetting.PublicQuery();
+						publicQuery.setFieldPermission(new LinkedHashMap<>());
+						return publicQuery;
+					});
 			if (!query.getFieldPermission().values().contains(FieldPermissionType.editable)) {
 				throw new ErrorCodeException(ErrorCode.QueryResultUpdateError);
 			}

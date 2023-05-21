@@ -137,7 +137,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
 					else if (questionType == SurveySchema.QuestionType.Dept) {
 						view.setDepts(ids
 								.stream().map(id -> deptService.listDept(null).stream()
-										.filter(x -> x.getId().equals(id)).findFirst().get())
+										.filter(x -> x.getId().equals(id)).findFirst().orElseGet(DeptView::new))
 								.collect(Collectors.toList()));
 					}
 				});
