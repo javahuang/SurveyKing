@@ -3,6 +3,7 @@ package cn.surveyking.server.impl;
 import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.constant.CacheConsts;
 import cn.surveyking.server.core.security.PreAuthorizeAnnotationExtractor;
+import cn.surveyking.server.core.uitls.RSAUtils;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.domain.mapper.RoleViewMapper;
 import cn.surveyking.server.domain.model.Role;
@@ -47,6 +48,7 @@ public class SystemServiceImpl implements SystemService {
 	@Override
 	public SystemInfo getSystemInfo() {
 		SystemInfo systemInfo = new SystemInfo();
+		systemInfo.setPublicKey(RSAUtils.DEFAULT_PUBLIC_KEY);
 		SysInfo info = sysInfoMapper.selectOne(Wrappers.<SysInfo>lambdaQuery().eq(SysInfo::getIsDefault, true));
 		BeanUtils.copyProperties(info, systemInfo);
 		return systemInfo;

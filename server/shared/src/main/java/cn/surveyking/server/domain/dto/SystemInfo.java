@@ -46,6 +46,8 @@ public class SystemInfo {
 
 	private SystemSetting setting;
 
+	private String publicKey;
+
 	@Data
 	public static class RegisterInfo {
 
