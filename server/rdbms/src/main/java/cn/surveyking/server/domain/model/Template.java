@@ -28,6 +28,11 @@ public class Template extends BaseModel {
 	private String repoId;
 
 	/**
+	 * 序号
+	 */
+	private String serialNo;
+
+	/**
 	 * 模板标题
 	 */
 	private String name;

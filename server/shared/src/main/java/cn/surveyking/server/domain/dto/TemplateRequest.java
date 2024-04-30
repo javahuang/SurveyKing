@@ -21,6 +21,11 @@ public class TemplateRequest {
 	private String id;
 
 	/**
+	 * 序号，模板可以增量更新
+	 */
+	private String serialNo;
+
+	/**
 	 * 模板标题
 	 */
 	private String name;

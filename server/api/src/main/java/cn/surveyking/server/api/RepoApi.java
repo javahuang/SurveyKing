@@ -54,6 +54,7 @@ public class RepoApi {
 	}
 
 	@PostMapping("/batchCreate")
+	@PreAuthorize("hasAuthority('repo:create')")
 	public void batchAddRepoTemplate(@RequestBody RepoTemplateRequest request) {
 		repoService.batchAddRepoTemplate(request);
 	}

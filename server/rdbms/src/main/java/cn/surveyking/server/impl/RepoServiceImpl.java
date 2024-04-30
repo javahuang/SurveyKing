@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
@@ -101,8 +102,17 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 		List<Tag> tagList = new ArrayList<>();
 		List<TemplateRequest> templatesAdd = new ArrayList<>();
 		List<TemplateRequest> templatesUpdate = new ArrayList<>();
+		List<Template> templateListOfCurrentRepo = templateService.list(Wrappers.<Template>lambdaQuery()
+				.eq(Template::getRepoId, request.getRepoId()));
 
 		request.getTemplates().forEach(template -> {
+			//  根据序号更新更新题库
+			templateListOfCurrentRepo.stream().filter(t -> StringUtils.hasText(t.getSerialNo()) &&
+					t.getSerialNo().equals(template.getSerialNo())
+					&& t.getQuestionType() == template.getQuestionType()).findFirst().ifPresent(t -> {
+				template.setId(t.getId());
+			});
+
 			if (template.getId() == null) {
 				template.setId(IdWorker.getIdStr());
 				templatesAdd.add(template);
@@ -128,12 +138,12 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 			template.setQuestionType(template.getTemplate().getType());
 		});
 
-		if (templatesAdd.size() > 0) {
+		if (!templatesAdd.isEmpty()) {
 			// 添加模板的时候，需要添加题库与模板的关联关系
 			templatesAdd.forEach(x -> x.setRepoId(request.getRepoId()));
 			templateService.batchAddTemplate(templatesAdd);
 		}
-		if (templatesUpdate.size() > 0) {
+		if (!templatesUpdate.isEmpty()) {
 			templatesUpdate.forEach(x -> x.setRepoId(request.getRepoId()));
 			templateService.batchUpdateTemplate(templatesUpdate);
 			// 更新模板时需要删除之前的标签
@@ -142,7 +152,7 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 		}
 
 		// 添加模板问题标签
-		if (tagList.size() > 0) {
+		if (!tagList.isEmpty()) {
 			tagService.saveBatch(tagList);
 		}
 	}
