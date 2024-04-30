@@ -58,13 +58,13 @@ public class SurveySchema implements Serializable {
 		/**
 		 * 分页
 		 */
-		Pagination, Remark, SplitLine, Option, User, Dept, Nps, HorzBlank, Address, Barcode;
+		Pagination, Remark, SplitLine, Option, User, Dept, Nps, HorzBlank, Address, Barcode, Judge;
 
 		// 分为数据类型和空类型
 		public static EnumSet<QuestionType> dataType() {
 			return EnumSet.of(FillBlank, Textarea, MultipleBlank, Signature, Score, Radio, Checkbox, Select, Cascader,
 					Upload, MatrixAuto, MatrixRadio, MatrixCheckbox, MatrixFillBlank, MatrixScore, MatrixNps, User,
-					Dept, Nps, HorzBlank, Address, Barcode, RichText);
+					Dept, Nps, HorzBlank, Address, Barcode, RichText, Judge);
 		}
 
 		public static EnumSet<QuestionType> voidType() {
