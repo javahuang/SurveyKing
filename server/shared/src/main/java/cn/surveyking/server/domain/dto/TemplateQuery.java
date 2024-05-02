@@ -35,4 +35,6 @@ public class TemplateQuery extends PageQuery {
 
 	private ProjectModeEnum mode;
 
+	private String id;
+
 }

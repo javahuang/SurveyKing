@@ -199,6 +199,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
         if (request.getMetaInfo() != null) {
             request.getMetaInfo().setClientInfo(parseClientInfo(request.getMetaInfo().getClientInfo()));
         }
+        request.setTempSave(1);
         if (StringUtils.hasText(request.getId())) {
             return updateAnswer(request);
         } else {
@@ -593,15 +594,15 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
      * @return
      */
     private Answer beforeSaveAnswer(Answer answer) {
-        Project project = projectMapper.selectById(answer.getProjectId());
+        ProjectView project = projectService.getProject(answer.getProjectId());
         computeExamScore(answer, project);
         updateLinkSurveyAnswer(answer, project);
         return answer;
     }
 
-    private void computeExamScore(Answer answer, Project project) {
+    private void computeExamScore(Answer answer, ProjectView project) {
         if (project != null && ProjectModeEnum.exam.equals(project.getMode()) && answer != null
-                && answer.getAnswer() != null) {
+                && answer.getAnswer() != null && !ExerciseProjectTemplate.EXERCISE_PROJECT_ID.equals(project.getId())) {
             SurveySchema srcSchema = project.getSurvey();
             // 随机抽题需要根据答案获取 schema
             if (answer.getId() != null) {
@@ -624,7 +625,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
      * @param answer
      * @param project
      */
-    private void updateLinkSurveyAnswer(Answer answer, Project project) {
+    private void updateLinkSurveyAnswer(Answer answer, ProjectView project) {
         SchemaHelper.flatSurveySchema(project.getSurvey()).stream()
                 .filter(qSchema -> !CollectionUtils.isEmpty(qSchema.getChildren().get(0).getLinkSurveys()))
                 .forEach(qSchemaHasLinkSurvey -> {

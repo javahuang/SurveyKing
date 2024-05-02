@@ -51,4 +51,6 @@ public class UserBookView {
 
 	private Date updateAt;
 
+	private Double qscore;
+
 }

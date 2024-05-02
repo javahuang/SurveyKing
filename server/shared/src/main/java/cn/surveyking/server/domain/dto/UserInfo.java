@@ -60,6 +60,8 @@ public class UserInfo implements UserDetails, Serializable {
 
 	private List<String> authorityList;
 
+	private Integer correctTimes;
+
 	public UserInfo() {
 	}
 

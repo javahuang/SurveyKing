@@ -43,4 +43,9 @@ public class RepoRequest {
 
 	private Boolean shared;
 
+	/**
+	 * 题库分类
+	 */
+	private String category;
+
 }

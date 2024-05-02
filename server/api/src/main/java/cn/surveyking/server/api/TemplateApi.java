@@ -28,6 +28,12 @@ public class TemplateApi {
 		return templateService.listTemplate(query);
 	}
 
+	@GetMapping("/get")
+	public TemplateView getTemplate(TemplateQuery query) {
+		return templateService.getTemplate(query);
+	}
+
+
 	@PostMapping("/create")
 	@PreAuthorize("hasAuthority('template:create')")
 	public String addTemplate(@RequestBody TemplateRequest template) {

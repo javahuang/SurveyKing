@@ -10,24 +10,26 @@ import java.util.List;
  */
 public interface SurveyService {
 
-	PublicProjectView loadProject(ProjectQuery projectQuery);
+    PublicProjectView loadProject(ProjectQuery projectQuery);
 
-	PublicStatisticsView statProject(ProjectQuery query);
+    PublicStatisticsView statProject(ProjectQuery query);
 
-	PublicAnswerView saveAnswer(AnswerRequest request);
+    PublicAnswerView saveAnswer(AnswerRequest request);
 
-	PublicQueryVerifyView loadQuery(PublicQueryRequest request);
+    PublicQueryVerifyView loadQuery(PublicQueryRequest request);
 
-	PublicQueryView getQueryResult(PublicQueryRequest request);
+    PublicQueryView getQueryResult(PublicQueryRequest request);
 
-	PublicProjectView validateProject(ProjectQuery query);
+    PublicProjectView validateProject(ProjectQuery query);
 
-	List<PublicDictView> loadDict(PublicDictRequest request);
+    List<PublicDictView> loadDict(PublicDictRequest request);
 
-	PublicExamResult loadExamResult(PublicExamRequest request);
+    PublicExamResult loadExamResult(PublicExamRequest request);
 
-	void tempSaveAnswer(AnswerRequest request);
+    void tempSaveAnswer(AnswerRequest request);
 
-	PublicLinkResult loadLinkResult(PublicLinkRequest request);
+    PublicLinkResult loadLinkResult(PublicLinkRequest request);
+
+    void validateProject(ProjectView project);
 
 }

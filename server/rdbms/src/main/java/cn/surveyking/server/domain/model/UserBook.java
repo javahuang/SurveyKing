@@ -37,6 +37,12 @@ public class UserBook extends BaseModel {
 	private Integer wrongTimes;
 
 	/**
+	 * 正确次数
+	 */
+	@TableField(value = "correct_times")
+	private Integer correctTimes;
+
+	/**
 	 * 笔记
 	 */
 	@TableField(typeHandler = JacksonTypeHandler.class, jdbcType = JdbcType.LONGVARCHAR)
@@ -53,6 +59,13 @@ public class UserBook extends BaseModel {
 	 */
 	@TableField(value = "type")
 	private Integer type;
+
+	private String repoId;
+
+	/**
+	 * 是否标记
+	 */
+	private Boolean isMarked;
 
 	@TableField(exist = false)
 	private static final long serialVersionUID = 1L;

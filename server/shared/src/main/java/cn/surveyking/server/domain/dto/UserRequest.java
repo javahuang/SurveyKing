@@ -45,4 +45,9 @@ public class UserRequest {
 
 	private MultipartFile file;
 
+	/**
+	 * 错题答对次数
+	 */
+	private Integer correctTimes;
+
 }

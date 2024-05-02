@@ -84,4 +84,5 @@ public interface AnswerService {
 
 	AnswerUploadView upload(AnswerUploadRequest request);
 
+	PaginationResponse<ExerciseView> historyExercise(HistoryExerciseQuery query);
 }

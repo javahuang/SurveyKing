@@ -98,8 +98,8 @@ public class RepoApi {
 
 	@PostMapping("/book/update")
 	@PreAuthorize("hasAuthority('repo:book')")
-	public void updateUserBook(@RequestBody UserBookRequest request) {
-		repoService.updateUserBook(request);
+	public UserBookView updateUserBook(@RequestBody UserBookRequest request) {
+		return repoService.updateUserBook(request);
 	}
 
 	/**

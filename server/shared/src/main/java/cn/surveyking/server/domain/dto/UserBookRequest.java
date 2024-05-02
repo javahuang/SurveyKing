@@ -2,6 +2,7 @@ package cn.surveyking.server.domain.dto;
 
 import lombok.Data;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -45,4 +46,9 @@ public class UserBookRequest {
 
 	private List<String> ids;
 
+	private Boolean isMarked;
+
+	private LinkedHashMap answer;
+
+	private String answerId;
 }

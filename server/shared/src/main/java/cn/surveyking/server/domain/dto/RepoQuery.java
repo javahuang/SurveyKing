@@ -19,4 +19,5 @@ public class RepoQuery extends PageQuery {
 
 	private String mode;
 
+	private String category;
 }

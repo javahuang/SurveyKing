@@ -1,12 +1,11 @@
 package cn.surveyking.server.domain.model;
 
+import cn.surveyking.server.core.constant.ExamExerciseTypeEnum;
 import cn.surveyking.server.core.model.BaseModel;
 import cn.surveyking.server.domain.dto.AnswerExamInfo;
 import cn.surveyking.server.domain.dto.AnswerMetaInfo;
 import cn.surveyking.server.domain.dto.SurveySchema;
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,7 +23,13 @@ import java.util.LinkedHashMap;
 @EqualsAndHashCode(callSuper = false)
 public class Answer extends BaseModel {
 
+	@TableId(type = IdType.ASSIGN_UUID)
+	private String id;
+
 	private String projectId;
+
+
+	private String repoId;
 
 	/**
 	 * 暂存的答案
@@ -62,6 +67,11 @@ public class Answer extends BaseModel {
 	 * 0 暂存 1 已完成
 	 */
 	private Integer tempSave;
+
+	/**
+	 * 考试练习模式
+	 */
+	private ExamExerciseTypeEnum examExerciseType;
 
 	@TableField(fill = FieldFill.INSERT)
 	private String createBy;

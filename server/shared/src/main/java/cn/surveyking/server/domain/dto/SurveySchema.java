@@ -366,6 +366,12 @@ public class SurveySchema implements Serializable {
 		 */
 		private List<String> globalRule;
 
+
+		/**
+		 * 问卷模式
+		 */
+		private SchemaMode mode;
+
 	}
 
 	/**
@@ -541,6 +547,12 @@ public class SurveySchema implements Serializable {
 	public enum LinkType {
 
 		eq, like
+
+	}
+
+	public enum SchemaMode {
+
+		exam, survey;
 
 	}
 

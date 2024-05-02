@@ -16,7 +16,7 @@ public class TemplateView {
 
 	private String name;
 
-	private String questionType;
+	private SurveySchema.QuestionType questionType;
 
 	private SurveySchema template;
 
@@ -38,5 +38,12 @@ public class TemplateView {
 	private String repoName;
 
 	private String repoId;
+
+	private Integer wrongTimes;
+
+	private Integer correctTimes;
+
+	private String note;
+
 
 }

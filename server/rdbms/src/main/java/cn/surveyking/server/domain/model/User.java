@@ -37,4 +37,9 @@ public class User extends BaseModel {
 	 */
 	private Integer status;
 
+	/**
+	 * 错题答对次数
+	 */
+	private Integer correctTimes;
+
 }

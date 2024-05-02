@@ -43,4 +43,6 @@ public class PublicProjectView {
 
 	private Boolean isAuthenticated;
 
+	private AnswerExamInfo examInfo;
+
 }

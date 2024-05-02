@@ -1,5 +1,6 @@
 package cn.surveyking.server.domain.dto;
 
+import cn.surveyking.server.core.constant.ExamExerciseTypeEnum;
 import cn.surveyking.server.core.constant.ProjectModeEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -16,6 +17,8 @@ public class ProjectQuery extends PageQuery {
 
 	private String id;
 
+	private String repoId;
+
 	private String password;
 
 	private String name;
@@ -27,6 +30,8 @@ public class ProjectQuery extends PageQuery {
 	private LinkedHashMap<String, Object> answer;
 
 	private String answerId;
+
+	private ExamExerciseTypeEnum examExerciseType;
 
 	public void setAnswer(LinkedHashMap<String, Object> answer) {
 		this.answer = answer;

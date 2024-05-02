@@ -57,4 +57,5 @@ public class RepoView {
 
 	private Boolean shared;
 
+	private String category;
 }

@@ -21,4 +21,8 @@ public class UploadFileRequest {
 
 	private String id;
 
+	private String projectId;
+
+	private String questionId;
+
 }

@@ -67,7 +67,7 @@ public interface RepoService {
 
 	void createUserBook(UserBookRequest request);
 
-	void updateUserBook(UserBookRequest request);
+	UserBookView updateUserBook(UserBookRequest request);
 
 	void deleteUserBook(UserBookRequest request);
 
