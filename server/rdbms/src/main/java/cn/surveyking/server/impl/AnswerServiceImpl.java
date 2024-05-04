@@ -376,6 +376,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
         super.page(page, Wrappers.<Answer>lambdaQuery()
                 .eq(query.getProjectId() != null, Answer::getProjectId, query.getProjectId())
                 .isNotNull(Answer::getExamExerciseType)
+                .eq(query.getTempSave() != null, Answer::getTempSave, query.getTempSave())
                 .eq(Answer::getCreateBy, SecurityContextUtils.getUserId())
                 .orderByDesc(Answer::getCreateAt));
 
@@ -385,7 +386,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
             view.setProjectName(x.getProjectId());
             view.setTempSave(x.getTempSave());
             view.setCreateAt(x.getCreateAt());
-            view.setExamPracticeType(x.getExamExerciseType());
+            view.setExamExerciseType(x.getExamExerciseType());
             view.setAnswerId(x.getId());
             SurveySchema schema = x.getSurvey();
             view.setProjectName(schema.getTitle());

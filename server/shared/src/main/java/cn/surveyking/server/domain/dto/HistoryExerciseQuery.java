@@ -17,7 +17,7 @@ public class HistoryExerciseQuery extends PageQuery {
 
 	private String projectId;
 
-	private String tempSave;
+	private Integer tempSave;
 
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date[] createTime;

@@ -30,7 +30,7 @@ public class ExerciseView {
 
     private Date createAt;
 
-    private ExamExerciseTypeEnum examPracticeType;
+    private ExamExerciseTypeEnum examExerciseType;
 
     private String repoId;
 
