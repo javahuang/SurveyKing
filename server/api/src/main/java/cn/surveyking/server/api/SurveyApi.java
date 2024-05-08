@@ -87,6 +87,7 @@ public class SurveyApi {
 	 */
 	@PostMapping("/upload")
 	public FileView upload(UploadFileRequest request) {
+		request.setPublicUpload(true);
 		return fileService.upload(request);
 	}
 

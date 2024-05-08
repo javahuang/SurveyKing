@@ -82,32 +82,34 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements Fi
         MultipartFile uploadFile = request.getFile();
         String filePath = getFileNameByStrategy(Objects.requireNonNull(uploadFile.getOriginalFilename()));
         String extName = StringUtils.substringAfterLast(uploadFile.getOriginalFilename(), ".");
-
-        if (StringUtils.isEmpty(request.getProjectId()) || StringUtils.isEmpty(request.getQuestionId())) {
-            throw new ErrorCodeException(FileUploadError);
-        }
-        ProjectView projectView = projectService.getProject(request.getProjectId());
-        // 校验对应项目状态
-        surveyService.validateProject(projectView);
-
-        //  校验文件拓展名
-        SurveySchema uploadSchema = SchemaHelper.flatSurveySchema(projectView.getSurvey()).stream()
-                .filter(x -> x.getId().equals(request.getQuestionId())).findFirst()
-                .orElseThrow(() -> new ErrorCodeException(FileUploadError));
-        String fileAccept = uploadSchema.getChildren().get(0).getAttribute().getFileAccept();
-        if (StringUtils.isNotEmpty(fileAccept)) {
-            // 只允许上传指定格式的文件
-            boolean notAllowExtension = Arrays.stream(fileAccept.split(","))
-                    .map(type -> type.trim().replaceFirst("\\.", "")).noneMatch(type -> type.equalsIgnoreCase(extName));
-            if (notAllowExtension) {
+        // 通过问卷页面上传需要校验文件类型
+        if (Boolean.TRUE.equals(request.getPublicUpload())) {
+            if (StringUtils.isEmpty(request.getProjectId()) || StringUtils.isEmpty(request.getQuestionId())) {
                 throw new ErrorCodeException(FileUploadError);
             }
-        } else {
-            // 默认文件类型白名单限制
-            boolean notAllowExtension = Arrays.stream(FileUtils.ALLOWED_EXTENSIONS)
-                    .noneMatch(ext -> ext.equalsIgnoreCase(extName));
-            if (notAllowExtension) {
-                throw new ErrorCodeException(FileUploadError);
+            ProjectView projectView = projectService.getProject(request.getProjectId());
+            // 校验对应项目状态
+            surveyService.validateProject(projectView);
+
+            //  校验文件拓展名
+            SurveySchema uploadSchema = SchemaHelper.flatSurveySchema(projectView.getSurvey()).stream()
+                    .filter(x -> x.getId().equals(request.getQuestionId())).findFirst()
+                    .orElseThrow(() -> new ErrorCodeException(FileUploadError));
+            String fileAccept = uploadSchema.getChildren().get(0).getAttribute().getFileAccept();
+            if (StringUtils.isNotEmpty(fileAccept)) {
+                // 只允许上传指定格式的文件
+                boolean notAllowExtension = Arrays.stream(fileAccept.split(","))
+                        .map(type -> type.trim().replaceFirst("\\.", "")).noneMatch(type -> type.equalsIgnoreCase(extName));
+                if (notAllowExtension) {
+                    throw new ErrorCodeException(FileUploadError);
+                }
+            } else {
+                // 默认文件类型白名单限制
+                boolean notAllowExtension = Arrays.stream(FileUtils.ALLOWED_EXTENSIONS)
+                        .noneMatch(ext -> ext.equalsIgnoreCase(extName));
+                if (notAllowExtension) {
+                    throw new ErrorCodeException(FileUploadError);
+                }
             }
         }
 

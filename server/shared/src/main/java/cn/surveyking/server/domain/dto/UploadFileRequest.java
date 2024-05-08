@@ -25,4 +25,5 @@ public class UploadFileRequest {
 
 	private String questionId;
 
+	public Boolean publicUpload;
 }
