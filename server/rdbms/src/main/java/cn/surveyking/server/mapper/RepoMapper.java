@@ -28,7 +28,7 @@ public interface RepoMapper extends BaseMapper<Repo> {
 	 * @return
 	 */
 	@Select("SELECT a.question_type, COUNT(*) total FROM t_template a "
-			+ "WHERE a.repo_id = #{repoId} GROUP BY a.question_type")
+			+ "WHERE a.is_deleted = 0 and a.repo_id = #{repoId} GROUP BY a.question_type")
 	List<RepoQuestionTypeTotalView> selectRepoQuestionTypes(String repoId);
 
 }
