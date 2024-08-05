@@ -1,5 +1,6 @@
 package cn.surveyking.server.domain.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,5 +26,6 @@ public class UploadFileRequest {
 
 	private String questionId;
 
+	@JsonIgnore
 	public Boolean publicUpload;
 }

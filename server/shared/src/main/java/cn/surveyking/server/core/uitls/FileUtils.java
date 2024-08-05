@@ -11,7 +11,7 @@ public class FileUtils {
 
     public static final String[] ALLOWED_EXTENSIONS = {
             // 图像文件
-            "jpg", "jpeg", "png", "gif", "bmp", "svg",
+            "jpg", "jpeg", "png", "gif", "bmp",
 
             // 文档和文本文件
             "pdf", "txt", "doc", "docx", "ppt", "pptx", "xls", "xlsx", "odt", "ods",
