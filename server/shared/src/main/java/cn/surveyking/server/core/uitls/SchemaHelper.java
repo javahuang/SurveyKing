@@ -8,6 +8,7 @@ import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.util.CollectionUtils;
 
 import java.text.Format;
 import java.text.SimpleDateFormat;
@@ -233,9 +234,22 @@ public class SchemaHelper {
 							.findFirst().orElseGet(SurveySchema.Row::new).getTitle());
 					List<String> valueList = new ArrayList<>();
 					((LinkedHashMap) valueMap).forEach((childOptId, val) -> {
-						if (val != null && val instanceof Boolean) {
+						if (val != null) {
 							valueList.add(trimHtmlTag(schemaType.getChildren().stream()
-									.filter(x -> x.getId().equals(childOptId)).findFirst().orElseGet(SurveySchema::new).getTitle()));
+									.filter(x -> x.getId().equals(childOptId)).findFirst()
+									.map(x -> {
+										if(!CollectionUtils.isEmpty(x.getDataSource())) {
+											Optional<SurveySchema.DataSource> findDataSource = x.getDataSource().stream()
+													.filter(data -> data.getValue().equals(val)).findFirst();
+											if (findDataSource.isPresent()) {
+												return findDataSource.get().getLabel();
+											} else {
+												return val+"";
+											}
+										} else {
+											return x.getTitle();
+										}
+									}).orElse("")));
 						}
 						else {
 							valueList.add(val + "");
