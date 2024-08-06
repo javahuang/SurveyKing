@@ -57,6 +57,8 @@ public class Repo extends BaseModel {
 
 	private String category;
 
+	private Boolean isPractice;
+
 	@JsonIgnore
 	@TableField(exist = false)
 	private boolean deleted = false;

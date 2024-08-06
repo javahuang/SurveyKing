@@ -27,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static cn.surveyking.server.impl.UserBookServiceImpl.BOOK_TYPE_WRONG;
 import static com.baomidou.mybatisplus.core.toolkit.StringUtils.isNotBlank;
 
 /**
@@ -57,6 +58,7 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
                         .eq(StringUtils.hasText(query.getCategory()), Repo::getCategory, query.getCategory())
                         .and(x -> x.eq(Repo::getCreateBy, SecurityContextUtils.getUserId())
                                 .or(y -> y.eq(Repo::getShared, true)))
+                        .eq(query.getIsPractice() != null, Repo::getIsPractice, query.getIsPractice())
                         .eq(query.getMode() != null, Repo::getMode, query.getMode()).orderByAsc(Repo::getCreateAt));
         PaginationResponse<RepoView> result = new PaginationResponse<>(page.getTotal(),
                 repoViewMapper.toView(page.getRecords()));
@@ -259,6 +261,8 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
         if (request.getAnswer() != null) {
             Template template = templateService.getById(request.getTemplateId());
             userBook.setRepoId(template.getRepoId());
+            userBook.setName(template.getName());
+            userBook.setType(BOOK_TYPE_WRONG);
             // 模板问题分值默认是没有分数的，需要手动设置一个分数用于正确和错误运算
             template.getTemplate().getAttribute().setExamScore(5.0);
             template.getTemplate().setId(template.getId());

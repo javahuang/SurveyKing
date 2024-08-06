@@ -496,8 +496,6 @@ public class SurveyServiceImpl implements SurveyService {
             if (totalAnswers >= maxAnswers) {
                 throw new ErrorCodeException(ErrorCode.ExceededMaxAnswers);
             }
-            // 不将设置暴露给前端接口，不使用 @JsonProperty，否则设置页面回获取不到该值
-            setting.getAnswerSetting().setMaxAnswers(null);
         }
         // 校验问卷是否已到结束时间
         Long endTime = setting.getAnswerSetting().getEndTime();

@@ -392,10 +392,15 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
             view.setProjectName(schema.getTitle());
             view.setRepoId(x.getRepoId());
             view.setPercent(0L);
-            if (x.getSurvey() != null && x.getTempAnswer() != null && !x.getSurvey().getChildren().isEmpty()) {
-                double percent = (double) x.getTempAnswer().size() / (double) x.getSurvey().getChildren().size() * 100;
-                view.setPercent(Math.round(percent));
+
+            if (x.getSurvey() == null || x.getTempAnswer() == null || x.getSurvey().getChildren().isEmpty()) {
+                return view;
             }
+            int totalQuestions = x.getSurvey().getChildren().size();
+            int answeredQuestions = x.getTempSave() == 1 ? x.getAnswer().size() : x.getTempAnswer().size();
+
+            double percent = ((double) answeredQuestions / totalQuestions) * 100;
+            view.setPercent(Math.round(percent));
             return view;
         }).collect(Collectors.toList());
 

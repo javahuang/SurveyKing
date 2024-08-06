@@ -48,4 +48,9 @@ public class RepoRequest {
 	 */
 	private String category;
 
+	/**
+	 * 是否是练习题库
+	 */
+	private Boolean isPractice;
+
 }
