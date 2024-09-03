@@ -43,6 +43,10 @@
 docker run -p 1991:1991 surveyking/surveyking
 ```
 
+### Sealos 一键部署
+
+[![](https://raw.githubusercontent.com/labring-actions/templates/main/Deploy-on-Sealos.svg)](https://template.bja.sealos.run/deploy?templateName=surveyking)
+
 ## 特性
 
 - 🥇 支持 20 多种题型，如填空、选择、下拉、级联、矩阵、分页、签名、题组、上传、[横向填空](https://wj.surveyking.cn/s/EMqvs7)等
