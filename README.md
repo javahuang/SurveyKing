@@ -7,10 +7,10 @@
     <img src='https://img.shields.io/github/forks/javahuang/surveyking?style=social' alt='fork'></img>
     <br />
     <br />   
-    <a href="https://surveyking.cn/" target="_blank">官方网站</a>&nbsp;
-    <a href="https://surveyking.cn/open-source/deploy.html"  target="_blank" >部署文档</a>&nbsp;
-    <a href="https://surveyking.cn/help/quickstart.html" target="_blank">操作手册</a>&nbsp;
-    <a href="https://pro.surveyking.cn/s/plus" target="_blank">演示问卷</a>&nbsp;
+    <a href="https://surveyking.cn/" target="_blank">官方网站</a> 
+    <a href="https://surveyking.cn/open-source/deploy.html"  target="_blank" >部署文档</a> 
+    <a href="https://surveyking.cn/help/quickstart.html" target="_blank">操作手册</a> 
+    <a href="https://pro.surveyking.cn/s/plus" target="_blank">演示问卷</a> 
 </p>
 
 简体中文 | [English](./README.en-us.md)
@@ -27,7 +27,7 @@
 
 需要您的 star ⭐️⭐️⭐️ 支持鼓励 🙏🙏🙏，**右上角点 Star 加 QQ 群(92878557)获取最新的数据库脚本**。
 
-> Q1群: 338461197(2000人满) Q2群:1074277968(2000人满) Q3群: 770779467(2000人满) Q4群: 92878557 
+> Q1群: 338461197(2000人满) Q2群:1074277968(2000人满) Q3群: 770779467(2000人满) Q4群: 92878557(2000人满)  Q5群:980962382
 
 ## 快速开始(一键部署)
 
@@ -37,10 +37,30 @@
 2. 解压，双击运行 start.bat
 3. 打开浏览器访问 [http://localhost:1991](http://localhost:1991)，输入账号密码： _admin_/_123456_
 
+### 宝塔一键部署
+
+[使用宝塔快速一键部署，部署更方便，运维更简单](https://surveyking.cn/open-source/deploy/baota-simple-deploy)
+
 ### 一键 docker 部署
 
 ```bash
-docker run -p 1991:1991 surveyking/surveyking
+# 一键启动，默认使用的是内置的 h2 数据库
+docker run -d -p 1991:1991 surveyking/surveyking
+# 如果 surveyking/surveyking 无法拉取，可以使用阿里云的镜像库
+docker run -d -p 1991:1991 registry.cn-hangzhou.aliyuncs.com/surveyking/surveyking:latest
+
+# 挂载文件目录和日志文件
+docker run -d -p 1991:1991 -v ${PWD}/files:/app/files -v ${PWD}/logs:/app/logs surveyking/surveyking
+
+# 使用外置 mysql 数据库，系统启动时会自动导入初始 sql
+docker run -e PROFILE=mysql \
+           -v ${PWD}/logs:/app/logs \
+           -v ${PWD}/files:/app/files \
+           -e MYSQL_PASS=surveyking \
+           -e MYSQL_USER=surveyking \
+           -e DB_URL='jdbc:mysql://172.17.0.1:3306/surveyking?rewriteBatchedStatements=true&useUnicode=true&characterEncoding=UTF-8' \
+           -p 1991:1991 \
+           surveyking/surveyking
 ```
 
 ## 特性
@@ -74,17 +94,17 @@ docker run -p 1991:1991 surveyking/surveyking
 
 |                 | 问卷网 | 腾讯问卷 | 问卷星 | 金数据 | 卷王 |
 | --------------- | ------ | -------- | ------ | ------ | ---- |
-| 问卷调查        | ✔️     | ✔️       | ✔️     | ✔️     | ✔️   |
-| 在线考试        | ✔️     | ❌       | ✔️     | ✔️     | ✔️   |
-| 投票            | ✔️     | ✔️       | ✔️     | ✔️     | ✔️   |
+| 问卷调查        | ✔️   | ✔️     | ✔️   | ✔️   | ✔️ |
+| 在线考试        | ✔️   | ❌       | ✔️   | ✔️   | ✔️ |
+| 投票            | ✔️   | ✔️     | ✔️   | ✔️   | ✔️ |
 | 支持题型        | 🥇     | 🥉       | 🥇     | 🥈     | 🥈   |
 | 题型设置        | 🥇     | 🥉       | 🥇     | 🥇     | 🥇   |
 | 自动计算        | ❌     | ❌       | 🥉     | 🥈     | 🥇   |
 | 逻辑设置        | 🥈     | 🥈       | 🥈     | 🥈     | 🥇   |
-| 自定义校验      | ❌     | ❌       | ❌     | ❌     | ✔️   |
+| 自定义校验      | ❌     | ❌       | ❌     | ❌     | ✔️ |
 | 自定义导出      | 🥈     | ❌       | ❌     | 🥉     | 🥇   |
-| 手机端编辑      | ✔️     | ✔️       | ✔️     | ✔️     | ✔️   |
-| 公开查询（快查) | ✔️     | ❌       | ✔️     | ❌     | ✔️   |
+| 手机端编辑      | ✔️   | ✔️     | ✔️   | ✔️   | ✔️ |
+| 公开查询（快查) | ✔️   | ❌       | ✔️   | ❌     | ✔️ |
 | 私有部署        | 💰💰💰 | 💰💰💰   | 💰💰💰 | 💰💰💰 | 🆓   |
 
 注: 上表与卷王对比的全部是商业问卷产品，他们有很多地方值得卷王学习，仅列出部分主要功能供大家参考，如果对结果有疑问，可以点击对应产品的链接自行对比体验。
