@@ -187,13 +187,13 @@ public class SchemaHelper {
 						}
 						return optionValue.toString();
 					}
-					// 选项类型为横向填空
-					if (SurveySchema.DataType.horzBlank.equals(optionSchema.getAttribute().getDataType())) {
-						return getHorzBlankValue(optionSchema, (Map<String, String>) optionValue);
-					}
 					if (optionValue != null && optionValue instanceof Boolean) {
 						// 单选、多选题，选中的话，答案会是 true，需要转换成标题
 						return trimHtmlTag(optionSchema.getTitle());
+					}
+					// 选项类型为横向填空
+					if (SurveySchema.DataType.horzBlank.equals(optionSchema.getAttribute().getDataType())) {
+						return getHorzBlankValue(optionSchema, (Map<String, String>) optionValue);
 					}
 					// 如果是单选填空，需要同时显示选项标题和答案
 					if (schemaType.getType().equals(SurveySchema.QuestionType.Radio)

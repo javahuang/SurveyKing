@@ -48,10 +48,10 @@ public class TemplateServiceImpl extends BaseService<TemplateMapper, Template> i
                 .eq(query.getQuestionType() != null, Template::getQuestionType, query.getQuestionType())
                 // 默认查询额是普通题型
                 .ne(query.getQuestionType() == null, Template::getQuestionType, SurveySchema.QuestionType.Survey)
-                .in(query.getCategories().size() > 0, Template::getCategory, query.getCategories())
+                .in(!query.getCategories().isEmpty(), Template::getCategory, query.getCategories())
                 .eq(query.getRepoId() != null, Template::getRepoId, query.getRepoId())
                 .eq(query.getMode() != null, Template::getMode, query.getMode())
-                .exists(query.getTag().size() > 0,
+                .exists(!query.getTag().isEmpty(),
                         String.format("select 1 from t_tag t where t.entity_id = t_template.id and t.name in (%s)",
                                 query.getTag().stream().map(x -> "'" + x + "'").collect(Collectors.joining(","))))
                 .eq(query.getShared() != null, Template::getShared, query.getShared())
@@ -60,7 +60,7 @@ public class TemplateServiceImpl extends BaseService<TemplateMapper, Template> i
                 .eq(query.getShared() == null, Template::getCreateBy, SecurityContextUtils.getUserId())
                 .orderByAsc(Template::getPriority));
         return new PaginationResponse<>(templatePage.getTotal(),
-                templatePage.getRecords().stream().map(x -> templateViewMapper.toView(x)).collect(Collectors.toList()));
+                templatePage.getRecords().stream().map(templateViewMapper::toView).collect(Collectors.toList()));
     }
 
     @Override
