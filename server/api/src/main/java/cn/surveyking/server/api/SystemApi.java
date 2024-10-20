@@ -154,7 +154,11 @@ public class SystemApi {
 	@PostMapping("/user/delete")
 	@PreAuthorize("hasAuthority('system:user:delete')")
 	public void deleteUser(@RequestBody UserRequest request) {
-		userService.deleteUser(request.getId());
+		if(request.getId() != null) {
+			for (String userId : request.getId().split(",")) {
+				userService.deleteUser(userId);
+			}
+		}
 	}
 
 	/**

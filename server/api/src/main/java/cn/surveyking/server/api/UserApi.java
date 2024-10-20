@@ -107,6 +107,7 @@ public class UserApi {
      * @param request
      */
     @PostMapping("/importUser")
+    @PreAuthorize("hasAuthority('home')")
     public void importUser(UserRequest request) {
         userService.importUser(request);
     }
@@ -118,6 +119,7 @@ public class UserApi {
      * @return
      */
     @GetMapping("/listUserTask")
+    @PreAuthorize("hasAuthority('home')")
     public PaginationResponse<MyTaskView> myTask(MyTaskQuery query) {
         return userService.queryTask(query);
     }

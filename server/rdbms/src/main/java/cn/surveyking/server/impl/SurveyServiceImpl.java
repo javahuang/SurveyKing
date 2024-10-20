@@ -777,9 +777,10 @@ public class SurveyServiceImpl implements SurveyService {
         }
         long total = answerService.count(query);
         // 允许修改答案的话就获取最近一次的答案，不抛出异常
-        if (limitSetting.getLimitNum() != null && total >= limitSetting.getLimitNum()
-                && (setting.getSubmittedSetting() == null
-                || !Boolean.TRUE.equals(setting.getSubmittedSetting().getEnableUpdate()))) {
+        if (setting.getSubmittedSetting() != null && Boolean.TRUE.equals(setting.getSubmittedSetting().getEnableUpdate())) {
+            return;
+        }
+        if (limitSetting.getLimitNum() != null && total >= limitSetting.getLimitNum()) {
             throw new ErrorCodeException(ErrorCode.SurveySubmitted);
         }
     }
