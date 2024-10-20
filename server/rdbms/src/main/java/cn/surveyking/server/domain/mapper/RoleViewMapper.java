@@ -18,7 +18,10 @@ public interface RoleViewMapper extends BaseModelMapper<RoleRequest, RoleView, R
 
 	@AfterMapping
 	default void afterMapping(Role role, @MappingTarget RoleView target) {
-		target.setAuthorities(Arrays.asList(role.getAuthority().split(",")));
+		if(role.getAuthority() != null) {
+			target.setAuthorities(Arrays.asList(role.getAuthority().split(",")));
+		}
+
 	}
 
 	@AfterMapping
