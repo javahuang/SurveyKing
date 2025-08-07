@@ -1,4 +1,4 @@
-version: 1.8.0
+version: 1.9.0
 spring:
   application:
     name: survey
@@ -51,3 +51,21 @@ aj:
 
 api:
   prefix: /api
+
+surveyking:
+  ai:
+    siliconflow:
+      enabled: true
+      base-url: https://api.siliconflow.cn
+      token: ${AI_SILICONFLOW_TOKEN:your_token}
+      model-id: deepseek-chat
+      model-types:
+        - display-name: "DeepSeek Chat"
+          value: "deepseek-chat"
+          description: "DeepSeek 对话模型"
+        - display-name: "Qwen2.5-72B-Instruct"
+          value: "Qwen/Qwen2.5-72B-Instruct"
+          description: "Qwen2.5 72B 指令模型"
+        - display-name: "Llama-3.1-70B-Instruct"
+          value: "meta-llama/Meta-Llama-3.1-70B-Instruct"
+          description: "Llama 3.1 70B 指令模型"

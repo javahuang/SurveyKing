@@ -5,6 +5,7 @@ import cn.surveyking.server.core.constant.ProjectModeEnum;
 import cn.surveyking.server.domain.dto.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
@@ -21,37 +22,52 @@ import java.util.stream.Collectors;
  * @author javahuang
  * @date 2021/8/10
  */
+@Slf4j
 public class SchemaHelper {
 
 	protected static ThreadLocal<Boolean> localOpenId = new ThreadLocal<>();
 
-	public static final String openidColumnName = "自定义字段";
+	// 常量定义
+	public static final String OPENID_COLUMN_NAME = "自定义字段";
+	public static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+	public static final String HTML_TAG_REGEX = "(<.*?>)|(&.*?;)";
+	public static final String MULTIPLE_SPACES_REGEX = "\\s{2,}";
+	public static final String DICT_SEPARATOR = "\\|";
+	public static final int DICT_LABEL_INDEX = 1;
+
+	private static final String[] FORMULA_INJECTION_PREFIXES = { "=", "+", "-", "@" };
+	private static final long MILLISECONDS_PER_SECOND = 1000L;
+	private static final long MILLISECONDS_PER_MINUTE = 60000L;
+	private static final long MILLISECONDS_PER_HOUR = 3600000L;
+	private static final long MILLISECONDS_PER_DAY = MILLISECONDS_PER_HOUR * 24;
+
+	@Deprecated
+	public static final String openidColumnName = OPENID_COLUMN_NAME;
 
 	/**
 	 * 将 schema 解析为导出的 excel的header
-	 * @param schemaDataTypes
-	 * @param mode
-	 * @return
+	 * 
+	 * @param schemaDataTypes 问题数据类型列表
+	 * @param mode            项目模式
+	 * @return Excel表头列表
 	 */
 	public static List<String> parseColumns(List<SurveySchema> schemaDataTypes, ProjectModeEnum mode) {
 		List<String> result = new ArrayList<>();
 		result.add("序号");
-		schemaDataTypes.forEach(schemaType -> {
-			result.add(schemaType.getTitle());
-		});
+
+		// 添加问题标题
+		schemaDataTypes.forEach(schemaType -> result.add(schemaType.getTitle()));
+
+		// 考试模式添加分数列
 		if (ProjectModeEnum.exam.equals(mode)) {
 			result.add("分数");
 		}
-		result.add(openidColumnName);
-		result.add("提交人");
-		result.add("提交时间");
-		result.add("填写时长");
-		result.add("填写设备");
-		result.add("操作系统");
-		result.add("浏览器");
-		result.add("填写地区");
-		result.add("IP");
-		result.add("ID");
+
+		// 添加固定的元数据列
+		result.addAll(Arrays.asList(
+				OPENID_COLUMN_NAME, "提交人", "提交时间", "填写时长",
+				"填写设备", "操作系统", "浏览器", "填写地区", "IP", "ID"));
+
 		return result;
 	}
 
@@ -88,19 +104,50 @@ public class SchemaHelper {
 
 	/**
 	 * 转换答案为导出 excel 的行格式
+	 * 
 	 * @param answerInfo 单条答案记录
-	 * @param dataTypes 所有的问题 schema
-	 * @param index 当前行索引
-	 * @param mode 项目模式
+	 * @param dataTypes  所有的问题 schema
+	 * @param index      当前行索引
+	 * @param mode       项目模式
 	 * @return excel 行记录
 	 */
 	public static List<Object> parseRowData(AnswerView answerInfo, List<SurveySchema> dataTypes, int index,
 			ProjectModeEnum mode) {
+		try {
+			LinkedHashMap<String, Object> answer = answerInfo.getAnswer();
+			List<Object> rowData = new ArrayList<>();
+			rowData.add(index);
+
+			// 转换问题答案
+			parseQuestionAnswers(answerInfo, dataTypes, rowData);
+
+			// 添加考试分数
+			if (ProjectModeEnum.exam.equals(mode)) {
+				rowData.add(answerInfo.getExamScore());
+			}
+
+			// 添加 openid 信息
+			parseOpenIdInfo(answer, rowData);
+
+			// 添加元数据信息
+			parseMetaData(answerInfo, rowData);
+
+			// 防止公式注入
+			avoidFormulaInjection(rowData);
+			return rowData;
+		} catch (Exception e) {
+			log.error("解析答案数据失败, answerInfo: {}, error: {}", answerInfo.getId(), e.getMessage(), e);
+			return createErrorRowData(index);
+		}
+	}
+
+	/**
+	 * 解析问题答案
+	 */
+	private static void parseQuestionAnswers(AnswerView answerInfo, List<SurveySchema> dataTypes,
+			List<Object> rowData) {
 		LinkedHashMap<String, Object> answer = answerInfo.getAnswer();
-		List<Object> rowData = new ArrayList<>();
-		rowData.add(index);
-		// 转换答案
-		// TODO: 中途修改 schema 可能会出错、提取公共解析方法
+
 		for (SurveySchema schemaType : dataTypes) {
 			String questionId = schemaType.getId();
 			SurveySchema.QuestionType questionType = schemaType.getType();
@@ -110,188 +157,330 @@ public class SchemaHelper {
 				rowData.add(null);
 				continue;
 			}
-			if (questionType == SurveySchema.QuestionType.Upload
-					|| questionType == SurveySchema.QuestionType.Signature) {
-				Map mapValue = (Map) valueObj;
-				rowData.add(mapValue.values().stream().map((x) -> {
-					if(x instanceof String) {
-						return x;
+
+			Object parsedValue = parseQuestionValue(schemaType, valueObj, answerInfo);
+			rowData.add(parsedValue);
+		}
+	}
+
+	/**
+	 * 根据问题类型解析问题值
+	 */
+	private static Object parseQuestionValue(SurveySchema schemaType, Object valueObj, AnswerView answerInfo) {
+		SurveySchema.QuestionType questionType = schemaType.getType();
+
+		switch (questionType) {
+			case Upload:
+			case Signature:
+				return parseFileQuestionValue(valueObj, answerInfo);
+			case Cascader:
+				return parseCascaderQuestionValue(schemaType, valueObj);
+			case User:
+				return parseUserQuestionValue(valueObj, answerInfo);
+			case Dept:
+				return parseDeptQuestionValue(valueObj, answerInfo);
+			case MatrixAuto:
+				return parseMatrixAutoQuestionValue(schemaType, valueObj);
+			default:
+				if (questionType.name().startsWith("Matrix")) {
+					return parseMatrixQuestionValue(schemaType, valueObj, questionType);
+				} else {
+					return parseStandardQuestionValue(schemaType, valueObj);
+				}
+		}
+	}
+
+	/**
+	 * 解析文件类型问题值
+	 */
+	private static String parseFileQuestionValue(Object valueObj, AnswerView answerInfo) {
+		Map<?, ?> mapValue = (Map<?, ?>) valueObj;
+		return mapValue.values().stream()
+				.map(x -> {
+					if (x instanceof String) {
+						return (String) x;
 					}
 					List<String> fileIds = (List<String>) x;
 					return fileIds.stream()
 							.map(id -> answerInfo.getAttachment().stream()
-									.filter(attachment -> attachment.getId().equals(id)).findFirst()
-									.orElse(new FileView()).getOriginalName())
+									.filter(attachment -> attachment.getId().equals(id))
+									.findFirst()
+									.orElse(new FileView())
+									.getOriginalName())
 							.collect(Collectors.joining(","));
-				}).collect(Collectors.joining(",")));
+				})
+				.collect(Collectors.joining(","));
+	}
+
+	/**
+	 * 解析层级选择器问题值
+	 */
+	private static String parseCascaderQuestionValue(SurveySchema schemaType, Object valueObj) {
+		Map<?, ?> mapValue = (Map<?, ?>) valueObj;
+		List<String> result = new ArrayList<>();
+		List<SurveySchema.DataSource> dataSources = schemaType.getDataSource();
+
+		for (SurveySchema child : schemaType.getChildren()) {
+			String optionId = child.getId();
+			String optionValue = (String) mapValue.get(optionId);
+			SurveySchema.DataSource dataSource = dataSources.stream()
+					.filter(x -> x.getValue().equals(optionValue))
+					.findFirst()
+					.orElse(new SurveySchema.DataSource("", "", new ArrayList<>()));
+			result.add(dataSource.getLabel());
+			dataSources = dataSource.getChildren();
+			if (dataSources == null) {
+				break;
 			}
-			else if (questionType == SurveySchema.QuestionType.Cascader) {
-				Map mapValue = (Map) valueObj;
-				List<String> result = new ArrayList<>();
-				List<SurveySchema.DataSource> dataSources = schemaType.getDataSource();
-				for (SurveySchema child : schemaType.getChildren()) {
-					String optionId = child.getId();
-					String optionValue = (String) mapValue.get(optionId);
-					SurveySchema.DataSource dataSource = dataSources.stream()
-							.filter(x -> x.getValue().equals(optionValue)).findFirst()
-							.orElse(new SurveySchema.DataSource("", "", new ArrayList<>()));
-					result.add(dataSource.getLabel());
-					dataSources = dataSource.getChildren();
-					if (dataSources == null) {
-						break;
-					}
+		}
+		return String.join(",", result);
+	}
+
+	/**
+	 * 解析用户选择问题值
+	 */
+	private static String parseUserQuestionValue(Object valueObj, AnswerView answerInfo) {
+		Map<?, ?> mapValue = (Map<?, ?>) valueObj;
+		return mapValue.values().stream()
+				.map(x -> {
+					List<String> userIds = (List<String>) x;
+					return userIds.stream()
+							.map(id -> answerInfo.getUsers().stream()
+									.filter(user -> user.getUserId().equals(id))
+									.findFirst()
+									.orElse(new UserInfo())
+									.getName())
+							.collect(Collectors.joining(","));
+				})
+				.collect(Collectors.joining(","));
+	}
+
+	/**
+	 * 解析部门选择问题值
+	 */
+	private static String parseDeptQuestionValue(Object valueObj, AnswerView answerInfo) {
+		Map<?, ?> mapValue = (Map<?, ?>) valueObj;
+		return mapValue.values().stream()
+				.map(x -> {
+					List<String> deptIds = (List<String>) x;
+					return deptIds.stream()
+							.map(id -> answerInfo.getDepts().stream()
+									.filter(dept -> dept.getId().equals(id))
+									.findFirst()
+									.orElse(new DeptView())
+									.getName())
+							.collect(Collectors.joining(","));
+				})
+				.collect(Collectors.joining(","));
+	}
+
+	/**
+	 * 解析标准问题值（单选、多选、填空等）
+	 */
+	private static String parseStandardQuestionValue(SurveySchema schemaType, Object valueObj) {
+		return schemaType.getChildren().stream()
+				.map(optionSchema -> parseOptionValue(schemaType, optionSchema, valueObj))
+				.filter(Objects::nonNull)
+				.collect(Collectors.joining(","));
+	}
+
+	/**
+	 * 解析选项值
+	 */
+	private static String parseOptionValue(SurveySchema schemaType, SurveySchema optionSchema, Object valueObj) {
+		Object optionValue = ((Map<?, ?>) valueObj).get(optionSchema.getId());
+		if (optionValue == null) {
+			return null;
+		}
+
+		SurveySchema.DataType dataType = optionSchema.getAttribute().getDataType();
+
+		// 数据字典类型
+		if (SurveySchema.DataType.selectDict.equals(dataType)) {
+			return parseDictValue(optionValue.toString());
+		}
+
+		// 下拉选择类型
+		if (SurveySchema.DataType.select.equals(dataType)) {
+			return parseSelectValue(optionSchema, optionValue);
+		}
+
+		// 布尔类型（单选、多选题选中）
+		if (optionValue instanceof Boolean) {
+			return trimHtmlTag(optionSchema.getTitle());
+		}
+
+		// 横向填空类型
+		if (SurveySchema.DataType.horzBlank.equals(dataType)) {
+			return getHorzBlankValue(optionSchema, (Map<String, String>) optionValue);
+		}
+
+		// 单选或多选填空题
+		if (SurveySchema.QuestionType.Radio.equals(schemaType.getType())
+				|| SurveySchema.QuestionType.Checkbox.equals(schemaType.getType())) {
+			return String.format("%s(%s)", trimHtmlTag(optionSchema.getTitle()), optionValue);
+		}
+
+		return optionValue.toString();
+	}
+
+	/**
+	 * 解析字典值
+	 */
+	private static String parseDictValue(String value) {
+		String[] dictValueAndLabel = value.split(DICT_SEPARATOR, 2);
+		if (dictValueAndLabel.length > DICT_LABEL_INDEX) {
+			return dictValueAndLabel[DICT_LABEL_INDEX];
+		}
+		return dictValueAndLabel[0]; // 兼容历史版本
+	}
+
+	/**
+	 * 解析下拉选择值
+	 */
+	private static String parseSelectValue(SurveySchema optionSchema, Object optionValue) {
+		Optional<SurveySchema.DataSource> findDataSource = optionSchema.getDataSource().stream()
+				.filter(x -> x.getValue().equals(optionValue))
+				.findFirst();
+
+		return findDataSource.map(SurveySchema.DataSource::getLabel)
+				.orElse(optionValue.toString());
+	}
+
+	/**
+	 * 解析矩阵自动问题值
+	 */
+	private static String parseMatrixAutoQuestionValue(SurveySchema schemaType, Object valueObj) {
+		List<String> result = new ArrayList<>();
+		((List<Map<?, ?>>) valueObj).forEach(rowValue -> {
+			List<String> matrixRowData = new ArrayList<>();
+			rowValue.forEach((optionId, v) -> {
+				SurveySchema optionSchema = schemaType.getChildren().stream()
+						.filter(option -> option.getId().equals(optionId))
+						.findFirst()
+						.orElse(null);
+
+				if (optionSchema != null && optionSchema.getDataSource() != null) {
+					String label = optionSchema.getDataSource().stream()
+							.filter(x -> x.getValue().equals(v))
+							.findFirst()
+							.orElse(new SurveySchema.DataSource())
+							.getLabel();
+					matrixRowData.add(label);
+				} else if (v instanceof Boolean) {
+					String title = trimHtmlTag(schemaType.getChildren().stream()
+							.filter(x -> x.getId().equals(optionId))
+							.findFirst()
+							.orElseGet(SurveySchema::new)
+							.getTitle());
+					matrixRowData.add(title);
+				} else {
+					matrixRowData.add(String.valueOf(v));
 				}
-				rowData.add(String.join(",", result));
-			}
-			else if (questionType == SurveySchema.QuestionType.User) {
-				Map mapValue = (Map) valueObj;
-				rowData.add(mapValue.values().stream().map((x) -> {
-					List<String> userIds = (List<String>) x;
-					return userIds.stream().map(id -> answerInfo.getUsers().stream()
-							.filter(user -> user.getUserId().equals(id)).findFirst().orElse(new UserInfo()).getName())
-							.collect(Collectors.joining(","));
-				}).collect(Collectors.joining(",")));
-			}
-			else if (questionType == SurveySchema.QuestionType.Dept) {
-				Map mapValue = (Map) valueObj;
-				rowData.add(mapValue.values().stream().map((x) -> {
-					List<String> userIds = (List<String>) x;
-					return userIds.stream().map(id -> answerInfo.getDepts().stream()
-							.filter(dept -> dept.getId().equals(id)).findFirst().orElse(new DeptView()).getName())
-							.collect(Collectors.joining(","));
-				}).collect(Collectors.joining(",")));
-			}
-			else if (!questionType.name().startsWith("Matrix")) {
-				// 需要将数字类型转换成字符串
-				// 通过 valueObj 遍历可能会导致选项的顺序乱掉，所以得按照 children schema 的顺序来构建答案
-				rowData.add(schemaType.getChildren().stream().map(optionSchema -> {
-					Object optionValue = ((Map<?, ?>) valueObj).get(optionSchema.getId());
-					if (optionValue == null) {
-						return null;
-					}
-					// 数据字典
-					if (SurveySchema.DataType.selectDict.equals(optionSchema.getAttribute().getDataType())) {
-						String[] dictValueAndLabel = optionValue.toString().split("\\|", 2);
-						if (dictValueAndLabel.length > 1) {
-							return dictValueAndLabel[1];
-						}
-						// 兼容历史版本
-						return dictValueAndLabel[0];
-					}
-					// 下拉题
-					if (SurveySchema.DataType.select.equals(optionSchema.getAttribute().getDataType())) {
-						Optional<SurveySchema.DataSource> findDataSource = optionSchema.getDataSource().stream()
-								.filter(x -> x.getValue().equals(optionValue)).findFirst();
-						if (findDataSource.isPresent()) {
-							return findDataSource.get().getLabel();
-						}
-						return optionValue.toString();
-					}
-					if (optionValue != null && optionValue instanceof Boolean) {
-						// 单选、多选题，选中的话，答案会是 true，需要转换成标题
-						return trimHtmlTag(optionSchema.getTitle());
-					}
-					// 选项类型为横向填空
-					if (SurveySchema.DataType.horzBlank.equals(optionSchema.getAttribute().getDataType())) {
-						return getHorzBlankValue(optionSchema, (Map<String, String>) optionValue);
-					}
-					// 如果是单选填空，需要同时显示选项标题和答案
-					if (schemaType.getType().equals(SurveySchema.QuestionType.Radio)
-							|| schemaType.getType().equals(SurveySchema.QuestionType.Checkbox)) {
-						return String.format("%s(%s)", trimHtmlTag(optionSchema.getTitle()), optionValue);
-					}
-					return optionValue.toString();
-				}).filter(x -> x != null).collect(Collectors.joining(",")));
-			}
-			else if (questionType == SurveySchema.QuestionType.MatrixAuto) {
-				List<String> result = new ArrayList<>();
-				((List<Map<?, ?>>) valueObj).forEach((rowValue) -> {
-					List<String> matrixRowData = new ArrayList<>();
-					rowValue.forEach((optionId, v) -> {
-						SurveySchema optionSchema = schemaType.getChildren().stream()
-								.filter(option -> option.getId().equals(optionId)).findFirst().orElse(null);
-						if (optionSchema != null && optionSchema.getDataSource() != null) {
-							matrixRowData.add(optionSchema.getDataSource().stream().filter(x -> x.getValue().equals(v))
-									.findFirst().orElse(new SurveySchema.DataSource()).getLabel());
-						}
-						else if (v != null && v instanceof Boolean) {
-							// 单选、多选题，选中的话，答案会是 true，需要转换成标题
-							matrixRowData.add(trimHtmlTag(schemaType.getChildren().stream()
-									.filter(x -> x.getId().equals(optionId)).findFirst().orElseGet(SurveySchema::new).getTitle()));
-						}
-						else {
-							matrixRowData.add(v + "");
-						}
-					});
-					result.add(String.format("(%s)", String.join(",", matrixRowData)));
-				});
-				rowData.add(String.join(",", result));
-			}
-			else if (questionType.name().startsWith("Matrix")) {
-				List<String> result = new ArrayList<>();
-				((Map<?, ?>) valueObj).forEach((optionId, valueMap) -> {
-					String title = trimHtmlTag(schemaType.getRow().stream().filter(x -> x.getId().equals(optionId))
-							.findFirst().orElseGet(SurveySchema.Row::new).getTitle());
-					List<String> valueList = new ArrayList<>();
-					((LinkedHashMap) valueMap).forEach((childOptId, val) -> {
-						if (val != null) {
-							valueList.add(trimHtmlTag(schemaType.getChildren().stream()
-									.filter(x -> x.getId().equals(childOptId)).findFirst()
-									.map(x -> {
-										if(!CollectionUtils.isEmpty(x.getDataSource())) {
-											Optional<SurveySchema.DataSource> findDataSource = x.getDataSource().stream()
-													.filter(data -> data.getValue().equals(val)).findFirst();
-											if (findDataSource.isPresent()) {
-												return findDataSource.get().getLabel();
-											} else {
-												return val+"";
-											}
-										} else {
-											return x.getTitle();
-										}
-									}).orElse("")));
-						}
-						else {
-							valueList.add(val + "");
-						}
-					});
-					result.add(String.format("%s:(%s)", title, String.join(",", valueList)));
-				});
-				rowData.add(String.join(",", result));
-			}
-			else {
-				rowData.add(null);
-			}
+			});
+			result.add(String.format("(%s)", String.join(",", matrixRowData)));
+		});
+		return String.join(",", result);
+	}
+
+	/**
+	 * 解析矩阵问题值
+	 */
+	private static String parseMatrixQuestionValue(SurveySchema schemaType, Object valueObj,
+			SurveySchema.QuestionType questionType) {
+		List<String> result = new ArrayList<>();
+		((Map<?, ?>) valueObj).forEach((optionId, valueMap) -> {
+			String title = trimHtmlTag(schemaType.getRow().stream()
+					.filter(x -> x.getId().equals(optionId))
+					.findFirst()
+					.orElseGet(SurveySchema.Row::new)
+					.getTitle());
+
+			List<String> valueList = new ArrayList<>();
+			((LinkedHashMap<?, ?>) valueMap).forEach((childOptId, val) -> {
+				if (val != null) {
+					String processedValue = schemaType.getChildren().stream()
+							.filter(x -> x.getId().equals(childOptId))
+							.findFirst()
+							.map(x -> processMatrixCellValue(x, val, questionType))
+							.orElse("");
+					valueList.add(trimHtmlTag(processedValue));
+				} else {
+					valueList.add("");
+				}
+			});
+			result.add(String.format("%s:(%s)", title, String.join(",", valueList)));
+		});
+		return String.join(",", result);
+	}
+
+	/**
+	 * 处理矩阵单元格值
+	 */
+	private static String processMatrixCellValue(SurveySchema cellSchema, Object val,
+			SurveySchema.QuestionType questionType) {
+		if (!CollectionUtils.isEmpty(cellSchema.getDataSource())) {
+			Optional<SurveySchema.DataSource> findDataSource = cellSchema.getDataSource().stream()
+					.filter(data -> data.getValue().equals(val))
+					.findFirst();
+			return findDataSource.map(SurveySchema.DataSource::getLabel)
+					.orElse(String.valueOf(val));
+		} else if (SurveySchema.QuestionType.MatrixFillBlank.equals(questionType)) {
+			return String.valueOf(val);
+		} else {
+			return cellSchema.getTitle();
 		}
-		if (ProjectModeEnum.exam.equals(mode)) {
-			rowData.add(answerInfo.getExamScore());
-		}
+	}
+
+	/**
+	 * 解析 openid 信息
+	 */
+	private static void parseOpenIdInfo(LinkedHashMap<String, Object> answer, List<Object> rowData) {
 		if (answer.containsKey("openid")) {
 			rowData.add(answer.get("openid"));
 			localOpenId.set(true);
-		}
-		else {
+		} else {
 			rowData.add("");
 		}
-		// 转换答卷元数据
-		rowData.add(answerInfo.getCreateByName());
-		Format formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		rowData.add(formatter.format(answerInfo.getCreateAt()));
-		rowData.add(parseHumanReadableDuration(answerInfo));
-		if (answerInfo.getMetaInfo() == null || answerInfo.getMetaInfo().getClientInfo() == null) {
-			rowData.addAll(Arrays.asList("", "", "", "", ""));
-		}
-		else {
-			rowData.add(answerInfo.getMetaInfo().getClientInfo().getDeviceType());
-			rowData.add(answerInfo.getMetaInfo().getClientInfo().getPlatform());
-			rowData.add(answerInfo.getMetaInfo().getClientInfo().getBrowser());
-			rowData.add(answerInfo.getMetaInfo().getClientInfo().getRegion());
-			rowData.add(answerInfo.getMetaInfo().getClientInfo().getRemoteIp());
-			rowData.add(answerInfo.getId());
-		}
+	}
 
-		avoidFormulaInjection(rowData);
-		return rowData;
+	/**
+	 * 解析元数据信息
+	 */
+	private static void parseMetaData(AnswerView answerInfo, List<Object> rowData) {
+		// 提交人信息
+		rowData.add(answerInfo.getCreateByName());
+
+		// 提交时间
+		Format formatter = new SimpleDateFormat(DATE_TIME_FORMAT);
+		rowData.add(formatter.format(answerInfo.getCreateAt()));
+
+		// 填写时长
+		rowData.add(parseHumanReadableDuration(answerInfo));
+
+		// 客户端信息
+		if (answerInfo.getMetaInfo() == null || answerInfo.getMetaInfo().getClientInfo() == null) {
+			rowData.addAll(Arrays.asList("", "", "", "", "", ""));
+		} else {
+			AnswerMetaInfo.ClientInfo clientInfo = answerInfo.getMetaInfo().getClientInfo();
+			rowData.addAll(Arrays.asList(
+					clientInfo.getDeviceType(),
+					clientInfo.getPlatform(),
+					clientInfo.getBrowser(),
+					clientInfo.getRegion(),
+					clientInfo.getRemoteIp(),
+					answerInfo.getId()));
+		}
+	}
+
+	/**
+	 * 创建错误行数据
+	 */
+	private static List<Object> createErrorRowData(int index) {
+		List<Object> errorRow = new ArrayList<>();
+		errorRow.add(index);
+		errorRow.add("数据解析错误");
+		return errorRow;
 	}
 
 	/**
@@ -311,8 +500,7 @@ public class SchemaHelper {
 				String[] dictValueAndLabel = subOptionValue.split("\\|", 2);
 				if (dictValueAndLabel.length > 1) {
 					result.add(dictValueAndLabel[1]);
-				}
-				else {
+				} else {
 					// 兼容历史版本
 					result.add(dictValueAndLabel[0]);
 				}
@@ -323,12 +511,10 @@ public class SchemaHelper {
 						.filter(x -> x.getValue().equals(subOptionValue)).findFirst();
 				if (findDataSource.isPresent()) {
 					result.add(findDataSource.get().getLabel());
-				}
-				else {
+				} else {
 					result.add(subOptionValue);
 				}
-			}
-			else {
+			} else {
 				result.add(subOptionValue);
 			}
 		}
@@ -336,44 +522,80 @@ public class SchemaHelper {
 	}
 
 	/**
+	 * 移除HTML标签和实体字符
 	 * 更好的方式是使用 Jsoup.parse(html).text(); 但是我不想引入过多的第三方 jar
-	 * @param string
-	 * @return
+	 * 
+	 * @param string 包含HTML标签的字符串
+	 * @return 清理后的纯文本字符串
 	 */
 	public static String trimHtmlTag(String string) {
-		if (string == null) {
+		if (StringUtils.isBlank(string)) {
 			return "";
 		}
-		return string.replaceAll("(<.*?>)|(&.*?;)", " ").replaceAll("\\s{2,}", " ").trim();
+		return string.replaceAll(HTML_TAG_REGEX, " ")
+				.replaceAll(MULTIPLE_SPACES_REGEX, " ")
+				.trim();
 	}
 
+	/**
+	 * 根据字段权限更新Schema
+	 * 
+	 * @param fieldPermission 字段权限映射
+	 * @param schema          Schema对象
+	 */
 	public static void updateSchemaByPermission(LinkedHashMap<String, Integer> fieldPermission, SurveySchema schema) {
-		if (schema.getChildren() == null || fieldPermission == null) {
+		if (schema.getChildren() == null || fieldPermission == null || fieldPermission.isEmpty()) {
 			return;
 		}
-		schema.getChildren().removeIf(child -> {
-			Integer permValue = fieldPermission.get(child.getId());
-			if (permValue == null) {
-				return false;
-			}
-			// 隐藏题目
-			if (permValue == FieldPermissionType.hidden) {
-				return true;
-			}
-			// 只读
-			if (permValue == FieldPermissionType.visible) {
-				if (child.getAttribute() == null) {
-					child.setAttribute(new SurveySchema.Attribute());
-				}
-				child.getAttribute().setReadOnly(true);
-			}
-			return false;
-		});
+
+		// 移除隐藏的题目，设置只读权限
+		schema.getChildren().removeIf(child -> processChildPermission(child, fieldPermission));
+
+		// 递归处理子项
 		schema.getChildren().forEach(child -> updateSchemaByPermission(fieldPermission, child));
 	}
 
 	/**
+	 * 处理子项权限
+	 * 
+	 * @param child           子项Schema
+	 * @param fieldPermission 字段权限映射
+	 * @return 是否应该移除该子项
+	 */
+	private static boolean processChildPermission(SurveySchema child, LinkedHashMap<String, Integer> fieldPermission) {
+		Integer permValue = fieldPermission.get(child.getId());
+		if (permValue == null) {
+			return false;
+		}
+
+		// 隐藏题目
+		if (permValue.equals(FieldPermissionType.hidden)) {
+			return true;
+		}
+
+		// 设置为只读
+		if (permValue.equals(FieldPermissionType.visible)) {
+			ensureAttributeExists(child);
+			child.getAttribute().setReadOnly(true);
+		}
+
+		return false;
+	}
+
+	/**
+	 * 确保Schema具有Attribute对象
+	 * 
+	 * @param schema Schema对象
+	 */
+	private static void ensureAttributeExists(SurveySchema schema) {
+		if (schema.getAttribute() == null) {
+			schema.setAttribute(new SurveySchema.Attribute());
+		}
+	}
+
+	/**
 	 * 移除 schema 里面的指定属性值
+	 * 
 	 * @param schema
 	 * @param attributes
 	 */
@@ -394,6 +616,7 @@ public class SchemaHelper {
 
 	/**
 	 * 根据属性名和属性值找到所有满足条件的子 schema 列表
+	 * 
 	 * @param schema
 	 * @param attributeName
 	 * @param attributeValue
@@ -415,6 +638,7 @@ public class SchemaHelper {
 
 	/**
 	 * 根据属性名查找子 schema 列表
+	 * 
 	 * @param schema
 	 * @param attributeName
 	 */
@@ -435,6 +659,7 @@ public class SchemaHelper {
 
 	/**
 	 * 主要是用于构建 FillBlank 类型的查询表单
+	 * 
 	 * @param field
 	 * @return
 	 */
@@ -456,8 +681,9 @@ public class SchemaHelper {
 
 	/**
 	 * 将问题 schema 添加到问卷里面
+	 * 
 	 * @param parent 问卷 schema
-	 * @param child 问题 schema
+	 * @param child  问题 schema
 	 */
 	public static void appendChildIfNotExist(SurveySchema parent, SurveySchema child) {
 		boolean exists = flatSurveySchema(parent).stream().anyMatch(x -> child.getId().equals(x.getId()));
@@ -486,19 +712,42 @@ public class SchemaHelper {
 		return new TreeNode(surveySchema, null);
 	}
 
+	/**
+	 * 防止Excel公式注入攻击
+	 * 在可能包含公式的字符串前添加单引号
+	 * 
+	 * @param rowData 行数据列表
+	 */
 	private static void avoidFormulaInjection(List<Object> rowData) {
-		ListIterator<Object> iterator = rowData.listIterator();
-		while (iterator.hasNext()) {
-			Object next = iterator.next();
-			if (next instanceof String && (((String) next).startsWith("=") || ((String) next).startsWith("+")
-					|| ((String) next).startsWith("-") || ((String) next).startsWith("@"))) {
-				iterator.set("'" + next);
+		for (int i = 0; i < rowData.size(); i++) {
+			Object item = rowData.get(i);
+			if (item instanceof String) {
+				String str = (String) item;
+				if (isFormulaInjectionRisk(str)) {
+					rowData.set(i, "'" + str);
+				}
 			}
 		}
 	}
 
 	/**
+	 * 检查字符串是否有公式注入风险
+	 * 
+	 * @param str 待检查的字符串
+	 * @return 是否有风险
+	 */
+	private static boolean isFormulaInjectionRisk(String str) {
+		if (StringUtils.isBlank(str)) {
+			return false;
+		}
+
+		return Arrays.stream(FORMULA_INJECTION_PREFIXES)
+				.anyMatch(str::startsWith);
+	}
+
+	/**
 	 * 构建 linkSurvey 的查询条件
+	 * 
 	 * @param linkSurvey
 	 * @param value
 	 * @return
@@ -511,30 +760,61 @@ public class SchemaHelper {
 		return StringUtils.substringBetween(objectMapper.writeValueAsString(optionValue), "{", "}");
 	}
 
+	/**
+	 * 解析人类可读的时长格式
+	 * 
+	 * @param answerInfo 答案信息
+	 * @return 格式化的时长字符串，如 "1天2小时30分钟15秒"
+	 */
 	private static String parseHumanReadableDuration(AnswerView answerInfo) {
-		String result = "";
 		if (answerInfo.getMetaInfo() == null || answerInfo.getMetaInfo().getAnswerInfo() == null) {
-			return result;
+			return "";
 		}
-		long duration = answerInfo.getMetaInfo().getAnswerInfo().getEndTime()
-				- answerInfo.getMetaInfo().getAnswerInfo().getStartTime();
-		double d = Math.floor(duration / (3600000 * 24));
-		double h = Math.floor((duration / 3600000) % 24);
-		double m = Math.floor((duration / 60000) % 60);
-		double s = Math.floor((duration / 1000) % 60);
-		if (d > 0) {
-			result += d + "天";
+
+		try {
+			long startTime = answerInfo.getMetaInfo().getAnswerInfo().getStartTime();
+			long endTime = answerInfo.getMetaInfo().getAnswerInfo().getEndTime();
+			long duration = endTime - startTime;
+
+			if (duration <= 0) {
+				return "";
+			}
+
+			return formatDuration(duration);
+		} catch (Exception e) {
+			log.warn("解析时长失败: {}", e.getMessage());
+			return "";
 		}
-		if (h > 0) {
-			result += h + "小时";
+	}
+
+	/**
+	 * 格式化时长
+	 * 
+	 * @param duration 时长（毫秒）
+	 * @return 格式化的时长字符串
+	 */
+	private static String formatDuration(long duration) {
+		List<String> parts = new ArrayList<>();
+
+		long days = duration / MILLISECONDS_PER_DAY;
+		long hours = (duration / MILLISECONDS_PER_HOUR) % 24;
+		long minutes = (duration / MILLISECONDS_PER_MINUTE) % 60;
+		long seconds = (duration / MILLISECONDS_PER_SECOND) % 60;
+
+		if (days > 0) {
+			parts.add(days + "天");
 		}
-		if (m > 0) {
-			result += m + "分钟";
+		if (hours > 0) {
+			parts.add(hours + "小时");
 		}
-		if (s > 0) {
-			result += s + "秒";
+		if (minutes > 0) {
+			parts.add(minutes + "分钟");
 		}
-		return result;
+		if (seconds > 0) {
+			parts.add(seconds + "秒");
+		}
+
+		return String.join("", parts);
 	}
 
 	public static class TreeNode {
@@ -551,8 +831,7 @@ public class SchemaHelper {
 			this.data = data;
 			if (parent == null) {
 				this.root = this;
-			}
-			else {
+			} else {
 				this.root = parent.root;
 				this.parent = parent;
 			}
@@ -581,7 +860,8 @@ public class SchemaHelper {
 	public enum LoginFormFieldEnum {
 
 		username("用户名", SurveySchema.DataType.text), password("密码", SurveySchema.DataType.password), extraPassword(
-				"请输入问卷密码", SurveySchema.DataType.text), whitelistName("请先输入名单，再进行填写", SurveySchema.DataType.text);
+				"请输入问卷密码", SurveySchema.DataType.text),
+		whitelistName("请先输入名单，再进行填写", SurveySchema.DataType.text);
 
 		private String title;
 

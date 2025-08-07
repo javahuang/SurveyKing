@@ -48,6 +48,8 @@ public class SystemInfo {
 
 	private String publicKey;
 
+	private Boolean aiEnabled;
+
 	@Data
 	public static class RegisterInfo {
 
@@ -85,6 +87,19 @@ public class SystemInfo {
 		 * 备案号
 		 */
 		private String recordNum;
+
+	}
+
+	@Data
+	public static class AiSetting {
+
+		private Boolean enabled;
+
+		private List<String> models;
+
+		private String token;
+
+		private String prompt;
 
 	}
 

@@ -60,9 +60,10 @@ public class ProjectServiceImpl extends BaseService<ProjectMapper, Project> impl
                 .and(isBlank(query.getParentId()),
                         c -> c.isNull(Project::getParentId).or().eq(Project::getParentId, "0"))
                 .eq(query.getMode() != null, Project::getMode, query.getMode())
-                .exists( "SELECT 1 FROM t_project_partner t WHERE t.type in (1, 2) AND t.user_id = {0} AND t.project_id = t_project.id",
+                .exists("SELECT 1 FROM t_project_partner t WHERE t.type in (1, 2) AND t.user_id = {0} AND t.project_id = t_project.id",
                         SecurityContextUtils.getUserId())
-                .orderByAsc(Project::getPriority, Project::getCreateAt));
+                // 文件夹排在前面，然后按创建时间从近到远排序
+                .last("ORDER BY CASE WHEN mode = 'folder' THEN 0 ELSE 1 END ASC, create_at DESC"));
         PaginationResponse<ProjectView> result = new PaginationResponse<>(page.getTotal(),
                 projectViewMapper.toView(page.getRecords()));
         result.getList().forEach(view -> {

@@ -66,6 +66,7 @@ public class RepoApi {
 
 	/**
 	 * 从题库里面挑选试题
+	 * 
 	 * @param repos
 	 * @return
 	 */
@@ -81,6 +82,7 @@ public class RepoApi {
 
 	/**
 	 * 我的笔记
+	 * 
 	 * @param query
 	 * @return
 	 */
@@ -104,6 +106,7 @@ public class RepoApi {
 
 	/**
 	 * 我的笔记
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -111,6 +114,17 @@ public class RepoApi {
 	@PreAuthorize("hasAuthority('repo:book')")
 	public void deleteUserBook(@RequestBody UserBookRequest request) {
 		repoService.deleteUserBook(request);
+	}
+
+	/**
+	 * 导出题库题目
+	 * 
+	 * @param request
+	 */
+	@GetMapping("/export")
+	// @PreAuthorize("hasAuthority('repo:export')")
+	public void exportRepoQuestions(RepoRequest request) {
+		repoService.exportRepoQuestions(request);
 	}
 
 }

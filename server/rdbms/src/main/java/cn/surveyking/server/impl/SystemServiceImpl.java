@@ -49,8 +49,15 @@ public class SystemServiceImpl implements SystemService {
 	public SystemInfo getSystemInfo() {
 		SystemInfo systemInfo = new SystemInfo();
 		systemInfo.setPublicKey(RSAUtils.DEFAULT_PUBLIC_KEY);
-		SysInfo info = sysInfoMapper.selectOne(Wrappers.<SysInfo>lambdaQuery().eq(SysInfo::getIsDefault, true));
-		BeanUtils.copyProperties(info, systemInfo);
+
+		// 数据库只有一条记录，id为1
+		SysInfo info = sysInfoMapper.selectById("1");
+		if (info != null) {
+			BeanUtils.copyProperties(info, systemInfo);
+			if (info.getAiSetting() != null) {
+				systemInfo.setAiEnabled(info.getAiSetting().getEnabled());
+			}
+		}
 		return systemInfo;
 	}
 
@@ -58,6 +65,8 @@ public class SystemServiceImpl implements SystemService {
 	public void updateSystemInfo(SystemInfoRequest request) {
 		SysInfo sysInfo = new SysInfo();
 		BeanUtils.copyProperties(request, sysInfo);
+		// 固定更新id为1的记录
+		sysInfo.setId("1");
 		sysInfoMapper.updateById(sysInfo);
 	}
 
@@ -84,13 +93,11 @@ public class SystemServiceImpl implements SystemService {
 				userRole.setRoleId(request.getId());
 				userRoleMapper.insert(userRole);
 			}
-		}
-		else if (!CollectionUtils.isEmpty(request.getEvictUserIds())) {
+		} else if (!CollectionUtils.isEmpty(request.getEvictUserIds())) {
 			// 批量移除用户角色
 			userRoleMapper.delete(Wrappers.<UserRole>lambdaUpdate().eq(UserRole::getRoleId, request.getId())
 					.in(UserRole::getUserId, request.getEvictUserIds()));
-		}
-		else {
+		} else {
 			roleService.updateById(roleViewMapper.fromRequest(request));
 			evictCache(request.getId());
 		}
@@ -105,6 +112,7 @@ public class SystemServiceImpl implements SystemService {
 
 	/**
 	 * 角色信息变化时，清除对应的 cache 缓存
+	 * 
 	 * @param roleId
 	 */
 	private void evictCache(String roleId) {
@@ -123,4 +131,10 @@ public class SystemServiceImpl implements SystemService {
 		// TODO:
 	}
 
+	@Override
+	public SystemInfo.AiSetting getSystemAiSetting() {
+		// 数据库只有一条记录，id为1
+		SysInfo info = sysInfoMapper.selectById("1");
+		return info != null ? info.getAiSetting() : new SystemInfo.AiSetting();
+	}
 }

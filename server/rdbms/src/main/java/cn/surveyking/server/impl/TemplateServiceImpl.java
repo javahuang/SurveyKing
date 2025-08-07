@@ -57,7 +57,7 @@ public class TemplateServiceImpl extends BaseService<TemplateMapper, Template> i
                 .eq(query.getShared() != null, Template::getShared, query.getShared())
                 .eq(query.getShared() != null && query.getShared() == 0, Template::getCreateBy,
                         SecurityContextUtils.getUserId())
-                .eq(query.getShared() == null, Template::getCreateBy, SecurityContextUtils.getUserId())
+                .eq(query.getShared() == null && query.getRepoId() == null, Template::getCreateBy, SecurityContextUtils.getUserId())
                 .orderByAsc(Template::getPriority));
         return new PaginationResponse<>(templatePage.getTotal(),
                 templatePage.getRecords().stream().map(templateViewMapper::toView).collect(Collectors.toList()));

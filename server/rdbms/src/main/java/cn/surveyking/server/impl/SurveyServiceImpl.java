@@ -78,6 +78,8 @@ public class SurveyServiceImpl implements SurveyService {
 
     private final ObjectMapper objectMapper;
 
+    private final RandomSurveyProcessor randomSurveyProcessor;
+
     /**
      * answerService 如果需要验证密码，则只有密码输入正确之后才开始加载 schema
      *
@@ -184,7 +186,8 @@ public class SurveyServiceImpl implements SurveyService {
             projectView.setLoginRequired(true);
         } else {
             // 随机问题
-            replaceSchemaIfRandomSchema(project, projectView);
+            randomSurveyProcessor.processRandomSurvey(project, projectView);
+           //  replaceSchemaIfRandomSchema(project, projectView);
             // 允许修改答案
             projectView.setAnswer(getLatestAnswer(projectView, null));
         }
@@ -206,7 +209,7 @@ public class SurveyServiceImpl implements SurveyService {
         convertAndValidateLoginFormIfNeeded(project, query.getAnswer());
         PublicProjectView projectView = projectViewMapper.toPublicProjectView(project);
         // 随机问题
-        replaceSchemaIfRandomSchema(project, projectView);
+        randomSurveyProcessor.processRandomSurvey(project, projectView);
         // 校验问卷
         validateProject(project);
         projectView.setAnswer(getLatestAnswer(projectView, (String) SchemaHelper.getLoginFormAnswer(query.getAnswer(),
@@ -1212,79 +1215,6 @@ public class SurveyServiceImpl implements SurveyService {
                 answerService.updateAnswer(answerUpdateRequest);
             }
 
-        }
-    }
-
-    /**
-     * 随机问题，分为随机问题和错题练习
-     *
-     * @param project
-     */
-    private void replaceSchemaIfRandomSchema(ProjectView project, PublicProjectView projectView) {
-        if (ProjectModeEnum.exam != project.getMode()) {
-            return;
-        }
-        SurveySchema source = project.getSurvey();
-        Boolean randomSurveyWrong = project.getSetting().getExamSetting().getRandomSurveyWrong();
-        if (Boolean.TRUE.equals(randomSurveyWrong)) {
-            if (!SecurityContextUtils.isAuthenticated()) {
-                // 需要登录
-            }
-            List<UserBook> wrongUserQuestions = userBookService
-                    .list(Wrappers.<UserBook>lambdaQuery().eq(UserBook::getType, UserBookServiceImpl.BOOK_TYPE_WRONG)
-                            .eq(UserBook::getCreateBy, SecurityContextUtils.getUserId()));
-            if (wrongUserQuestions.size() == 0) {
-                return;
-            }
-            SurveySchema randomSchema = SurveySchema.builder().id(source.getId()).children(templateService
-                            .listByIds(wrongUserQuestions.stream().map(x -> x.getTemplateId()).collect(Collectors.toList()))
-                            .stream().map(x -> {
-                                SurveySchema schema = x.getTemplate();
-                                schema.setId(x.getId());
-                                schema.setTitle(x.getName());
-                                return schema;
-                            }).collect(Collectors.toList())).title(source.getTitle()).attribute(source.getAttribute())
-                    .description(source.getDescription()).build();
-            projectView.setSurvey(randomSchema);
-            return;
-        }
-        List<ProjectSetting.RandomSurveyCondition> randomSurveyCondition = project.getSetting().getExamSetting()
-                .getRandomSurvey();
-        if (randomSurveyCondition == null || randomSurveyCondition.size() == 0) {
-            return;
-        }
-        // 从已有答案里面加载 schema
-        String cookieName = AppConsts.COOKIE_RANDOM_PROJECT_PREFIX + project.getId();
-        String answerId = ContextHelper.getCookie(cookieName);
-        if (answerId != null) {
-            AnswerQuery answerQuery = new AnswerQuery();
-            answerQuery.setId(answerId);
-            AnswerView answerView = answerService.getAnswer(answerQuery);
-            if (answerView != null && answerView.getSurvey() != null) {
-                projectView.setSurvey(answerView.getSurvey());
-                projectView.setTempAnswer(answerView.getTempAnswer());
-                return;
-            }
-        }
-        // 从题库里面挑题
-        List<SurveySchema> questionSchemaList = repoService.pickQuestionFromRepo(randomSurveyCondition);
-        // 最终的试卷=编辑器的问题+题库挑的题
-        if (project.getSurvey() != null && !CollectionUtils.isEmpty(project.getSurvey().getChildren())) {
-            questionSchemaList = Stream.concat(project.getSurvey().getChildren().stream(), questionSchemaList.stream())
-                    .collect(Collectors.toList());
-        }
-
-        SurveySchema randomSchema = SurveySchema.builder().id(source.getId()).children(questionSchemaList)
-                .title(source.getTitle()).attribute(source.getAttribute()).description(source.getDescription()).build();
-        if (questionSchemaList.size() > 0) {
-            projectView.setSurvey(randomSchema);
-            AnswerRequest answerRequest = new AnswerRequest();
-            answerRequest.setSurvey(randomSchema);
-            answerRequest.setProjectId(project.getId());
-            AnswerView answerView = answerService.saveAnswer(answerRequest);
-            Cookie cookie = new Cookie(cookieName, answerView.getId());
-            cookie.setMaxAge(7 * 24 * 60 * 60);
-            ContextHelper.getCurrentHttpResponse().addCookie(cookie);
         }
     }
 

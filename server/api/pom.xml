@@ -26,6 +26,11 @@
             <version>${revision}</version>
         </dependency>
         <dependency>
+            <groupId>cn.surveyking</groupId>
+            <artifactId>ai</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>

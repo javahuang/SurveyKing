@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -349,7 +350,7 @@ public class ProjectSetting {
 	 * 随机问题条件
 	 */
 	@Data
-	public static class RandomSurveyCondition {
+	public static class RandomSurveyCondition implements Serializable {
 
 		private String id;
 
