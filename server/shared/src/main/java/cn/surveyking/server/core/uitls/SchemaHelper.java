@@ -9,6 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.util.CollectionUtils;
 
 import java.text.Format;
@@ -41,8 +44,30 @@ public class SchemaHelper {
 	private static final long MILLISECONDS_PER_HOUR = 3600000L;
 	private static final long MILLISECONDS_PER_DAY = MILLISECONDS_PER_HOUR * 24;
 
+	private static final MessageSource MESSAGE_SOURCE = initMessageSource();
+
 	@Deprecated
 	public static final String openidColumnName = OPENID_COLUMN_NAME;
+
+	private static MessageSource initMessageSource() {
+		ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+		messageSource.setBasenames("i18n/schema");
+		messageSource.setDefaultEncoding("UTF-8");
+		messageSource.setFallbackToSystemLocale(false);
+		return messageSource;
+	}
+
+	public static String getOpenIdColumnName() {
+		return i18n("schema.column.customField", OPENID_COLUMN_NAME);
+	}
+
+	private static String i18n(String code, String defaultMessage, Object... args) {
+		Locale locale = LocaleContextHolder.getLocale();
+		if (locale == null) {
+			locale = Locale.SIMPLIFIED_CHINESE;
+		}
+		return MESSAGE_SOURCE.getMessage(code, args, defaultMessage, locale);
+	}
 
 	/**
 	 * 将 schema 解析为导出的 excel的header
@@ -53,20 +78,28 @@ public class SchemaHelper {
 	 */
 	public static List<String> parseColumns(List<SurveySchema> schemaDataTypes, ProjectModeEnum mode) {
 		List<String> result = new ArrayList<>();
-		result.add("序号");
+		result.add(i18n("schema.column.serialNumber", "序号"));
 
 		// 添加问题标题
 		schemaDataTypes.forEach(schemaType -> result.add(schemaType.getTitle()));
 
 		// 考试模式添加分数列
 		if (ProjectModeEnum.exam.equals(mode)) {
-			result.add("分数");
+			result.add(i18n("schema.column.score", "分数"));
 		}
 
 		// 添加固定的元数据列
 		result.addAll(Arrays.asList(
-				OPENID_COLUMN_NAME, "提交人", "提交时间", "填写时长",
-				"填写设备", "操作系统", "浏览器", "填写地区", "IP", "ID"));
+				getOpenIdColumnName(),
+				i18n("schema.column.submitter", "提交人"),
+				i18n("schema.column.submitTime", "提交时间"),
+				i18n("schema.column.duration", "填写时长"),
+				i18n("schema.column.device", "填写设备"),
+				i18n("schema.column.os", "操作系统"),
+				i18n("schema.column.browser", "浏览器"),
+				i18n("schema.column.region", "填写地区"),
+				i18n("schema.column.ip", "IP"),
+				i18n("schema.column.id", "ID")));
 
 		return result;
 	}
@@ -136,7 +169,7 @@ public class SchemaHelper {
 			avoidFormulaInjection(rowData);
 			return rowData;
 		} catch (Exception e) {
-			log.error("解析答案数据失败, answerInfo: {}, error: {}", answerInfo.getId(), e.getMessage(), e);
+			log.error("Failed to parse answer data, answerId: {}, error: {}", answerInfo.getId(), e.getMessage(), e);
 			return createErrorRowData(index);
 		}
 	}
@@ -479,7 +512,7 @@ public class SchemaHelper {
 	private static List<Object> createErrorRowData(int index) {
 		List<Object> errorRow = new ArrayList<>();
 		errorRow.add(index);
-		errorRow.add("数据解析错误");
+		errorRow.add(i18n("schema.error.rowData", "数据解析错误"));
 		return errorRow;
 	}
 
@@ -782,7 +815,7 @@ public class SchemaHelper {
 
 			return formatDuration(duration);
 		} catch (Exception e) {
-			log.warn("解析时长失败: {}", e.getMessage());
+			log.warn("Failed to parse duration: {}", e.getMessage());
 			return "";
 		}
 	}
@@ -802,19 +835,26 @@ public class SchemaHelper {
 		long seconds = (duration / MILLISECONDS_PER_SECOND) % 60;
 
 		if (days > 0) {
-			parts.add(days + "天");
+			parts.add(i18n("schema.duration.days", "{0}天", days));
 		}
 		if (hours > 0) {
-			parts.add(hours + "小时");
+			parts.add(i18n("schema.duration.hours", "{0}小时", hours));
 		}
 		if (minutes > 0) {
-			parts.add(minutes + "分钟");
+			parts.add(i18n("schema.duration.minutes", "{0}分钟", minutes));
 		}
 		if (seconds > 0) {
-			parts.add(seconds + "秒");
+			parts.add(i18n("schema.duration.seconds", "{0}秒", seconds));
 		}
 
-		return String.join("", parts);
+		if (parts.isEmpty()) {
+			return "";
+		}
+
+		Locale locale = LocaleContextHolder.getLocale();
+		boolean isChinese = locale != null && locale.getLanguage().toLowerCase(Locale.ROOT).startsWith("zh");
+		String delimiter = isChinese ? "" : " ";
+		return String.join(delimiter, parts).trim();
 	}
 
 	public static class TreeNode {
@@ -859,21 +899,25 @@ public class SchemaHelper {
 
 	public enum LoginFormFieldEnum {
 
-		username("用户名", SurveySchema.DataType.text), password("密码", SurveySchema.DataType.password), extraPassword(
-				"请输入问卷密码", SurveySchema.DataType.text),
-		whitelistName("请先输入名单，再进行填写", SurveySchema.DataType.text);
+		username("schema.login.username", "用户名", SurveySchema.DataType.text),
+		password("schema.login.password", "密码", SurveySchema.DataType.password),
+		extraPassword("schema.login.extraPassword", "请输入问卷密码", SurveySchema.DataType.text),
+		whitelistName("schema.login.whitelistName", "请先输入名单，再进行填写", SurveySchema.DataType.text);
 
-		private String title;
+		private final String titleKey;
 
-		private SurveySchema.DataType dataType;
+		private final String defaultTitle;
 
-		LoginFormFieldEnum(String title, SurveySchema.DataType dataType) {
-			this.title = title;
+		private final SurveySchema.DataType dataType;
+
+		LoginFormFieldEnum(String titleKey, String defaultTitle, SurveySchema.DataType dataType) {
+			this.titleKey = titleKey;
+			this.defaultTitle = defaultTitle;
 			this.dataType = dataType;
 		}
 
 		public String getTitle() {
-			return title;
+			return i18n(this.titleKey, this.defaultTitle);
 		}
 
 		public SurveySchema.DataType getDataType() {

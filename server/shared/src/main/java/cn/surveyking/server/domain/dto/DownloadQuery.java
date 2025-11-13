@@ -46,6 +46,11 @@ public class DownloadQuery extends PageQuery {
 	@NotNull
 	private DownloadType type;
 
+	/**
+	 * 浏览器语言
+	 */
+	private String locale;
+
 	public enum DownloadType {
 
 		/**

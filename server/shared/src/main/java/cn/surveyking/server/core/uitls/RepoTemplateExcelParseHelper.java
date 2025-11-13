@@ -47,28 +47,33 @@ public class RepoTemplateExcelParseHelper {
                 try (Stream<Row> rows = sheet.openStream()) {
                     rows.forEach(r -> {
                         int rowNum = r.getRowNum();
-                        if (rowNum == 1) {
-                            // 第一行作为行头
-                            parseHeader(r);
-                        } else {
-                            switch (sheetName) {
-                                case "单选题":
-                                    parseRadioOrJudge(r, SurveySchema.QuestionType.Radio);
-                                    break;
-                                case "判断题":
-                                    parseRadioOrJudge(r, SurveySchema.QuestionType.Judge);
-                                    break;
-                                case "多选题":
-                                    parseCheckbox(r);
-                                    break;
-                                case "填空题":
-                                    parseFillBlank(r);
-                                    break;
-                                case "简答题":
-                                    parseTextarea(r);
-                                    break;
-                            }
-                        }
+						if (rowNum == 1) {
+							// 第一行作为行头
+							parseHeader(r);
+						}
+						else {
+							RepoTemplateI18n.SheetType sheetType = RepoTemplateI18n.SheetType.fromName(sheetName);
+							if (sheetType == null) {
+								return;
+							}
+							switch (sheetType) {
+								case SINGLE_CHOICE:
+									parseRadioOrJudge(r, SurveySchema.QuestionType.Radio);
+									break;
+								case TRUE_FALSE:
+									parseRadioOrJudge(r, SurveySchema.QuestionType.Judge);
+									break;
+								case MULTIPLE_CHOICE:
+									parseCheckbox(r);
+									break;
+								case FILL_BLANK:
+									parseFillBlank(r);
+									break;
+								case TEXTAREA:
+									parseTextarea(r);
+									break;
+							}
+						}
                     });
                 } catch (Exception e) {
                     throw new ErrorCodeException(ErrorCode.FileParseError, e);
@@ -200,40 +205,22 @@ public class RepoTemplateExcelParseHelper {
         name2index = new HashMap<>();
         List<Integer> optionCellIndexes = new ArrayList<>();
         header.stream().forEach(cell -> {
-            int columnIndex = cell.getColumnIndex();
-            String cellText = cell.getText();
-            switch (cellText) {
-                case "序号":
-                    name2index.put("serialNo", columnIndex);
-                    break;
-                case "题干":
-                    name2index.put("title", columnIndex);
-                    break;
-                case "解析":
-                    name2index.put("examAnalysis", columnIndex);
-                    break;
-                case "分数":
-                case "单空分数":
-                    name2index.put("examScore", columnIndex);
-                    break;
-                case "答案":
-                    name2index.put("examCorrectAnswer", columnIndex);
-                    break;
-                case "标签":
-                    name2index.put("tags", columnIndex);
-                    break;
-                default:
-                    if (isNotBlank(cellText) && (cellText.startsWith("选项") || cellText.startsWith("空"))) {
-                        // 其他列都解析为答案列
-                        optionCellIndexes.add(columnIndex);
-                        if (cellText.startsWith("选项")) {
-                            name2index.put("isChoice", -1);
-                        } else {
-                            name2index.put("isFillBlank", -1);
-                        }
-                    }
-                    break;
-            }
+			int columnIndex = cell.getColumnIndex();
+			String cellText = cell.getText();
+			RepoTemplateI18n.HeaderLabel headerLabel = RepoTemplateI18n.HeaderLabel.fromText(cellText);
+			if (headerLabel != null) {
+				headerLabel.apply(name2index, columnIndex);
+				return;
+			}
+			if (RepoTemplateI18n.isOptionColumn(cellText)) {
+				optionCellIndexes.add(columnIndex);
+				name2index.put("isChoice", -1);
+				return;
+			}
+			if (RepoTemplateI18n.isBlankColumn(cellText)) {
+				optionCellIndexes.add(columnIndex);
+				name2index.put("isFillBlank", -1);
+			}
         });
         if (optionCellIndexes.size() > 0) {
             name2index.put("minOptionIndex", optionCellIndexes.stream().mapToInt(v -> v).min().getAsInt());

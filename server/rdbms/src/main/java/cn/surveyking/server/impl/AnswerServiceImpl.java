@@ -24,6 +24,7 @@ import org.dhatim.fastexcel.reader.ReadableWorkbook;
 import org.dhatim.fastexcel.reader.Row;
 import org.dhatim.fastexcel.reader.Sheet;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
@@ -259,8 +260,11 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
         try {
             PipedOutputStream outputStream = new PipedOutputStream();
             PipedInputStream inputStream = new PipedInputStream(outputStream);
+            Locale locale = LocaleContextHolder.getLocale();
             new Thread(() -> {
+                Locale previousLocale = LocaleContextHolder.getLocale();
                 try {
+                    LocaleContextHolder.setLocale(locale);
                     export(project, answerViews, outputStream);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -270,6 +274,7 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                    LocaleContextHolder.setLocale(previousLocale);
                 }
             }).start();
             download.setResource(new InputStreamResource(inputStream));
@@ -437,8 +442,11 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
         try {
             PipedOutputStream outputStream = new PipedOutputStream();
             PipedInputStream inputStream = new PipedInputStream(outputStream);
+            Locale locale = LocaleContextHolder.getLocale();
             new Thread(() -> {
+                Locale previousLocale = LocaleContextHolder.getLocale();
                 try (ZipOutputStream zout = new ZipOutputStream(outputStream);) {
+                    LocaleContextHolder.setLocale(locale);
                     int[] serialNum = {0, 0};
                     List<SurveySchema> uploadQuestions = SchemaHelper.flatSurveySchema(project.getSurvey()).stream()
                             .filter(qSchema -> SurveySchema.QuestionType.Upload.equals(qSchema.getType()))
@@ -472,6 +480,8 @@ public class AnswerServiceImpl extends ServiceImpl<AnswerMapper, Answer> impleme
                     }
                 } catch (Exception e) {
                     throw new InternalServerError("生成压缩文件失败", e);
+                } finally {
+                    LocaleContextHolder.setLocale(previousLocale);
                 }
             }).start();
             return inputStream;

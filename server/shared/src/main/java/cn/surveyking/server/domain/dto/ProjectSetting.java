@@ -131,6 +131,11 @@ public class ProjectSetting {
 		 */
 		private Boolean copyEnabled = true;
 
+		/**
+		 * 答题页面默认语言
+		 */
+		private String defaultLocale;
+
 	}
 
 	public enum TriggerType {

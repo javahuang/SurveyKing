@@ -4,6 +4,7 @@ import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.core.constant.TagCategoryEnum;
 import cn.surveyking.server.core.uitls.AnswerScoreEvaluator;
 import cn.surveyking.server.core.uitls.RepoTemplateExcelParseHelper;
+import cn.surveyking.server.core.uitls.RepoTemplateI18n;
 import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.core.uitls.ContextHelper;
 import cn.surveyking.server.core.uitls.ExcelExporter;
@@ -651,26 +652,52 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
         }
 
         // 准备不同题型的列标题
-        List<String> radioCheckboxHeaders = Arrays.asList(
-                "序号", "题干", "选项A", "选项B", "选项C", "选项D",
-                "选项E", "选项F", "选项G", "选项H", "解析", "分数", "答案", "标签");
+        List<String> radioCheckboxHeaders = new ArrayList<>();
+        radioCheckboxHeaders.add(RepoTemplateI18n.HeaderLabel.SERIAL_NO.displayLabel());
+        radioCheckboxHeaders.add(RepoTemplateI18n.HeaderLabel.TITLE.displayLabel());
+        for (String suffix : Arrays.asList("A", "B", "C", "D", "E", "F", "G", "H")) {
+            radioCheckboxHeaders.add(RepoTemplateI18n.optionLabel(suffix));
+        }
+        radioCheckboxHeaders.add(RepoTemplateI18n.HeaderLabel.ANALYSIS.displayLabel());
+        radioCheckboxHeaders.add(RepoTemplateI18n.HeaderLabel.SCORE.displayLabel());
+        radioCheckboxHeaders.add(RepoTemplateI18n.HeaderLabel.ANSWER.displayLabel());
+        radioCheckboxHeaders.add(RepoTemplateI18n.HeaderLabel.TAGS.displayLabel());
 
-        List<String> judgeHeaders = Arrays.asList(
-                "序号", "题干", "选项A", "选项B", "解析", "分数", "答案", "标签");
+        List<String> judgeHeaders = new ArrayList<>();
+        judgeHeaders.add(RepoTemplateI18n.HeaderLabel.SERIAL_NO.displayLabel());
+        judgeHeaders.add(RepoTemplateI18n.HeaderLabel.TITLE.displayLabel());
+        judgeHeaders.add(RepoTemplateI18n.optionLabel("A"));
+        judgeHeaders.add(RepoTemplateI18n.optionLabel("B"));
+        judgeHeaders.add(RepoTemplateI18n.HeaderLabel.ANALYSIS.displayLabel());
+        judgeHeaders.add(RepoTemplateI18n.HeaderLabel.SCORE.displayLabel());
+        judgeHeaders.add(RepoTemplateI18n.HeaderLabel.ANSWER.displayLabel());
+        judgeHeaders.add(RepoTemplateI18n.HeaderLabel.TAGS.displayLabel());
 
-        List<String> fillBlankHeaders = Arrays.asList(
-                "序号", "题干", "空1", "空2", "空3", "空4", "空5", "空6", "空7", "空8", "解析", "单空分数", "标签");
+        List<String> fillBlankHeaders = new ArrayList<>();
+        fillBlankHeaders.add(RepoTemplateI18n.HeaderLabel.SERIAL_NO.displayLabel());
+        fillBlankHeaders.add(RepoTemplateI18n.HeaderLabel.TITLE.displayLabel());
+        for (String index : Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8")) {
+            fillBlankHeaders.add(RepoTemplateI18n.blankLabel(index));
+        }
+        fillBlankHeaders.add(RepoTemplateI18n.HeaderLabel.ANALYSIS.displayLabel());
+        fillBlankHeaders.add(RepoTemplateI18n.HeaderLabel.SINGLE_BLANK_SCORE.displayLabel());
+        fillBlankHeaders.add(RepoTemplateI18n.HeaderLabel.TAGS.displayLabel());
 
         List<String> textareaHeaders = Arrays.asList(
-                "序号", "题干", "答案", "解析", "分数", "标签");
+                RepoTemplateI18n.HeaderLabel.SERIAL_NO.displayLabel(),
+                RepoTemplateI18n.HeaderLabel.TITLE.displayLabel(),
+                RepoTemplateI18n.HeaderLabel.ANSWER.displayLabel(),
+                RepoTemplateI18n.HeaderLabel.ANALYSIS.displayLabel(),
+                RepoTemplateI18n.HeaderLabel.SCORE.displayLabel(),
+                RepoTemplateI18n.HeaderLabel.TAGS.displayLabel());
 
         // 创建Excel工作簿，包含多个sheet
         try (java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream()) {
-            org.dhatim.fastexcel.Workbook workbook = new org.dhatim.fastexcel.Workbook(baos, "题库", "1.0");
+            org.dhatim.fastexcel.Workbook workbook = new org.dhatim.fastexcel.Workbook(baos, RepoTemplateI18n.workbookName(), "1.0");
 
             // 创建单选题sheet
             if (!radioRows.isEmpty()) {
-                org.dhatim.fastexcel.Worksheet radioSheet = workbook.newWorksheet("单选题");
+                org.dhatim.fastexcel.Worksheet radioSheet = workbook.newWorksheet(RepoTemplateI18n.SheetType.SINGLE_CHOICE.displayName());
                 radioSheet.fitToWidth((short) 10);
                 radioSheet.setFitToPage(true);
 
@@ -697,7 +724,7 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 
             // 创建多选题sheet
             if (!checkboxRows.isEmpty()) {
-                org.dhatim.fastexcel.Worksheet checkboxSheet = workbook.newWorksheet("多选题");
+                org.dhatim.fastexcel.Worksheet checkboxSheet = workbook.newWorksheet(RepoTemplateI18n.SheetType.MULTIPLE_CHOICE.displayName());
                 checkboxSheet.fitToWidth((short) 10);
                 checkboxSheet.setFitToPage(true);
 
@@ -724,7 +751,7 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 
             // 创建判断题sheet
             if (!judgeRows.isEmpty()) {
-                org.dhatim.fastexcel.Worksheet judgeSheet = workbook.newWorksheet("判断题");
+                org.dhatim.fastexcel.Worksheet judgeSheet = workbook.newWorksheet(RepoTemplateI18n.SheetType.TRUE_FALSE.displayName());
                 judgeSheet.fitToWidth((short) 10);
                 judgeSheet.setFitToPage(true);
 
@@ -751,7 +778,7 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 
             // 创建填空题sheet
             if (!fillBlankRows.isEmpty()) {
-                org.dhatim.fastexcel.Worksheet fillBlankSheet = workbook.newWorksheet("填空题");
+                org.dhatim.fastexcel.Worksheet fillBlankSheet = workbook.newWorksheet(RepoTemplateI18n.SheetType.FILL_BLANK.displayName());
                 fillBlankSheet.fitToWidth((short) 10);
                 fillBlankSheet.setFitToPage(true);
 
@@ -778,7 +805,7 @@ public class RepoServiceImpl extends BaseService<RepoMapper, Repo> implements Re
 
             // 创建简答题sheet
             if (!textareaRows.isEmpty()) {
-                org.dhatim.fastexcel.Worksheet textareaSheet = workbook.newWorksheet("简答题");
+                org.dhatim.fastexcel.Worksheet textareaSheet = workbook.newWorksheet(RepoTemplateI18n.SheetType.TEXTAREA.displayName());
                 textareaSheet.fitToWidth((short) 10);
                 textareaSheet.setFitToPage(true);
 

@@ -18,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -79,6 +81,8 @@ public class SurveyServiceImpl implements SurveyService {
     private final ObjectMapper objectMapper;
 
     private final RandomSurveyProcessor randomSurveyProcessor;
+
+    private final MessageSource messageSource;
 
     /**
      * answerService 如果需要验证密码，则只有密码输入正确之后才开始加载 schema
@@ -144,7 +148,7 @@ public class SurveyServiceImpl implements SurveyService {
                         .title(repo.getName())
                         .attribute(SurveySchema.Attribute.builder()
                                 .mode(SurveySchema.SchemaMode.exam)
-                                .submitButton("结束练习")
+                                .submitButton(i18n("survey.practice.finish"))
                                 .build())
                         .children(questionList)
                         .build();
@@ -555,7 +559,7 @@ public class SurveyServiceImpl implements SurveyService {
             query.setValueQuery(uniqueQuery);
             if (answerService.count(query) > 0) {
                 String uniqueText = optionSchema.getAttribute().getUniqueText();
-                throw new ValidationException(isNotBlank(uniqueText) ? uniqueText : "问卷重复保存");
+                throw new ValidationException(isNotBlank(uniqueText) ? uniqueText : i18n("survey.answer.duplicate"));
             }
         });
 
@@ -583,7 +587,7 @@ public class SurveyServiceImpl implements SurveyService {
                         .orElse(new PublicStatisticsView.OptionStatistics()).getCount();
                 Integer quota = optionSchema.getAttribute().getQuota();
                 if (quota != null && optionSelectedCount + 1 > quota) {
-                    throw new ValidationException("选项数量超过限制，请重新选择");
+                    throw new ValidationException(i18n("survey.option.limitExceeded"));
                 }
             });
         }
@@ -840,12 +844,12 @@ public class SurveyServiceImpl implements SurveyService {
         SurveySchema schema = SurveySchema.builder().id(query.getId()).title(query.getTitle())
                 .description(query.getDescription())
                 .children(findMatchChildrenInSchema(query.getConditionQuestion(), project))
-                .attribute(SurveySchema.Attribute.builder().submitButton("查询").build()).build();
+                .attribute(SurveySchema.Attribute.builder().submitButton(i18n("survey.query.submit")).build()).build();
         // 目前只支持文本题 #{huaw}#{fhpd}
         if (isNotBlank(query.getPassword())) {
             // 添加一个password的schema，用于密码校验
             SurveySchema passwordSchema = SurveySchema.builder().id(AppConsts.PUBLIC_QUERY_PASSWORD_FIELD_ID)
-                    .title("密码").type(SurveySchema.QuestionType.FillBlank)
+                    .title(i18n("survey.password.title")).type(SurveySchema.QuestionType.FillBlank)
                     .attribute(SurveySchema.Attribute.builder().required(true).build()).build();
             passwordSchema.setChildren(Collections
                     .singletonList(SurveySchema.builder().id(AppConsts.PUBLIC_QUERY_PASSWORD_FIELD_ID).build()));
@@ -880,13 +884,13 @@ public class SurveyServiceImpl implements SurveyService {
         SurveySchema schema = project.getSurvey().deepCopy();
         SchemaHelper.updateSchemaByPermission(query.getFieldPermission(), schema);
         if (query.getFieldPermission().values().contains(FieldPermissionType.editable)) {
-            schema.setAttribute(SurveySchema.Attribute.builder().submitButton("修改").suffix(null).build());
+            schema.setAttribute(SurveySchema.Attribute.builder().submitButton(i18n("survey.edit.submit")).suffix(null).build());
         } else {
             schema.setAttribute(null);
         }
         if (ProjectModeEnum.exam.equals(project.getMode())) {
             schema.getChildren()
-                    .add(SurveySchema.builder().id("examScore").title("分数").type(SurveySchema.QuestionType.FillBlank)
+                    .add(SurveySchema.builder().id("examScore").title(i18n("survey.score.title")).type(SurveySchema.QuestionType.FillBlank)
                             .attribute(SurveySchema.Attribute.builder().readOnly(true).build())
                             .children(Collections.singletonList(SurveySchema.builder().id("examScore").build()))
                             .build());
@@ -1182,9 +1186,9 @@ public class SurveyServiceImpl implements SurveyService {
      * @param request
      * @param project
      */
-    private void updateProjectPartnerByAnswer(AnswerRequest request, ProjectView project) {
-        if (project.getSetting() != null && project.getSetting().getAnswerSetting() != null) {
-            Integer whitelistType = project.getSetting().getAnswerSetting().getWhitelistType();
+	private void updateProjectPartnerByAnswer(AnswerRequest request, ProjectView project) {
+		if (project.getSetting() != null && project.getSetting().getAnswerSetting() != null) {
+			Integer whitelistType = project.getSetting().getAnswerSetting().getWhitelistType();
             if (whitelistType == null) {
                 return;
             }
@@ -1215,7 +1219,11 @@ public class SurveyServiceImpl implements SurveyService {
                 answerService.updateAnswer(answerUpdateRequest);
             }
 
-        }
-    }
+		}
+	}
+
+	private String i18n(String key, Object... args) {
+		return messageSource.getMessage(key, args, LocaleContextHolder.getLocale());
+	}
 
 }

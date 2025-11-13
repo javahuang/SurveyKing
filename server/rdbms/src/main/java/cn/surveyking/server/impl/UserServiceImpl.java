@@ -34,6 +34,8 @@ import org.dhatim.fastexcel.reader.ReadableWorkbook;
 import org.dhatim.fastexcel.reader.Row;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.GrantedAuthority;
@@ -79,6 +81,8 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 
 	private final UserPositionDtoMapper userPositionDtoMapper;
 
+	private final MessageSource messageSource;
+
 	private final DeptMapper deptMapper;
 
 	private final SystemService systemService;
@@ -98,10 +102,10 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 				username);
 		Account existAccount = accountMapper.selectOne(queryWrapper);
 		if (existAccount == null) {
-			throw new UsernameNotFoundException(format("用户: {}, 不存在", username));
+			throw new UsernameNotFoundException(i18n("user.service.notFound", username));
 		}
 		if (existAccount.getStatus() != AppConsts.USER_STATUS.VALID) {
-			throw new AccessDeniedException("用户: {}, 被禁用");
+			throw new AccessDeniedException(i18n("user.service.disabled", username));
 		}
 
 		return userViewMapper.toUserView(existAccount);
@@ -241,10 +245,10 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 		if (request.getStatus() != null || isNotBlank(request.getPassword())) {
 			// 更新登录账号
 			Account account = accountMapper
-					.selectOne(Wrappers.<Account>lambdaQuery().eq(Account::getUserId, request.getId()));
+				.selectOne(Wrappers.<Account>lambdaQuery().eq(Account::getUserId, request.getId()));
 			if (isNotBlank(request.getPassword()) && isNotBlank(request.getOldPassword())) {
 				if (!passwordEncoder.matches(request.getOldPassword(), account.getAuthSecret())) {
-					throw new InternalServerError("密码验证失败");
+					throw new InternalServerError(i18n("user.password.invalid"));
 				}
 			}
 			if (request.getUsername() != null) {
@@ -451,6 +455,10 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 				.collect(Collectors.toMap(Role::getName, Role::getId));
 		Map<String, String> deptName2Id = deptMapper.selectList(null).stream()
 				.collect(Collectors.toMap(Dept::getName, Dept::getId));
+		Set<String> usernameSet = new HashSet<>();
+		Set<String> existingUsernames = accountMapper
+				.selectList(Wrappers.<Account>lambdaQuery().select(Account::getAuthAccount)).stream()
+				.map(Account::getAuthAccount).filter(Objects::nonNull).collect(Collectors.toSet());
 		try (InputStream is = request.getFile().getInputStream(); ReadableWorkbook wb = new ReadableWorkbook(is)) {
 			wb.getSheets().forEach(sheet -> {
 				int[] rowNum = { 1 };
@@ -463,19 +471,23 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 						UserRequest userRequest = new UserRequest();
 						userRequest.setName(
 								getCellValue(r, 0).orElseThrow(() -> new ErrorCodeException(ErrorCode.FileParseError)));
-						// 自动根据用户名设置登录名
-						// 登录名可能有重复，通过唯一索引抛异常由用户自己控制
 						userRequest.setUsername(
 								getCellValue(r, 1).orElse(PinyinUtils.chineseToPinyin(userRequest.getName())));
+						if (existingUsernames.contains(userRequest.getUsername())) {
+							throw new InternalServerError(i18n("user.import.usernameExists", rowNum[0]));
+						}
+						if (!usernameSet.add(userRequest.getUsername())) {
+							throw new InternalServerError(i18n("user.import.usernameDuplicate", rowNum[0]));
+						}
 						// 默认密码为 123456
 						userRequest.setPassword(getCellValue(r, 2).orElse("123456"));
-						userRequest.setPhone(r.getCellAsString(3).orElse(null));
-						userRequest.setEmail(r.getCellAsString(4).orElse(null));
-						String deptName = r.getCellAsString(5).orElse(null);
+						userRequest.setPhone(getCellValue(r, 3).orElse(null));
+						userRequest.setEmail(getCellValue(r, 4).orElse(null));
+						String deptName = getCellValue(r, 5).orElse(null);
 						if (deptName != null && deptName2Id.containsKey(deptName)) {
 							userRequest.setDeptId(deptName2Id.get(deptName));
 						}
-						String roles = r.getCellAsString(6).orElse(null);
+						String roles = getCellValue(r, 6).orElse(null);
 						if (roles != null) {
 							List<String> roleIds = Arrays.stream(roles.split(",|\\s+")).filter(roleName2Id::containsKey)
 									.map(roleName2Id::get).collect(Collectors.toList());
@@ -486,9 +498,9 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 				}
 				catch (Exception e) {
 					if (e instanceof DuplicateKeyException) {
-						throw new InternalServerError(String.format("模板第%d行用户已存在", rowNum[0]), e);
+						throw new InternalServerError(i18n("user.import.userExists", rowNum[0]), e);
 					}
-					throw new InternalServerError(String.format("模板第%d行解析失败", rowNum[0]), e);
+					throw new InternalServerError(i18n("user.import.parseError", rowNum[0]), e);
 				}
 			});
 		}
@@ -588,11 +600,21 @@ public class UserServiceImpl extends BaseService<UserMapper, User> implements Us
 	}
 
 	private Optional<String> getCellValue(Row row, int cellIndex) {
-		String cellValue = row.getCellAsString(cellIndex).orElse(null);
+		String cellValue;
+		try {
+			cellValue = row.getCellText(cellIndex);
+		}
+		catch (Exception ex) {
+			cellValue = row.getCellRawValue(cellIndex).orElse(null);
+		}
 		if (isBlank(cellValue)) {
 			return Optional.empty();
 		}
-		return Optional.of(cellValue);
+		return Optional.of(cellValue.trim());
+	}
+
+	private String i18n(String key, Object... args) {
+		return messageSource.getMessage(key, args, LocaleContextHolder.getLocale());
 	}
 
 }

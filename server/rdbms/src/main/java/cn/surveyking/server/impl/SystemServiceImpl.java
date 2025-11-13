@@ -63,11 +63,18 @@ public class SystemServiceImpl implements SystemService {
 
 	@Override
 	public void updateSystemInfo(SystemInfoRequest request) {
-		SysInfo sysInfo = new SysInfo();
-		BeanUtils.copyProperties(request, sysInfo);
-		// 固定更新id为1的记录
-		sysInfo.setId("1");
-		sysInfoMapper.updateById(sysInfo);
+		SysInfo sysInfo = sysInfoMapper.selectById("1");
+		boolean exists = sysInfo != null;
+		if (!exists) {
+			sysInfo = new SysInfo();
+			sysInfo.setId("1");
+		}
+		mergeSysInfo(sysInfo, request);
+		if (exists) {
+			sysInfoMapper.updateById(sysInfo);
+		} else {
+			sysInfoMapper.insert(sysInfo);
+		}
 	}
 
 	@Override
@@ -136,5 +143,74 @@ public class SystemServiceImpl implements SystemService {
 		// 数据库只有一条记录，id为1
 		SysInfo info = sysInfoMapper.selectById("1");
 		return info != null ? info.getAiSetting() : new SystemInfo.AiSetting();
+	}
+
+	private void mergeSysInfo(SysInfo target, SystemInfoRequest request) {
+		if (isNotBlank(request.getName())) {
+			target.setName(request.getName());
+		}
+		if (isNotBlank(request.getDescription())) {
+			target.setDescription(request.getDescription());
+		}
+		if (isNotBlank(request.getAvatar())) {
+			target.setAvatar(request.getAvatar());
+		}
+		if (isNotBlank(request.getLocale())) {
+			target.setLocale(request.getLocale());
+		}
+		if (request.getRegisterInfo() != null) {
+			SystemInfo.RegisterInfo source = request.getRegisterInfo();
+			SystemInfo.RegisterInfo registerInfo = target.getRegisterInfo();
+			if (registerInfo == null) {
+				registerInfo = new SystemInfo.RegisterInfo();
+				target.setRegisterInfo(registerInfo);
+			}
+			if (source.getRegisterEnabled() != null) {
+				registerInfo.setRegisterEnabled(source.getRegisterEnabled());
+			}
+			if (source.getRoles() != null) {
+				registerInfo.setRoles(source.getRoles());
+			}
+			if (source.getStrongPasswordEnabled() != null) {
+				registerInfo.setStrongPasswordEnabled(source.getStrongPasswordEnabled());
+			}
+		}
+		if (request.getSetting() != null) {
+			SystemInfo.SystemSetting source = request.getSetting();
+			SystemInfo.SystemSetting setting = target.getSetting();
+			if (setting == null) {
+				setting = new SystemInfo.SystemSetting();
+				target.setSetting(setting);
+			}
+			if (source.getCaptchaEnabled() != null) {
+				setting.setCaptchaEnabled(source.getCaptchaEnabled());
+			}
+			if (isNotBlank(source.getCopyright())) {
+				setting.setCopyright(source.getCopyright());
+			}
+			if (isNotBlank(source.getRecordNum())) {
+				setting.setRecordNum(source.getRecordNum());
+			}
+		}
+		if (request.getAiSetting() != null) {
+			SystemInfo.AiSetting source = request.getAiSetting();
+			SystemInfo.AiSetting aiSetting = target.getAiSetting();
+			if (aiSetting == null) {
+				aiSetting = new SystemInfo.AiSetting();
+				target.setAiSetting(aiSetting);
+			}
+			if (source.getEnabled() != null) {
+				aiSetting.setEnabled(source.getEnabled());
+			}
+			if (source.getModels() != null) {
+				aiSetting.setModels(source.getModels());
+			}
+			if (isNotBlank(source.getToken())) {
+				aiSetting.setToken(source.getToken());
+			}
+			if (isNotBlank(source.getPrompt())) {
+				aiSetting.setPrompt(source.getPrompt());
+			}
+		}
 	}
 }

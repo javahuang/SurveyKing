@@ -4,13 +4,16 @@ import cn.surveyking.server.core.common.PaginationResponse;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.service.AnswerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * @author javahuang
@@ -115,7 +118,22 @@ public class AnswerApi {
 	@GetMapping("/download")
 	@PreAuthorize("hasAuthority('answer:export')")
 	public ResponseEntity<Resource> download(DownloadQuery query) {
-		return answerService.download(query);
+		Locale previous = LocaleContextHolder.getLocale();
+		setLocale(query.getLocale());
+		try {
+			return answerService.download(query);
+		}
+		finally {
+			LocaleContextHolder.setLocale(previous);
+		}
+	}
+
+	private void setLocale(String localeStr) {
+		if (!StringUtils.hasText(localeStr)) {
+			return;
+		}
+		String normalized = localeStr.replace('_', '-');
+		LocaleContextHolder.setLocale(Locale.forLanguageTag(normalized));
 	}
 
 	/**

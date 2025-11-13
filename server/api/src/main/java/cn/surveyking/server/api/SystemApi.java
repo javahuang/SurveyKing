@@ -1,14 +1,20 @@
 package cn.surveyking.server.api;
 
 import cn.surveyking.server.core.common.PaginationResponse;
+import cn.surveyking.server.core.uitls.SecurityContextUtils;
 import cn.surveyking.server.domain.dto.*;
 import cn.surveyking.server.service.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.ValidationException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author javahuang
@@ -29,6 +35,8 @@ public class SystemApi {
 
 	private final DictService dictService;
 
+	private final MessageSource messageSource;
+
 	/**
 	 * @return 当前系统信息
 	 */
@@ -45,7 +53,11 @@ public class SystemApi {
 	@GetMapping("/aiSetting")
 	@PreAuthorize("hasRole('admin')")
 	public SystemInfo.AiSetting getSystemAiSetting() {
-		return systemService.getSystemAiSetting();
+		SystemInfo.AiSetting aiSetting = systemService.getSystemAiSetting();
+		if (aiSetting != null) {
+			aiSetting.setToken(null);
+		}
+		return aiSetting;
 	}
 
 	/**
@@ -101,6 +113,15 @@ public class SystemApi {
 	@PostMapping("/role/delete")
 	@PreAuthorize("hasAuthority('system:role:delete')")
 	public void deleteRole(@RequestBody RoleRequest request) {
+		if (request.getId() == null) {
+			return;
+		}
+		Long totalRoleObj = systemService.getRoles(new RoleQuery()).getTotal();
+		long totalRoles = totalRoleObj == null ? 0 : totalRoleObj;
+		if (totalRoles <= 1) {
+			throw new ValidationException(messageSource.getMessage("system.role.delete.retainOne", null,
+					LocaleContextHolder.getLocale()));
+		}
 		systemService.deleteRole(request);
 	}
 
@@ -176,15 +197,26 @@ public class SystemApi {
 	@PostMapping("/user/delete")
 	@PreAuthorize("hasAuthority('system:user:delete')")
 	public void deleteUser(@RequestBody UserRequest request) {
-		if (request.getId() != null) {
-			for (String userId : request.getId().split(",")) {
-				// 防止删除超管用户（ID为1）
-				if ("1".equals(userId.trim())) {
-					throw new IllegalArgumentException("不能删除超级管理员用户");
-				}
-				userService.deleteUser(userId);
-			}
+		if (request.getId() == null) {
+			return;
 		}
+		List<String> userIds = Arrays.stream(request.getId().split(",")).map(String::trim)
+				.filter(id -> !id.isEmpty()).distinct().collect(Collectors.toList());
+		if (userIds.isEmpty()) {
+			return;
+		}
+		String currentUserId = SecurityContextUtils.getUserId();
+		if (userIds.contains(currentUserId)) {
+			throw new ValidationException(messageSource.getMessage("system.user.delete.self", null,
+					LocaleContextHolder.getLocale()));
+		}
+		Long total = userService.getUsers(new UserQuery()).getTotal();
+		long totalUsers = total == null ? 0 : total;
+		if (totalUsers - userIds.size() < 1) {
+			throw new ValidationException(messageSource.getMessage("system.user.delete.retainOne", null,
+					LocaleContextHolder.getLocale()));
+		}
+		userIds.forEach(userService::deleteUser);
 	}
 
 	/**
@@ -269,6 +301,14 @@ public class SystemApi {
 	@PostMapping("/dept/delete")
 	@PreAuthorize("hasAuthority('system:dept:delete')")
 	public void deleteOrg(@RequestBody DeptRequest request) {
+		if (request.getId() == null) {
+			return;
+		}
+		List<DeptView> depts = deptService.listDept(null);
+		if (depts == null || depts.size() <= 1) {
+			throw new ValidationException(messageSource.getMessage("system.dept.delete.retainOne", null,
+					LocaleContextHolder.getLocale()));
+		}
 		deptService.deleteDept(request.getId());
 	}
 
