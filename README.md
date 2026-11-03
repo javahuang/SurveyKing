@@ -153,6 +153,11 @@ docker run -d \
   registry.cn-hangzhou.aliyuncs.com/surveyking/surveyking:latest
 ```
 
+## One-Click Deploy
+
+<a href="https://repocloud.io/details/SurveyKing/"><img src="https://d16t0pc4846x52.cloudfront.net/deploylobe.svg" alt="Deploy on RepoCloud" height="42"></a>
+<a href="https://template.sealos.io/deploy?templateName=surveyking"><img src="https://raw.githubusercontent.com/labring-actions/templates/main/Deploy-on-Sealos.svg" alt="Deploy on Sealos" height="42"></a>
+
 ## Technology
 
 | Layer | Technology |
